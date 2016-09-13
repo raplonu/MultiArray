@@ -5,8 +5,6 @@
 #include <typeinfo>
 #include <iostream>
 
-#include "type.h"
-
 template<typename T>
 std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {
     s.put('[');
@@ -18,7 +16,7 @@ std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {
     return s << ']';
 }
 
-u8 const
+char const
     READ(0),
     WRITE(1);
 
@@ -50,7 +48,8 @@ static size_t prod(std::vector<size_t> const & vect, size_t offset = 0)
 		res *= vect[i];
 	return res;
 }
-static i32 azeazeazeazeazeaze = prod(std::vector<size_t>(),0);
+
+static int azeazeazeazeazeaze = prod(std::vector<size_t>(),0);
 
 template<typename T, typename Board>
 struct Container
