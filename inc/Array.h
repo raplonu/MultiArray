@@ -1,11 +1,8 @@
 #include <iostream>
 #include<string>
 #include <memory>
-#include <array>
 #include <vector>
 #include <algorithm>
-#include <typeinfo>
-
 
 using u8 = char;
 
@@ -13,7 +10,7 @@ u8 const
     READ(0),
     WRITE(1);
 
-void handleError(
+static void ArrayHandleError(
 	std::string err,
 	char const * file,
 	int line
@@ -22,7 +19,7 @@ void handleError(
 	exit( EXIT_FAILURE );
 }
 
-#define HANDLE_ERROR(err) (handleError((err), __FILE__, __LINE__ ))
+#define ARRAY_HANDLE_ERROR(err) (ArrayHandleError((err), __FILE__, __LINE__ ))
 
 template<typename T>
 struct Host;
@@ -34,31 +31,53 @@ template<typename T>
 void memFill(Host<T> & dst, T value, size_t nbElement, size_t offsetDst);
 
 
-template<typename A, size_t NbDim>
-size_t prod(A const (& array)[NbDim], size_t offset = 0)
+/**
+ * Calculate the product of a constant array
+ * @param  array Constant array of type T and length NbDim
+ * @return       Product of the array
+ */
+template<typename T, size_t NbDim>
+T prod(T const (& array)[NbDim], size_t offset = 0)
 {
-    size_t res(1);
+    T res(1);
     for(size_t i(offset); i < NbDim; ++i)
         res *= array[i];
     return res;
 }
 
+/**
+ * Calculate the product of a vector
+ * @param  vect   vector of type T
+ * @param  offset optionnal offset to start
+ * @return        product of the vector
+ */
 template<typename T>
-static size_t prod(std::vector<T> const & vect, size_t offset = 0)
+static T prod(std::vector<T> const & vect, size_t offset = 0)
 {
-    size_t res(1);
+    T res(1);
     for(size_t i(offset); i < vect.size(); ++i)
         res *= vect[i];
     return res;
 }
 
+template<typename T>
+struct ForceCopy
+{
+    T data;
+};
+
 template<typename T, typename Board>
 class Container
 {
 public:
+    //Number of elements declared
 	size_t _length;
+    //Type of container/allocator
     Board _board;
 
+    /**
+     * Default constructor
+     */
     Container():
         _length(0),
         _board()
@@ -133,6 +152,11 @@ struct Dimension
         return stop - start;
     }
 
+    size_t realLength() const
+    {
+        return std::max(stop - start, size_t(1));
+    }
+
     void updateOffset(size_t & offset) const
     {
         offset = offset * dim + start;
@@ -201,13 +225,17 @@ public:
 
     Space operator[](size_t pos) const
     {
-        size_t changeDim(firstActiveDim());
+        //Copy dim vector
         std::vector<Dimension> newDims(_dims);
-        Dimension & d(newDims[changeDim]);
 
+        //Select fist avtive dim
+        Dimension & d(newDims[firstActiveDim()]);
+
+        //Then close it a the pos position
         d.start += pos;
         d.stop = d.start;
 
+        //Finally, return the new space
         return Space(std::move(newDims));
     }
 
@@ -221,10 +249,10 @@ public:
 
         //Test if space have enought dimension for args
         if(start.size() != stop.size())
-            HANDLE_ERROR("start & stop don't have same size");
+            ARRAY_HANDLE_ERROR("start & stop don't have same size");
 
         if(start.size() > nbActiveD)
-            HANDLE_ERROR("Not enought active dims");
+            ARRAY_HANDLE_ERROR("Not enought active dims");
 
         //Create new dimensions
         std::vector<Dimension> newDims(_dims);
@@ -235,7 +263,7 @@ public:
             argsIndex(0);
 
         //For each argsIndex dimensions
-        for(; argsIndex < nbActiveD; ++dimsIndex)
+        for(; argsIndex < start.size(); ++dimsIndex)
         {
             //Only compute if current dim is active
             if(isActive(dimsIndex))
@@ -246,9 +274,9 @@ public:
                 d.start += start[argsIndex];
 
                 if(d.start >= d.dim)
-                    HANDLE_ERROR("start dim bigger than dim size");
+                    ARRAY_HANDLE_ERROR("start dim bigger than dim size");
                 if(d.stop > _dims[dimsIndex].stop)
-                    HANDLE_ERROR("Can't enlarge stop limit that way !");
+                    ARRAY_HANDLE_ERROR("Can't enlarge stop limit that way !");
 
                 argsIndex++;
             }
@@ -273,9 +301,52 @@ public:
         d.start += start;
 
         if(d.start >= d.dim)
-            HANDLE_ERROR("start dim bigger than dim size");
+            ARRAY_HANDLE_ERROR("start dim bigger than dim size");
         if(d.stop > _dims[dim].stop)
-            HANDLE_ERROR("Can't enlarge stop limit that way !");
+            ARRAY_HANDLE_ERROR("Can't enlarge stop limit that way !");
+
+        return Space(std::move(newDims));
+    }
+
+    template<typename A, size_t NbDim>
+    Space at(
+        A const (& start)[NbDim],
+        A const (& stop)[NbDim]
+    ) const
+    {
+        //Note how many dimension we have
+        size_t nbActiveD(nbActiveDim());
+
+        if(NbDim > nbActiveD)
+            ARRAY_HANDLE_ERROR("Not enought active dims");
+
+        //Create new dimensions
+        std::vector<Dimension> newDims(_dims);
+
+        //Create 2 iterators, one for space dimensions, other for args dimensions
+        size_t
+            dimsIndex(firstActiveDim()),
+            argsIndex(0);
+
+        //For each argsIndex dimensions
+        for(; argsIndex < NbDim; ++dimsIndex)
+        {
+            //Only compute if current dim is active
+            if(isActive(dimsIndex))
+            {
+                Dimension & d = newDims[dimsIndex];
+
+                d.stop = d.start + stop[argsIndex];
+                d.start += start[argsIndex];
+
+                if(d.start >= d.dim)
+                    ARRAY_HANDLE_ERROR("start dim bigger than dim size");
+                if(d.stop > _dims[dimsIndex].stop)
+                    ARRAY_HANDLE_ERROR("Can't enlarge stop limit that way !");
+
+                argsIndex++;
+            }
+        }
 
         return Space(std::move(newDims));
     }
@@ -311,12 +382,6 @@ public:
         return !(*this == oSpace);
     }
 
-    //Return the dims of the data
-    // std::vector<size_t> const & dim() const
-    // {
-    //     return dim_;
-    // }
-
     //Return the current dim of data
     std::vector<size_t> shape() const
     {
@@ -335,7 +400,7 @@ public:
         if(dim < nbDim())
             return _dims[dim];
         else
-            return 0;
+            return Dimension();
     }
 
     //The dimension size @ dim
@@ -353,7 +418,7 @@ public:
     //The current dim @ dim
     size_t realLengthAt(size_t dim) const
     {
-        return std::max(_dims[dim].length(), size_t(1));
+        return _dims[dim].realLength();
     }
 
     //Return the current dim @ dim active dimension
@@ -453,11 +518,11 @@ public:
 
     size_t nbNotRangedDim() const
     {
-        size_t dim(nbDim() - 1), notRangedDim(0);
+        size_t dim(nbDim()), notRangedDim(0);
 
-        while(dim > 0 && isDimComplete(dim--));
+        while(dim > 0 && isDimComplete(--dim));
 
-        while(dim > 0 && isActive(dim--))
+        while(dim > 0 && isActive(--dim))
         	++notRangedDim;
 
         return notRangedDim;
@@ -478,17 +543,9 @@ public:
             if(isActive(i))
                 return i;
 
-        return isActive(0);
-    }
-
-    bool hasActiveDim() const
-    {
-        return firstActiveDim() != nbDim();
-    }
-
-    bool isLastDimActive() const
-    {
-        return isActive(nbDim() - 1);
+        //return 0 without testing first dim
+        //you have to test it before if space have active dim first
+        return 0;
     }
 
     size_t lastCompleteDim() const
@@ -499,6 +556,16 @@ public:
 
         return d;
     }
+
+    bool hasActiveDim() const
+    {
+        return firstActiveDim() != nbDim();
+    }
+
+    // bool isLastDimActive() const
+    // {
+    //     return isActive(nbDim() - 1);
+    // }
 };
 
 template<typename T, typename Board> class BaseArray;
@@ -536,6 +603,15 @@ public:
         setMem(array);
     }
 
+    //N dimensions constructor with init array and optionnal board specific args
+    template<typename... OtherArgs>
+    BaseArray(std::vector<size_t> const & lengths, T * array, OtherArgs... args):
+        _container(std::make_shared<Container<T, Board>>(prod(lengths), args...)),
+        _space(lengths)
+    {
+        setMem(array);
+    }
+
     //1 dimensions constructor with init value and optionnal board specific args
     template<typename... OtherArgs>
     BaseArray(size_t length, T value, OtherArgs... args):
@@ -554,6 +630,15 @@ public:
         fill(value);
     }
 
+    //N dimensions constructor with init value and optionnal board specific args
+    template<typename... OtherArgs>
+    BaseArray(std::vector<size_t> const & lengths, T value, OtherArgs... args):
+        _container(std::make_shared<Container<T, Board>>(prod(lengths), args...)),
+        _space(lengths)
+    {
+        fill(value);
+    }
+
     //1 dimensions constructor with optionnal board specific args
 	template<typename... OtherArgs>
     BaseArray(size_t length, OtherArgs... args):
@@ -564,6 +649,13 @@ public:
     //N dimensions constructor with optionnal board specific args
     template<typename A, size_t NbDim, typename... OtherArgs>
     BaseArray(A const (&&lengths)[NbDim], OtherArgs... args):
+        _container(std::make_shared<Container<T, Board>>(prod(lengths), args...)),
+        _space(lengths)
+    {}
+
+    //N dimensions constructor with optionnal board specific args
+    template<typename... OtherArgs>
+    BaseArray(std::vector<size_t> const & lengths, OtherArgs... args):
         _container(std::make_shared<Container<T, Board>>(prod(lengths), args...)),
         _space(lengths)
     {}
@@ -628,7 +720,7 @@ public:
     {
         if(!_container)
         {
-            _container = std::make_shared<Container<T, Board>>(oArray.length());//oArray._container);
+            _container = std::make_shared<Container<T, Board>>(oArray.shape());
     		_space = oArray._space;
         }
 
@@ -642,7 +734,7 @@ public:
     {
         if(!_container)
         {
-            _container = std::make_shared<Container<T, Board>>(oArray.length());
+            _container = std::make_shared<Container<T, Board>>(oArray.shape());
             _space = std::move(oArray._space);
         }
 
@@ -650,13 +742,60 @@ public:
     	return *this;
     }
 
+
+    BaseArray<T, Board> & operator=(T value)
+    {
+        if(!_container)
+        {
+            _container = std::make_shared<Container<T, Board>>(size_t(1));
+            _space = Space(size_t(1));
+        }
+
+    	fill(value);
+    	return *this;
+    }
+
+    // BaseArray<T, Board> & operator=(ForceCopy<BaseArray<T, Board>> const & fc)
+    // {
+    //     _container = fc.data._container;
+    //     _space = fc.data._space;
+    //
+    //     return *this;
+    // }
+    //
+    // BaseArray<T, Board> & operator=(ForceCopy<BaseArray<T, Board>> && fc)
+    // {
+    //     _container = std::move(fc.data._container);
+    //     _space = std::move(fc.data._space);
+    //
+    //     return *this;
+    // }
+    //
+    // template<typename OtherBoard>
+    // BaseArray<T, Board> & operator=(ForceCopy<BaseArray<T, OtherBoard>> const & fc)
+    // {
+    //     _container = fc.data._container;
+    //     _space = fc.data._space;
+    //
+    //     return *this;
+    // }
+    //
+    // template<typename OtherBoard>
+    // BaseArray<T, Board> & operator=(ForceCopy<BaseArray<T, OtherBoard>> && fc)
+    // {
+    //     _container = std::move(fc.data._container);
+    //     _space = std::move(fc.data._space);
+    //
+    //     return *this;
+    // }
+
     template<typename A, size_t NbDim>
     BaseArray<T, Board> at(
     	A const (&&start)[NbDim],
     	A const (&&stop)[NbDim]
     ) const
     {
-        return BaseArray<T, Board>(_container, std::move(_space.at(std::move(start), std::move(stop))));
+        return BaseArray<T, Board>(_container, std::move(_space.at(start, stop)));
     }
 
     BaseArray<T, Board> at(size_t start, size_t stop) const
@@ -699,7 +838,6 @@ public:
         accessArray<READ, OtherBoard, OtherArgs...>(oArray, args...);
     }
 
-
     template<typename... OtherArgs>
     void setValue(
         T value,
@@ -738,10 +876,6 @@ public:
     	return getValue();
 	}
 
-    // friend std::ostream& operator<<(std::ostream& s, const BaseArray<T, Board>& ba) {
-    //     return s << ba.getValue();
-    // }
-
     std::vector<size_t> shape() const
     {
     	return _space.shape();
@@ -752,6 +886,11 @@ public:
     	return prod(_space.shape());
     }
 
+    bool isAlloc() const
+    {
+        return !!_container;
+    }
+
 protected:
 
     template<typename... OtherArgs>
@@ -759,10 +898,10 @@ protected:
         T value,
         OtherArgs... args
     ){
-    	recusiveSetValue(
+        recusiveSetValue(
             value,
             0, _space.lastCompleteDim(),
-            _space.dimOffset(), _space.nbRangedElement(), 0,
+            _space, _space.nbRangedElement(),
             args...
         );
     }
@@ -771,28 +910,25 @@ protected:
     void recusiveSetValue(
         T value,
         size_t dim, size_t dimStop,
-        size_t dimOffset, size_t length, size_t offset,
+        Space currentSpace, size_t length,
         OtherArgs... args
     ){
-        Dimension d(_space.dimensionAt(dim));
-
         if(dim < dimStop)
         {
-            size_t pos(d.start);
+            size_t pos(0), dimLength(currentSpace.lengthAt(dim));
             do
-            {
         		recusiveSetValue(
                     value,
                     dim + 1, dimStop,
-                    dimOffset, length, offset * d.dim + pos,
+                    currentSpace[pos], length,
                     args...
                 );
-            }
-            while(pos++ < d.stop);
+            while(++pos < dimLength);
         }
         else
-        	memFill(_container->_board, value, length, offset * _space.dimProd(dim) + dimOffset, args...);
+            memFill(_container->_board, value, length, currentSpace.offset(), args...);
     }
+
 
     template<u8 Op, typename... OtherArgs>
     void accessArray(
@@ -803,24 +939,7 @@ protected:
         recusiveAccessArray<Op, OtherArgs...>(
             array, arrayOffset,
             0, _space.lastCompleteDim(),
-            _space.dimOffset(), _space.nbRangedElement(), 0,
-            args...
-        );
-    }
-
-    template<u8 Op, typename OtherBoard, typename... OtherArgs>
-    void accessArray(
-        BaseArray<T, OtherBoard> & oArray, OtherArgs... args
-    ){
-        if(_space != oArray._space)
-            HANDLE_ERROR("Dimensions don't compute");
-
-        recusiveAccessArray<Op, OtherBoard, OtherArgs...>(
-            oArray,
-            0,
-            std::max(_space.nbNotRangedDim(), oArray._space.nbNotRangedDim()),
-            std::min(_space.nbRangedElement(), oArray._space.nbRangedElement()),
-            _space, oArray._space,
+            _space, _space.nbRangedElement(),
             args...
         );
     }
@@ -828,51 +947,69 @@ protected:
     template<u8 Op, typename... OtherArgs>
     void recusiveAccessArray(
         T * array, size_t & arrayOffset,
-        size_t dim, size_t dimStop, size_t dimOffset,
-        size_t length, size_t offset,
+        size_t dim, size_t dimStop,
+        Space currentSpace, size_t length,
         OtherArgs... args
     ){
-        Dimension d(_space.dimensionAt(dim));
-
         if(dim < dimStop)
         {
-            size_t pos(d.start);
+            size_t pos(0), dimLength(currentSpace.lengthAt(dim));
             do
-            {
                 recusiveAccessArray<Op, OtherArgs...>(
                     array, arrayOffset,
                     dim + 1, dimStop,
-                    dimOffset, length, offset * d.dim + pos,
+                    currentSpace[pos], length,
                     args...
                 );
-            } while (pos++ < d.stop);
+            while(++pos < dimLength);
         }
         else
         {
             if(Op == WRITE)
-                memCopy(_container->_board, array, length, offset * _space.dimProd(dim) + dimOffset, arrayOffset, args...);
+                memCopy(_container->_board, array, length, currentSpace.offset(), arrayOffset, args...);
             else
-                memCopy(array, _container->_board, length, arrayOffset, offset * _space.dimProd(dim) + dimOffset, args...);
+                memCopy(array, _container->_board, length, arrayOffset, currentSpace.offset(), args...);
 
             arrayOffset += length;
         }
     }
 
+
+    template<u8 Op, typename OtherBoard, typename... OtherArgs>
+    void accessArray(
+        BaseArray<T, OtherBoard> & oArray, OtherArgs... args
+    ){
+        if(_space != oArray._space)
+            ARRAY_HANDLE_ERROR("Dimensions don't compute");
+
+        recusiveAccessArray<Op, OtherBoard, OtherArgs...>(
+            oArray,
+            0, std::max(_space.nbNotRangedDim(), oArray._space.nbNotRangedDim()),
+            _space, oArray._space, std::min(_space.nbRangedElement(), oArray._space.nbRangedElement()),
+            args...
+        );
+    }
+
     template<u8 Op, typename OtherBoard, typename... OtherArgs>
     void recusiveAccessArray(
         BaseArray<T, OtherBoard> & oArray,
-        size_t dim, size_t dimStop, size_t length,
-        Space space, Space oSpace,
+        size_t dim, size_t dimStop,
+        Space space, Space oSpace, size_t length,
         OtherArgs... args
     ){
         if(dim < dimStop)
-            for(size_t pos(0); pos < space.currentLength(); ++pos)
+        {
+            size_t pos(0), dimLength(space.lengthAt(dim));
+            do
                 recusiveAccessArray<Op, OtherBoard, OtherArgs...>(
                     oArray,
-                    dim + 1, dimStop, length,
-                    space[pos], oSpace[pos],
+                    dim + 1, dimStop,
+                    space[pos], oSpace[pos], length,
                     args...
                 );
+            while(++pos < dimLength);
+
+        }
         else
         {
             if(Op == WRITE)
@@ -882,7 +1019,6 @@ protected:
         }
     }
 };
-
 
 template<typename T>
 struct Host
@@ -919,6 +1055,11 @@ struct Host
         }
     }
 
+    T* ptr() const
+    {
+        return _ptr;
+    }
+
     operator T*() const
     {
         return _ptr;
@@ -944,10 +1085,7 @@ void memFill(Host<T> & dst, T value, size_t nbElement, size_t offsetDst)
 }
 
 template<typename T>
-using Array = BaseArray<T, Host<T>>;
-
-template<typename T>
-std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {
+static std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {
     s.put('[');
     char comma[3] = {'\0', ' ', '\0'};
     for (const auto& e : v) {
@@ -957,23 +1095,43 @@ std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {
     return s << ']';
 }
 
-template<typename T>
-std::ostream& operator<<(std::ostream& s, const Array<T>& a) {
+template<typename T, typename Board>
+static void printArray(std::ostream& s, const BaseArray<T, Board>& a, int margin, int spacing)
+{
     auto shape = a.shape();
-    char comma[3] = {'\0', ' ', '\0'};
+
+    s.put('[');
 
     if(shape.size() > 1)
-        for (size_t i(0); i < shape[0]; ++i)
-            s << a[i] << std::endl;
+    {
+        printArray(s, a[0], margin + 1, spacing - 1);
+        for (size_t i(1); i < shape[0]; ++i)
+        {
+            s << std::string(spacing, '\n') << std::string(margin, ' ');
+            printArray(s, a[i], margin + 1, spacing - 1);
+        }
+    }
     else
     {
-        s.put('[');
-        for (size_t i(0); i < shape[0]; ++i)
+        s << a[0].getValue();
+        for (size_t i(1); i < shape[0]; ++i)
         {
-            s << comma << a[i].getValue();
-            comma[0] = ',';
+            s.put(' ');
+            s << a[i].getValue();
         }
-        s << ']';
     }
+
+    s.put(']');
+}
+
+template<typename T>
+static std::ostream& operator<<(std::ostream& s, const Array<T>& a) {
+    if(a.isAlloc())
+        printArray(s, a, 1, a.shape().size() - 1);
+    else
+            s << "[]";
     return s;
 }
+
+template<typename T>
+using Array = BaseArray<T, Host<T>>;
