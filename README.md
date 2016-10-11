@@ -1,6 +1,6 @@
 # `MultiArray`, a memory managment library
 
-`MultiArray` is a library for managing an multidimensional array written in C++.
+`MultiArray` is a library for managing a multidimensional array written in C++.
 
 ## Requirements
 
