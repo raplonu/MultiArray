@@ -4,7 +4,9 @@
 
 ## Requirements
 
-`MultiArray` is written in C++11 so you need a C++11 compiler like [Clang](http://clang.llvm.org/) or [GCC](http://gcc.gnu.org/). There is no other dependency.
+`MultiArray` is written in C++11 so you need a C++11 compiler like [Clang](http://clang.llvm.org/) or [GCC](http://gcc.gnu.org/).
+
+`MultiArray` also provide a support for [CUDA](https://developer.nvidia.com/about-cuda).
 
 ## Install
 
