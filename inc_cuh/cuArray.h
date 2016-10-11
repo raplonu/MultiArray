@@ -133,7 +133,17 @@ namespace ma
 			if(_id != newId)
 			{
 				_id = newId;
-				allocate();
+				if(!_ptr)
+					allocate();
+				else
+				{
+					_id.set();
+					T *tmpPtr;
+					HANDLE_ERROR(cudaMalloc((void**)tmpPtr, _size * sizeof(T)));
+					HANDLE_ERROR(cudaMemcpy(tmpPtr, _ptr, _size * sizeof(T)));
+					deallocate();
+					_ptr = tmpPtr;
+				}
 			}
 		}
 
