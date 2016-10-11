@@ -90,62 +90,62 @@ namespace ma
 	struct Device
 	{
 		T* _ptr;
-	    size_t _size;
-	    DeviceId _id;
+		size_t _size;
+		DeviceId _id;
 		
 		Device():_ptr(nullptr), _size(), _id(){}
 
 		Device(size_t nbElement):_ptr(nullptr), _size(nbElement * sizeof(T)), _id()
-	    {
+		{
 			allocate();
-	    }
+		}
 
 		Device(size_t nbElement, DeviceId id):_ptr(nullptr), _size(nbElement * sizeof(T)), _id(id)
-	    {
+		{
 			allocate();
-	    }
+		}
 
-	    ~Device()
-	    {
+		~Device()
+		{
 			deallocate();
-	    }
+		}
 
-	    void allocate()
-	    {
+		void allocate()
+		{
 			if(_ptr)
 				deallocate();
 
 			_id.set();
 			HANDLE_ERROR(cudaMalloc((void**)_ptr, _size * sizeof(T)));
-	    }
+		}
 
-	    void deallocate()
-	    {
+		void deallocate()
+		{
 			if(_ptr)
 			{
 		    	cudaFree(_ptr);
 		    	_ptr = nullptr;
 			}
-	    }
+		}
 
-	    void setDevice(DeviceId newId)
-	    {
+		void setDevice(DeviceId newId)
+		{
 			if(_id != newId)
 			{
 				_id = newId;
 				allocate();
 			}
-	    }
+		}
 
 		T* ptr() const
-    	{
-        	return _ptr;
-    	}
+		{
+        		return _ptr;
+		}
 		
-	    operator T*() const
-	    {
+		operator T*() const
+		{
 			return _ptr;
-	    }
+		}
 
 		T* operator+(size_t offset) const
 		{
