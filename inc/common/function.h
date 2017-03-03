@@ -120,21 +120,23 @@ namespace ma
             return SIZE_MAX;
         }
 
-
         template<typename Ret, typename Data>
-        typename std::enable_if<std::is_same<Data, Ret>::value, Ret>::type convert(Data d)
+        typename std::enable_if<std::is_same<Data, Ret>::value, Ret>::type
+        convert(Data d)
         {
             return d;
         }
 
         template<typename Ret, typename Data>
-        typename std::enable_if<is_iterable<Data>::value, Ret *>::type convert(Data & d)
+        typename std::enable_if<!std::is_same<Data, Ret const>::value, Ret *>::type
+        convert(Data & d)
         {
             return ptrOf<Ret>(d);
         }
 
         template<typename Ret, typename Data>
-        typename std::enable_if<is_iterable<Data>::value, Ret const *>::type convert(Data const & d)
+        typename std::enable_if<!std::is_same<Data, Ret>::value, Ret const *>::type
+        convert(Data const & d)
         {
             return ptrOf<Ret>(d);
         }

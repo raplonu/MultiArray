@@ -1,6 +1,8 @@
 #ifndef MA_COMMON_TRAITS_H
 #define MA_COMMON_TRAITS_H
 
+#include <type_traits>
+
 namespace ma
 {
     namespace detail
