@@ -1,0 +1,18 @@
+#ifndef MA_LIB
+#define MA_LIB
+
+#include "iterator/LinearIterator.h"
+#include "iterator/Iterator.h"
+#include "iterator/SpaceIterator.h"
+
+#include "range/LinearRange.h"
+#include "range/Range.h"
+
+#include "dimension/Dimension.h"
+
+#include "space/Space.h"
+
+//#include "Array.h"
+#include "Pointer.h"
+
+#endif //MA_LIB
