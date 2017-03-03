@@ -83,7 +83,7 @@ namespace ma
 
             template<
                 typename T,
-                typename = std::enable_if_t<std::is_base_of<IteratorBase, T>::value>
+                typename = typename std::enable_if<std::is_base_of<IteratorBase, T>::value>::type
             >
             IteratorInterface(T const &it)
                 :it_(new T(it))

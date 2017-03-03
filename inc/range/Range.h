@@ -190,7 +190,7 @@ namespace ma
 
             template<
                 typename T,
-                typename = std::enable_if_t<is_iterable<T>::value>
+                typename = typename std::enable_if<is_iterable<T>::value>::type
             >
             Range(T const &ra)
                 :range_(new RangeRef<T>(ra))

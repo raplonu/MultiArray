@@ -21,7 +21,7 @@ OBJ_MAIN := $(OBJ)/maintest.o
 TARGET := test
 
 CXX  ?= g++
-CXX_FLAGS := -g -Wall -std=c++14 -I$(CACTH_INCLUDE) -I$(MULTIARRAY_INCLUDE)
+CXX_FLAGS := -g -Wall -std=c++11 -I$(CACTH_INCLUDE) -I$(MULTIARRAY_INCLUDE)
 
 #Other
 MKDIR_P					?= mkdir -p

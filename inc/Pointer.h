@@ -86,7 +86,7 @@ namespace ma
             >(ptr(), common::convert<DataT>(data), std::min(size(), common::size(data)));
         }
 
-        template<typename OtherPointer, typename = std::enable_if_t<std::is_base_of<SuperBase<DataT>, OtherPointer>::value>, typename... Args>
+        template<typename OtherPointer, typename = typename std::enable_if<std::is_base_of<SuperBase<DataT>, OtherPointer>::value>::type, typename... Args>
         BasePointer(OtherPointer const & data, Args... args):
             container_(data::makeSharedContainer<DataT, AllocatorT>(data.size(), args...))
         {
@@ -96,7 +96,7 @@ namespace ma
             >(ptr(), common::convert<DataT>(data), size());
         }
 
-        template<typename OtherPointer, typename = std::enable_if_t<std::is_base_of<SuperBase<DataT>, OtherPointer>::value>, typename... Args>
+        template<typename OtherPointer, typename = typename std::enable_if<std::is_base_of<SuperBase<DataT>, OtherPointer>::value>::type, typename... Args>
         BasePointer(OtherPointer const & data, Allocator const & allocator = Allocator(), Args... args):
             container_(data::makeSharedContainer<DataT, AllocatorT>(data.size(), allocator, args...))
         {

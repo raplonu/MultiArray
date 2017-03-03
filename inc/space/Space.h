@@ -51,15 +51,16 @@ namespace ma
 
             SizeT size()
             {
-                return prodSize([](auto const & e){return std::max(e.size(), 1ul);});
+                return prodSize([](Dim const & e){return std::max(e.size(), 1ul);});
             }
 
             SizeT realSize()
             {
-                return prodSize([](auto const & e){return e.realSize();});
+                return prodSize([](Dim const & e){return e.realSize();});
             }
 
-            SizeT prodSize(auto sizeF)
+            template<typename Fn>
+            SizeT prodSize(Fn sizeF)
             {
                 if(nbDim() == 0)
                     return 0;
