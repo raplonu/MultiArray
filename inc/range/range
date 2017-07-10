@@ -1,7 +1,0 @@
-#ifndef MA_RANGE_RANGE
-#define MA_RANGE_RANGE
-
-#include "LinearRange.h"
-#include "Range.h"
-
-#endif //MA_RANGE_RANGE

@@ -1,7 +1,0 @@
-#ifndef MA_ITERATOR_ITERATOR
-#define MA_ITERATOR_ITERATOR
-
-#include "LinearIterator.h"
-#include "Iterator.h"
-
-#endif //MA_ITERATOR_ITERATOR

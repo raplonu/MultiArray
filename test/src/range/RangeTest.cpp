@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include <ma>
+#include <ma/ma>
 #include <vector>
 
 using namespace ma::range;

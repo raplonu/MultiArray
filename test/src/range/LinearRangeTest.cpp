@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include <ma>
+#include <ma/ma>
 
 using namespace ma::range;
 
@@ -15,7 +15,7 @@ TEST_CASE( "LinearRange", "[LinearRange]" )
             sum += e;
 
         REQUIRE( sum == 6 );
-        REQUIRE( lr.begin() + 4ul == lr.end());
+        REQUIRE( lr.begin() + 4 == lr.end());
     }
 
     SECTION( "LinearRange negative step" )

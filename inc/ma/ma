@@ -1,0 +1,41 @@
+#ifndef MA_LIB
+#define MA_LIB
+
+#include <ma/detail/type.h>
+#include <ma/detail/traits.h>
+#include <ma/detail/function.h>
+
+#include <ma/copy/memCopy.h>
+
+#include <ma/iterator/LinearIterator.h>
+#include <ma/iterator/Iterator.h>
+#include <ma/iterator/ShapeIterator.h>
+#include <ma/iterator/StepIterator.h>
+
+#include <ma/range/LinearRange.h>
+#include <ma/range/Range.h>
+
+#include <ma/dimension/Dimension.h>
+
+#include <ma/container/SharedContainer.h>
+
+#include <ma/shape/SimpleShape.h>
+#include <ma/shape/MShape.h>
+
+#include <ma/array/BaseArray.h>
+#include <ma/array/SArray.h>
+#include <ma/array/MArray.h>
+
+/*
+#include "iterator/SpaceIterator.h"
+
+
+#include "data/BaseData.h"
+#include "data/Container.h"
+#include "data/containerFunction.h"
+
+#include "Array.h"
+#include "Pointer.h"
+*/
+
+#endif //MA_LIB

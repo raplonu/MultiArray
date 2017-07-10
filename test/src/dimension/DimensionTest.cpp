@@ -1,5 +1,6 @@
 #include <catch.hpp>
-#include <ma>
+#include <ma/ma>
+
 #include <vector>
 #include <iostream>
 
@@ -16,7 +17,7 @@ TEST_CASE( "Dimension<LinearRange> Test", "[Dimension<LinearRange>]" )
     {
         REQUIRE( d1.size() == 5 );
 
-        REQUIRE( d1.realSize() == 5 );
+        REQUIRE( d1.baseSize() == 5 );
     }
 
     SECTION( "Dimension properties" )
@@ -32,7 +33,7 @@ TEST_CASE( "Dimension<LinearRange> Test", "[Dimension<LinearRange>]" )
     {
         REQUIRE( d2.size() == 3 );
 
-        REQUIRE( d2.realSize() == 5 );
+        REQUIRE( d2.baseSize() == 5 );
     }
 
     SECTION( "Dimension properties" )
@@ -48,7 +49,7 @@ TEST_CASE( "Dimension<LinearRange> Test", "[Dimension<LinearRange>]" )
     {
         REQUIRE( d3.size() == 0 );
 
-        REQUIRE( d3.realSize() == 5 );
+        REQUIRE( d3.baseSize() == 5 );
     }
 
     SECTION( "Dimension properties" )
@@ -74,10 +75,10 @@ TEST_CASE( "Dimension<Range> Test", "[Dimension<Range>]" )
     {
         REQUIRE( d1.size() == 5 );
 
-        REQUIRE( d1.realSize() == 5 );
+        REQUIRE( d1.baseSize() == 5 );
     }
 
-    SECTION( "Dimension properties" )
+    SECTION( "Dimension properties" ) 
     {
         REQUIRE( !d1.isComplete() );
 
@@ -92,7 +93,7 @@ TEST_CASE( "Dimension<Range> Test", "[Dimension<Range>]" )
     {
         REQUIRE( d2.size() == 3 );
 
-        REQUIRE( d2.realSize() == 5 );
+        REQUIRE( d2.baseSize() == 5 );
     }
 
     SECTION( "Dimension properties" )
@@ -108,7 +109,7 @@ TEST_CASE( "Dimension<Range> Test", "[Dimension<Range>]" )
     {
         REQUIRE( d3.size() == 0 );
 
-        REQUIRE( d3.realSize() == 5 );
+        REQUIRE( d3.baseSize() == 5 );
     }
 
     SECTION( "Dimension properties" )
