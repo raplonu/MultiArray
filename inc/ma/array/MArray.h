@@ -228,12 +228,6 @@ namespace ma
                 BaseT(size, container)
             {}
 
-            MArray operator=(DataT val)
-            {
-                BaseT::value(0) = val;
-                return *this;
-            }
-
             MArray(MArrayT const & oba) = default;
             MArray(MArrayT && oba) = default;
 
@@ -241,6 +235,12 @@ namespace ma
             MArrayT& operator=(MArrayT && oba) = default;
 
             ~MArray(){}
+
+            MArray operator=(DataT val)
+            {
+                BaseT::value(0) = val;
+                return *this;
+            }
 
             template<typename... R>
             MArrayT at(R&&... ranges)
