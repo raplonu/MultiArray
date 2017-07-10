@@ -8,12 +8,6 @@
 using namespace std;
 using namespace ma;
 
-template<typename T>
-void fun(T t)
-{
-    cout << __PRETTY_FUNCTION__ << endl;
-}
-
 TEST_CASE( "Array test", "[SArray && MArray]" )
 {
 
