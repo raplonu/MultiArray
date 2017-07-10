@@ -8,12 +8,6 @@
 using namespace std;
 using namespace ma;
 
-template<typename T>
-void fun(T t)
-{
-    cout << __PRETTY_FUNCTION__ << endl;
-}
-
 TEST_CASE( "Array test", "[SArray && MArray]" )
 {
 
@@ -56,6 +50,7 @@ TEST_CASE( "Array test", "[SArray && MArray]" )
         REQUIRE(ma[1][1] == 5);
 
         ma[0][1] = 42;
+        //add useless comment
 
         REQUIRE(ma[0][1] == 42);
         REQUIRE(sa[2] == 42);
