@@ -48,8 +48,9 @@ namespace ma
             template<typename IT>
             using GenIt = iterator::ShapeIterator<IT, ShapeT>;
 
-            using iterator = GenIt<typename ContainerT::iterator>;
             using const_iterator = GenIt<typename ContainerT::const_iterator>;
+            using iterator = GenIt<typename ContainerT::iterator>;
+            // using const_iterator = typename iterator::ShapeIterator<typename ContainerT::const_iterator, ShapeT>;
             // using const_reverse_iterator = GenIt<typename ContainerT::const_reverse_iterator>;
             // using reverse_iterator = GenIt<typename ContainerT::reverse_iterator>;
 
@@ -275,6 +276,97 @@ namespace ma
         template<typename T, typename Alloc, typename Container>
         class SArray;
     }
+
+    template
+    <
+    typename T, typename Shape, typename Alloc, typename Container
+    >
+    void printArray(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> && a, int margin, int spacing)
+    {
+        auto shape = a.shape();
+
+        s.put('[');
+
+        if(shape.size() > 1)
+        {
+            printArray(s, a[0], margin + 1, spacing - 1);
+            for (size_t i(1); i < shape[0]; ++i)
+            {
+                s << std::string(spacing, '\n') << std::string(margin, ' ');
+                printArray(s, a[i], margin + 1, spacing - 1);
+            }
+        }
+        else
+        {
+            s << a[0].value();
+            for (size_t i(1); i < shape[0]; ++i)
+            {
+                s.put(' ');
+                s << a[i].value();
+            }
+        }
+
+        s.put(']');
+    }
+
+    template
+    <
+        typename T, typename Shape, typename Alloc, typename Container
+    >
+    void printArray(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> & a, int margin, int spacing)
+    {
+        auto shape = a.shape();
+
+        s.put('[');
+
+        if(shape.size() > 1)
+        {
+            printArray(s, a[0], margin + 1, spacing - 1);
+            for (size_t i(1); i < shape[0]; ++i)
+            {
+                s << std::string(spacing, '\n') << std::string(margin, ' ');
+                printArray(s, a[i], margin + 1, spacing - 1);
+            }
+        }
+        else
+        {
+            s << a[0].value();
+            for (size_t i(1); i < shape[0]; ++i)
+            {
+                s.put(' ');
+                s << a[i].value();
+            }
+        }
+
+        s.put(']');
+    }
+
+    template
+    <
+        typename T, typename Shape, typename Alloc, typename Container
+    >
+    std::ostream& operator<<(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> & a)
+    {
+        if(a.size() > 0)
+            printArray(s, a, 1, a.shape().size() - 1);
+            else
+                    s << "[]";
+            return s;
+    }
+
+    template
+    <
+        typename T, typename Shape, typename Alloc, typename Container
+    >
+    std::ostream& operator<<(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> && a)
+    {
+        if(a.size() > 0)
+            printArray(s, a, 1, a.shape().size() - 1);
+            else
+                    s << "[]";
+            return s;
+    }
+
 }
 
 #endif //MA_ARRAY_BASE_ARRAY_H

@@ -38,8 +38,10 @@ namespace ma
             template<typename IT>
             using GenIt = iterator::ShapeIterator<IT, ShapeT>;
 
-            using iterator = GenIt<typename ContainerT::iterator>;
             using const_iterator = GenIt<typename ContainerT::const_iterator>;
+            using iterator = GenIt<typename ContainerT::iterator>;
+            // using const_iterator = typename iterator::ShapeIterator<typename ContainerT::const_iterator, ShapeT>;
+
 
             //Void construtor
 
@@ -59,7 +61,7 @@ namespace ma
                 typename Size,
                 typename = typename std::enable_if<std::is_integral<Size>::value>::type
             >
-            explicit MArray(std::initializer_list<SizeT> const & size, AllocT const & alloc = AllocT()):
+            explicit MArray(std::initializer_list<Size> const & size, AllocT const & alloc = AllocT()):
                 BaseT(size, alloc)
             {}
 

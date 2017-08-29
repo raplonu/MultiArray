@@ -49,7 +49,6 @@ namespace ma
                 dims_(dimension::initDimVect<DimT>(lengths)), offset_(offset)
             {}
 
-            template<typename L>
             MShape(SimpleShape const & sShape):
                 dims_(1, RangeT(sShape.start(), sShape.stop())), offset_(0)
             {}

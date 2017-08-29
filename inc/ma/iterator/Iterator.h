@@ -41,7 +41,7 @@ namespace ma
 
             virtual SizeT value(DiffT pos = 0) const
             {
-                return *it_;
+                return *it_ + pos;
             }
 
             virtual IteratorBase& increase(DiffT pos)

@@ -16,11 +16,11 @@ namespace ma
         {
             SizeT size(detail::sizes(dst, src));
 
-            data::setMem
-            <
-                typename detail::get_allocator_type<DST, detail::DefaultAlloc<DataT>>::type,
-                typename detail::get_allocator_type<SRC, detail::DefaultAlloc<DataT>>::type
-            >
+            data::setMem<DataT>
+            // <
+            //     typename detail::get_allocator_type<DST, detail::DefaultAlloc<DataT>>::type,
+            //     typename detail::get_allocator_type<SRC, detail::DefaultAlloc<DataT>>::type
+            // >
             (
                 detail::convert<DataT>(dst), detail::convert<const DataT>(src),
                 size, args...
@@ -39,11 +39,11 @@ namespace ma
 
             for(SizeT it(0); it < size; it += step)
             {
-                data::setMem
-                <
-                    typename detail::get_allocator_type<DST, detail::DefaultAlloc<DataT>>::type,
-                    typename detail::get_allocator_type<SRC, detail::DefaultAlloc<DataT>>::type
-                >
+                data::setMem<DataT>
+                // <
+                //     typename detail::get_allocator_type<DST, detail::DefaultAlloc<DataT>>::type,
+                //     typename detail::get_allocator_type<SRC, detail::DefaultAlloc<DataT>>::type
+                // >
                 (
                     detail::convert<DataT>(dstBeginIt),
                     detail::convert<const DataT>(srcBeginIt),

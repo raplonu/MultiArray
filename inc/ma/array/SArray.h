@@ -55,8 +55,9 @@ namespace ma
             template<typename IT>
             using GenIt = iterator::ShapeIterator<IT, ShapeT>;
 
-            using iterator = GenIt<typename ContainerT::iterator>;
             using const_iterator = GenIt<typename ContainerT::const_iterator>;
+            using iterator = GenIt<typename ContainerT::iterator>;
+            // using const_iterator = typename iterator::ShapeIterator<typename ContainerT::const_iterator, ShapeT>;
 
             // using BaseArray<T, shape::SimpleShape, Alloc, Container>::BaseArray;
 

@@ -24,7 +24,7 @@ namespace ma
             return std::make_tuple(start, stop, step);
         }
 
-        inline DelayLinearIndice L(SizeT start, detail::Delay stop, DiffT step = 1)
+        inline DelayLinearIndice L(SizeT start, detail::Delay, DiffT step = 1)
         {
             return std::make_tuple(start, step);
         }

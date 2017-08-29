@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <numeric>
+#include <iostream>
 
 #include <ma/detail/type.h>
 #include <ma/detail/traits.h>
@@ -187,6 +188,11 @@ namespace ma
             return impl::Steps<false, T...>::get(0, t...);
         }
 
+        // template<typename T>
+        // auto ptrOf(T & data) -> typename detail::enable_pointer<decltype(data)>::type
+        // {
+        //     return data;
+        // }
 
         template<typename T>
         auto ptrOf(T & data) -> typename detail::enable_pointer<decltype(&(*data))>::type
@@ -224,7 +230,6 @@ namespace ma
         {
             return ptrOf(data);
         }
-
 
         template<typename T>
         auto isContigous(T const & t) -> decltype(t.isContigous())
