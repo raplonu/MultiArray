@@ -37,6 +37,8 @@ namespace ma
     using detail::SizeT;
     using detail::DiffT;
 
+    static detail::All All;
+    static detail::All Auto;
     static detail::Delay delay;
 }
 

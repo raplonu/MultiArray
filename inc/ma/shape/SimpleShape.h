@@ -61,7 +61,7 @@ namespace ma
                 return SimpleShape(start_ + start, start_ + stop, size_);
             }
 
-            SimpleShape subShape(SizeT start, detail::Delay stop) const
+            SimpleShape subShape(SizeT start, detail::Delay) const
             {
                 if(start_ + start >= stop_)
                     throw std::out_of_range("Out of range's shape");

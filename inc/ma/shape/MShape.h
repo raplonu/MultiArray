@@ -49,7 +49,6 @@ namespace ma
                 dims_(dimension::initDimVect<DimT>(lengths)), offset_(offset)
             {}
 
-            template<typename L>
             MShape(SimpleShape const & sShape):
                 dims_(1, RangeT(sShape.start(), sShape.stop())), offset_(0)
             {}
@@ -60,11 +59,11 @@ namespace ma
             {}
 
         public:
-            MShape(MShapeT const & oShape) = default;
-            MShape(MShapeT && oShape) = default;
+            MShape(MShapeT const &) = default;
+            MShape(MShapeT &&) = default;
 
-            MShapeT& operator=(MShapeT const & oShape) = default;
-            MShapeT& operator=(MShapeT && oShape) = default;
+            MShapeT& operator=(MShapeT const &) = default;
+            MShapeT& operator=(MShapeT &&) = default;
 
             ~MShape(){}
 

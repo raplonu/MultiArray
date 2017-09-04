@@ -55,8 +55,9 @@ namespace ma
             template<typename IT>
             using GenIt = iterator::ShapeIterator<IT, ShapeT>;
 
-            using iterator = GenIt<typename ContainerT::iterator>;
             using const_iterator = GenIt<typename ContainerT::const_iterator>;
+            using iterator = GenIt<typename ContainerT::iterator>;
+            // using const_iterator = typename iterator::ShapeIterator<typename ContainerT::const_iterator, ShapeT>;
 
             // using BaseArray<T, shape::SimpleShape, Alloc, Container>::BaseArray;
 
@@ -135,11 +136,11 @@ namespace ma
                 BaseT(shape, container)
             {}
 
-            SArray(SArrayT const & oba) = default;
-            SArray(SArrayT && oba) = default;
+            SArray(SArrayT const &) = default;
+            SArray(SArrayT &&) = default;
 
-            SArrayT& operator=(SArrayT const & oba) = default;
-            SArrayT& operator=(SArrayT && oba) = default;
+            SArrayT& operator=(SArrayT const &) = default;
+            SArrayT& operator=(SArrayT &&) = default;
 
             ~SArray(){}
 

@@ -1,3 +1,2 @@
-*.o
-build/
-obj/
+test/build/
+test/obj/

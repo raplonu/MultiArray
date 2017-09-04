@@ -19,15 +19,17 @@ namespace ma
             using StepIteratorT = StepIterator<DataT>;
             using it_traits = std::iterator_traits<DataT>;
 
+        public:
+            DataT data_;
+            SizeT step_;
+
+        public:
             using iterator_category = typename it_traits::iterator_category;
             using value_type = typename it_traits::value_type;
             using difference_type = typename it_traits::difference_type;
             using reference = typename it_traits::reference;
             using pointer = typename it_traits::pointer;
 
-        protected:
-            DataT data_;
-            SizeT step_;
 
         public:
 
@@ -42,12 +44,12 @@ namespace ma
 
             value_type value() const
             {
-                return *data_;
+                return *ptr();
             }
 
-            value_type operator*() const
+            reference operator*() const
             {
-                return value();
+                return *data_;
             }
 
             StepIteratorT& operator++()
@@ -56,12 +58,23 @@ namespace ma
                 return *this;
             }
 
-            pointer ptr() const
+
+            pointer ptr()
             {
-                return &(*data_);
+                return detail::ptrOf<value_type>(data_);
             }
 
-            operator pointer() const
+            const pointer ptr() const
+            {
+                return detail::ptrOf<const value_type>(data_);
+            }
+
+            operator pointer()
+            {
+                return ptr();
+            }
+
+            operator const pointer() const
             {
                 return ptr();
             }
@@ -79,12 +92,12 @@ namespace ma
             using DataT = T;
             using ConstIteratorT = ConstIterator<DataT>;
             // using it_traits = std::iterator_traits<DataT>;
-            //
-            // using iterator_category = typename it_traits::iterator_category;
-            // using value_type = typename it_traits::value_type;
-            // using difference_type = typename it_traits::difference_type;
-            // using reference = typename it_traits::reference;
-            // using pointer = typename it_traits::pointer;
+
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = DataT;
+            using difference_type = DiffT;
+            using reference = DataT&;
+            using pointer = DataT*;
 
         protected:
             DataT data_;
@@ -94,11 +107,6 @@ namespace ma
             ConstIterator(DataT data):
                 data_(data)
             {}
-
-            DataT operator*() const
-            {
-                return data_;
-            }
 
             ConstIteratorT& operator++()
             {
@@ -115,11 +123,18 @@ namespace ma
                 return data_;
             }
 
+            DataT data() const
+            {
+                return data_;
+            }
+
             bool operator!=(ConstIteratorT const & osi)
             {
                 return data_ != osi.data_;
             }
         };
+
+
 
     }
 
@@ -128,33 +143,59 @@ namespace ma
         template<typename T>
         T convert(iterator::ConstIterator<T> t)
         {
-            return *t;
+            return t.data();
         }
     }
 
     namespace iterator
     {
-        template<typename T, typename Data>
-        auto stepIterator(Data & d, SizeT step)
-        -> typename std::enable_if<!std::is_same<T, Data>::value, StepIterator<decltype(std::begin(d))>>::type
+        template<typename T, typename Data, typename IT = typename std::enable_if<!std::is_same<T, Data>::value, decltype(std::begin(std::declval<Data&>()))>::type>
+        StepIterator<IT> stepIterator(Data & d, SizeT step)
         {
-            return StepIterator<decltype(std::begin(d))>(std::begin(d), step);
+            return StepIterator<IT>(std::begin(d), step);
         }
 
-        template<typename T, typename Data>
-        auto stepIterator(Data & d, SizeT step)
-        -> typename std::enable_if<!std::is_same<T, Data>::value, StepIterator<decltype(&(*d))>>::type
+        template<typename T>
+        StepIterator<T *> stepIterator(T * d, SizeT step)
         {
-            return StepIterator<decltype(&(*d))>(d, step);
+            return StepIterator<T*>(d, step);
         }
 
-        template<typename T, typename Data>
-        auto stepIterator(Data d, SizeT step)
-        -> typename std::enable_if< std::is_same<typename std::remove_const<T>::type, Data>::value, ConstIterator<Data>>::type
+        template<typename T, typename Data, typename = typename std::enable_if< std::is_same<typename std::remove_const<T>::type, Data>::value, ConstIterator<Data>>::type>
+        ConstIterator<Data> stepIterator(Data d, SizeT)
         {
             return ConstIterator<Data>(d);
         }
     }
+}
+
+namespace std
+{
+    template<typename RAI>
+    struct iterator_traits<ma::iterator::StepIterator<RAI>>
+    {
+        using StepIteratorT = ma::iterator::StepIterator<RAI>;
+
+        using difference_type =	typename StepIteratorT::difference_type;
+        using value_type = typename StepIteratorT::value_type;
+        using pointer =	typename StepIteratorT::pointer;
+        using reference = typename StepIteratorT::reference;
+        using iterator_category = typename StepIteratorT::iterator_category;
+
+    };
+
+    template<typename RAI>
+    struct iterator_traits<ma::iterator::ConstIterator<RAI>>
+    {
+        using ConstIteratorT = ma::iterator::ConstIterator<RAI>;
+
+        using difference_type =	typename ConstIteratorT::difference_type;
+        using value_type = typename ConstIteratorT::value_type;
+        using pointer =	typename ConstIteratorT::pointer;
+        using reference = typename ConstIteratorT::reference;
+        using iterator_category = typename ConstIteratorT::iterator_category;
+
+    };
 }
 
 #endif //MA_ITERATOR_STEP_ITERATOR_H

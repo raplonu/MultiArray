@@ -36,6 +36,12 @@ namespace ma
                 return dim.select(D(range));
             }
 
+            template<typename D>
+            D makeDim(D const & dim, detail::All const &)
+            {
+                return dim;
+            }
+
             template<typename... R> struct SelectRange;
 
             template<typename F, typename... R>

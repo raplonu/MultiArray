@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <numeric>
+#include <iostream>
 
 #include <ma/detail/type.h>
 #include <ma/detail/traits.h>
@@ -56,7 +57,7 @@ namespace ma
             }
 
             template<bool DefaultEnabled, typename T>
-            auto tryGetSize(T const & t, SizeT defaultSize) ->
+            auto tryGetSize(T const &, SizeT defaultSize) ->
             typename std::enable_if<!has_size<T>::value, SizeT>::type
             {
                 return defaultSize;
@@ -151,7 +152,7 @@ namespace ma
             }
 
             template<bool DefaultEnabled, typename T>
-            auto tryGetStep(T const & t, SizeT defaultStep) ->
+            auto tryGetStep(T const &, SizeT defaultStep) ->
             typename std::enable_if<!has_step<T>::value, SizeT>::type
             {
                 return defaultStep;
@@ -187,29 +188,40 @@ namespace ma
             return impl::Steps<false, T...>::get(0, t...);
         }
 
+        template<typename T>//, typename = typename detail::enable_pointer<T>::type>
+        T * ptrOf(T * data)
+        {
+            return data;
+        }
 
-        template<typename T>
-        auto ptrOf(T & data) -> typename detail::enable_pointer<decltype(&(*data))>::type
+        template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
+        decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
         {
             return &(*data);
         }
 
-        template<typename T>
-        auto ptrOf(T & data) -> typename detail::enable_pointer<decltype(data.data())>::type
+        template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
+        decltype(std::declval<Data&>().data()) ptrOf(Data & data)
         {
             return data.data();
         }
 
-        template<typename T>
-        auto ptrOf(T & data) -> typename enable_pointer<decltype(data.begin())>::type
+        template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
+        decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
         {
             return data.begin();
         }
 
-        template<typename T>
-        auto ptrOf(T & data) -> typename enable_pointer<decltype(data.ptr())>::type
+        template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
+        decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
         {
             return data.ptr();
+        }
+
+        template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().get())>::type>
+        decltype(std::declval<Data&>().get()) ptrOf(Data & data)
+        {
+            return data.get();
         }
 
         template<typename T>
@@ -218,97 +230,31 @@ namespace ma
             return t;
         }
 
-        template<typename T, typename Data>
-        auto convert(Data & data) ->
-        typename std::enable_if<!std::is_same<T, Data>::value, decltype(ptrOf(data))>::type
+        template<typename T>
+        T * convert(T * t)
         {
-            return ptrOf(data);
+            return t;
         }
 
+        template<typename T, typename Data, typename Ret = typename std::enable_if<!std::is_same<T, Data>::value, decltype(ptrOf<T>(std::declval<Data&>()))>::type>
+        Ret convert(Data & data) //decltype(ptrOf<T>(std::declval<Data&>()))
+        {
+            return ptrOf<T>(data);
+        }
 
-        template<typename T>
-        auto isContigous(T const & t) -> decltype(t.isContigous())
+        template<typename T, typename = decltype(std::declval<T&>().isContigous())>
+        decltype(std::declval<T&>().isContigous()) isContigous(T const & t)
         {
             return t.isContigous();
         }
 
-        template<typename T>
-        auto isContigous(T const & t) ->
-        typename std::enable_if<!has_comtigous_met<T>::value, bool>::type
+        template<typename T, typename = typename std::enable_if<!has_comtigous_met<T>::value, bool>::type>
+        bool isContigous(T const &)
         {
             return true;
         }
     }
 
 }
-
-
-//     	template<typename Ret, typename Data>
-//     	Ret prod(Data const & data)
-//     	{
-//     	    return std::accumulate(data.begin(), data.end(), 1, std::multiplies<Ret>());
-//     	}
-//
-//         template
-//         <
-//             typename Ret, typename Size,
-//             typename = typename enable_if_integral<Size>::type
-//         >
-//     	Ret prod(Size const & size)
-//     	{
-//     	    return size;
-//     	}
-//
-//         template<typename BeginIt, typename EndIt, typename UnaryFunction>
-//         UnaryFunction for_each(BeginIt first, EndIt last, UnaryFunction f )
-//         {
-//         	for (; first != last; ++first) {
-//                 f(*first);
-//             }
-//             return f;
-//         }
-//
-//         template<typename T>
-//         static T nextMul(T a, T b)
-//         {
-//             return ( (a-1) / b + 1) * b;
-//         }
-//
-//         template<typename T>
-//         std::vector<T> toVector(T t)
-//         {
-//             return std::vector<T>(1, t);
-//         }
-//
-//         template<typename T>
-//         std::vector<T> toVector(std::vector<T> const & t)
-//         {
-//             return t;
-//         }
-//
-//         template<typename T>
-//         std::vector<T> toVector(std::initializer_list<T> const & array)
-//         {
-//             std::vector<T> v(array.size());
-//             for(SizeT i(0); i < array.size(); ++i)
-//                 v[i] = array[i];
-//             return v;
-//         }
-//
-
-//
-//         template<typename T>
-//         SizeT size(std::vector<T> const & data){
-//             return data.size();
-//         }
-//
-//         template<typename T>
-//         SizeT size(T const & data){
-//             return data.size();
-//         }
-//
-
-//     }
-// }
 
 #endif //MA_DETAIL_FUNCTION_H

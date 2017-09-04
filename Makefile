@@ -1,7 +1,7 @@
 MULTIARRAY_DIR := .
 MULTIARRAY_INCLUDE := $(MULTIARRAY_DIR)/inc
 
-CACTH_DIR ?= ../other/Catch
+CACTH_DIR ?= ../tplib/Catch
 CACTH_INCLUDE := $(CACTH_DIR)/include
 
 TEST_DIR := $(MULTIARRAY_DIR)/test
@@ -58,4 +58,4 @@ exec : $(BUILD)/$(TARGET)
 
 clean :
 	@echo clean
-	@rm -rf $(OUT_DIR)
+	@rm -rf $(OBJ) $(BUILD)
