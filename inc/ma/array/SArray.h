@@ -136,11 +136,11 @@ namespace ma
                 BaseT(shape, container)
             {}
 
-            SArray(SArrayT const & oba) = default;
-            SArray(SArrayT && oba) = default;
+            SArray(SArrayT const &) = default;
+            SArray(SArrayT &&) = default;
 
-            SArrayT& operator=(SArrayT const & oba) = default;
-            SArrayT& operator=(SArrayT && oba) = default;
+            SArrayT& operator=(SArrayT const &) = default;
+            SArrayT& operator=(SArrayT &&) = default;
 
             ~SArray(){}
 

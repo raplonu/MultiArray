@@ -112,11 +112,11 @@ namespace ma
 
             }
 
-            BaseArray(BaseArrayT const & oba) = default;
-            BaseArray(BaseArrayT && oba) = default;
+            BaseArray(BaseArrayT const &) = default;
+            BaseArray(BaseArrayT &&) = default;
 
-            BaseArrayT& operator=(BaseArrayT const & oba) = default;
-            BaseArrayT& operator=(BaseArrayT && oba) = default;
+            BaseArrayT& operator=(BaseArrayT const &) = default;
+            BaseArrayT& operator=(BaseArrayT &&) = default;
 
             ~BaseArray(){}
 
@@ -148,16 +148,22 @@ namespace ma
                 return value(0);
             }
 
-            template<typename OData>
-            void copyTo(OData & data) const
+            // template<typename OData, typename... Args>
+            // void copyTo(OData & data, Args... args) const
+            // {
+            //     copy::memCopy<DataT>(data, *this, args...);
+            // }
+
+            template<typename OData, typename... Args>
+            void copyTo(OData && data, Args... args) const
             {
-                copy::memCopy<DataT>(data, *this);
+                copy::memCopy<DataT>(data, *this, args...);
             }
 
-            template<typename OData>
-            void setMem(OData const & data)
+            template<typename OData, typename... Args>
+            void setMem(OData const & data, Args... args)
             {
-                copy::memCopy<DataT>(*this, data);
+                copy::memCopy<DataT>(*this, data, args...);
             }
 
             ShapeT const & shapeMember() const

@@ -55,4 +55,14 @@ TEST_CASE( "Array test", "[SArray && MArray]" )
         REQUIRE(sa[2] == 42);
 
     }
+
+    struct Toto{};
+
+    SECTION( "Array with struct" )
+    {
+        Toto t;
+        SArray<Toto> sa(5, t);
+        sa.setMem(Toto{});
+        sa.copyTo(&t);
+    }
 }

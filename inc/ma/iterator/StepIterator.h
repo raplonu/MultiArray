@@ -28,7 +28,7 @@ namespace ma
             using value_type = typename it_traits::value_type;
             using difference_type = typename it_traits::difference_type;
             using reference = typename it_traits::reference;
-            using pointer = decltype(&(*data_));//typename it_traits::pointer;
+            using pointer = typename it_traits::pointer;
 
 
         public:
@@ -47,9 +47,9 @@ namespace ma
                 return *ptr();
             }
 
-            value_type operator*() const
+            reference operator*() const
             {
-                return value();
+                return *data_;
             }
 
             StepIteratorT& operator++()
@@ -58,12 +58,23 @@ namespace ma
                 return *this;
             }
 
-            pointer ptr() const
+
+            pointer ptr()
             {
-                return &(*data_);//detail::ptrOf(data_);
+                return detail::ptrOf<value_type>(data_);
             }
 
-            operator pointer() const
+            const pointer ptr() const
+            {
+                return detail::ptrOf<const value_type>(data_);
+            }
+
+            operator pointer()
+            {
+                return ptr();
+            }
+
+            operator const pointer() const
             {
                 return ptr();
             }
@@ -97,11 +108,6 @@ namespace ma
                 data_(data)
             {}
 
-            DataT operator*() const
-            {
-                return data_;
-            }
-
             ConstIteratorT& operator++()
             {
                 return *this;
@@ -113,6 +119,11 @@ namespace ma
             }
 
             operator DataT() const
+            {
+                return data_;
+            }
+
+            DataT data() const
             {
                 return data_;
             }
@@ -132,29 +143,26 @@ namespace ma
         template<typename T>
         T convert(iterator::ConstIterator<T> t)
         {
-            return *t;
+            return t.data();
         }
     }
 
     namespace iterator
     {
-        template<typename T, typename Data>
-        auto stepIterator(Data & d, SizeT step)
-        -> typename std::enable_if<!std::is_same<T, Data>::value, StepIterator<decltype(std::begin(d))>>::type
+        template<typename T, typename Data, typename IT = typename std::enable_if<!std::is_same<T, Data>::value, decltype(std::begin(std::declval<Data&>()))>::type>
+        StepIterator<IT> stepIterator(Data & d, SizeT step)
         {
-            return StepIterator<decltype(std::begin(d))>(std::begin(d), step);
+            return StepIterator<IT>(std::begin(d), step);
         }
 
-        template<typename T, typename Data>
-        auto stepIterator(Data & d, SizeT step)
-        -> typename std::enable_if<!std::is_same<T, Data>::value, StepIterator<decltype(&(*d))>>::type
+        template<typename T>
+        StepIterator<T *> stepIterator(T * d, SizeT step)
         {
-            return StepIterator<decltype(&(*d))>(d, step);
+            return StepIterator<T*>(d, step);
         }
 
-        template<typename T, typename Data>
-        auto stepIterator(Data d, SizeT step)
-        -> typename std::enable_if< std::is_same<typename std::remove_const<T>::type, Data>::value, ConstIterator<Data>>::type
+        template<typename T, typename Data, typename = typename std::enable_if< std::is_same<typename std::remove_const<T>::type, Data>::value, ConstIterator<Data>>::type>
+        ConstIterator<Data> stepIterator(Data d, SizeT)
         {
             return ConstIterator<Data>(d);
         }

@@ -59,11 +59,11 @@ namespace ma
             {}
 
         public:
-            MShape(MShapeT const & oShape) = default;
-            MShape(MShapeT && oShape) = default;
+            MShape(MShapeT const &) = default;
+            MShape(MShapeT &&) = default;
 
-            MShapeT& operator=(MShapeT const & oShape) = default;
-            MShapeT& operator=(MShapeT && oShape) = default;
+            MShapeT& operator=(MShapeT const &) = default;
+            MShapeT& operator=(MShapeT &&) = default;
 
             ~MShape(){}
 

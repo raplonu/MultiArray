@@ -230,11 +230,11 @@ namespace ma
                 BaseT(size, container)
             {}
 
-            MArray(MArrayT const & oba) = default;
-            MArray(MArrayT && oba) = default;
+            MArray(MArrayT const &) = default;
+            MArray(MArrayT &&) = default;
 
-            MArrayT& operator=(MArrayT const & oba) = default;
-            MArrayT& operator=(MArrayT && oba) = default;
+            MArrayT& operator=(MArrayT const &) = default;
+            MArrayT& operator=(MArrayT &&) = default;
 
             ~MArray(){}
 

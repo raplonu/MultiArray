@@ -107,12 +107,12 @@ namespace ma
 
             reference at( size_type pos )
             {
-                return container_->at(pos);
+                return container_->operator[](pos);
             }
 
             const_reference at( size_type pos ) const
             {
-                return container_->at(pos);
+                return container_->operator[](pos);
             }
 
             reference operator[]( size_type pos )
