@@ -355,9 +355,9 @@ namespace ma
     {
         if(a.size() > 0)
             printArray(s, a, 1, a.shape().size() - 1);
-            else
-                    s << "[]";
-            return s;
+        else
+            s << "[]";
+        return s;
     }
 
     template
@@ -368,9 +368,9 @@ namespace ma
     {
         if(a.size() > 0)
             printArray(s, a, 1, a.shape().size() - 1);
-            else
-                    s << "[]";
-            return s;
+        else
+            s << "[]";
+        return s;
     }
 
 }

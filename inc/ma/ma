@@ -12,6 +12,7 @@
 #include <ma/iterator/ShapeIterator.h>
 #include <ma/iterator/StepIterator.h>
 
+#include <ma/range/rangeFunction.h>
 #include <ma/range/LinearRange.h>
 #include <ma/range/Range.h>
 
@@ -25,17 +26,5 @@
 #include <ma/array/BaseArray.h>
 #include <ma/array/SArray.h>
 #include <ma/array/MArray.h>
-
-/*
-#include "iterator/SpaceIterator.h"
-
-
-#include "data/BaseData.h"
-#include "data/Container.h"
-#include "data/containerFunction.h"
-
-#include "Array.h"
-#include "Pointer.h"
-*/
 
 #endif //MA_LIB
