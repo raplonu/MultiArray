@@ -155,11 +155,17 @@ namespace ma
             return StepIterator<IT>(std::begin(d), step);
         }
 
-        template<typename T>
-        StepIterator<T *> stepIterator(T * d, SizeT step)
+        template<typename T, typename Data, typename StepIt = typename std::enable_if<std::is_same<T, typename std::iterator_traits<Data>::value_type>::value, StepIterator<Data>>::type>
+        StepIt stepIterator(Data & d, SizeT step)
         {
-            return StepIterator<T*>(d, step);
+            return StepIt(d, step);
         }
+
+        // template<typename T>
+        // StepIterator<T *> stepIterator(T * d, SizeT step)
+        // {
+        //     return StepIterator<T*>(d, step);
+        // }
 
         template<typename T, typename Data, typename = typename std::enable_if< std::is_same<typename std::remove_const<T>::type, Data>::value, ConstIterator<Data>>::type>
         ConstIterator<Data> stepIterator(Data d, SizeT)
