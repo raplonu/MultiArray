@@ -105,8 +105,8 @@ namespace ma
         {
             template <typename T, typename Alloc>
             auto has_same_alloc_impl(int) -> decltype (
-                std::declval<typename T::AllocT&>(),
-                std::true_type{});
+                std::is_same<typename T::AllocT&, Alloc>::value()
+            );
 
             template <typename T, typename Alloc>
             std::false_type has_same_alloc_impl(...);

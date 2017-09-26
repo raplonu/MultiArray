@@ -19,7 +19,7 @@ namespace ma
             using StepIteratorT = StepIterator<DataT>;
             using it_traits = std::iterator_traits<DataT>;
 
-        public:
+        protected:
             DataT data_;
             SizeT step_;
 
@@ -58,7 +58,7 @@ namespace ma
                 return *this;
             }
 
-
+        protected:
             pointer ptr()
             {
                 return detail::ptrOf<value_type>(data_);
@@ -69,15 +69,16 @@ namespace ma
                 return detail::ptrOf<const value_type>(data_);
             }
 
-            operator pointer()
-            {
-                return ptr();
-            }
-
-            operator const pointer() const
-            {
-                return ptr();
-            }
+        public:
+            // operator pointer()
+            // {
+            //     return ptr();
+            // }
+            //
+            // operator const pointer() const
+            // {
+            //     return ptr();
+            // }
 
             bool operator!=(StepIteratorT const & osi)
             {
@@ -161,11 +162,11 @@ namespace ma
             return StepIt(d, step);
         }
 
-        // template<typename T>
-        // StepIterator<T *> stepIterator(T * d, SizeT step)
-        // {
-        //     return StepIterator<T*>(d, step);
-        // }
+        template<typename T>
+        StepIterator<T *> stepIterator(T * d, SizeT step)
+        {
+            return StepIterator<T*>(d, step);
+        }
 
         template<typename T, typename Data, typename = typename std::enable_if< std::is_same<typename std::remove_const<T>::type, Data>::value, ConstIterator<Data>>::type>
         ConstIterator<Data> stepIterator(Data d, SizeT)

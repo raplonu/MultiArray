@@ -38,7 +38,7 @@ namespace ma
             template
             <
                 typename L,
-                typename = typename std::enable_if<!std::is_base_of<MShape, RangeT>::value>::type
+                typename = typename std::enable_if<!std::is_base_of<MShape, L>::value>::type
             >
             MShape(L && lengths):
                 dims_(dimension::initDimVect<DimT>(lengths)), offset_(0)

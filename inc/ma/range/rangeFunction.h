@@ -14,6 +14,11 @@ namespace ma
         using FullLinearIndice = std::tuple<SizeT, SizeT, DiffT>;
         using DelayLinearIndice = std::tuple<SizeT, DiffT>;
 
+        inline FullLinearIndice L(SizeT stop)
+        {
+            return std::make_tuple(0, stop, 1);
+        }
+
         inline FullLinearIndice L(SizeT start, SizeT stop)
         {
             return std::make_tuple(start, stop, (stop >= start)?1:-1);

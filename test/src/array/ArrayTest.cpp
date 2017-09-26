@@ -57,6 +57,16 @@ TEST_CASE( "Array test", "[SArray && MArray]" )
 
     }
 
+    SECTION( "Simple Loop test" )
+    {
+        int tab[] = {0, 3, 5, 1};
+        SArray<int> aa(4, &(tab[0]));
+
+        int pos(0);
+        for(auto val : aa)
+            REQUIRE(val == tab[pos++]);
+    }
+
     struct Toto{};
 
     SECTION( "Array with struct" )

@@ -21,7 +21,7 @@ namespace ma
             template<typename D>
             D makeDim(D const & dim, range::DelayLinearIndice range)
             {
-                return dim.select(D(range::LinearRange(std::get<0>(range), dim.stop(), std::get<1>(range))));
+                return dim.select(D(range::LinearRange(std::get<0>(range), dim.size(), std::get<1>(range))));
             }
 
             template<typename D, typename Size, typename = typename std::enable_if<std::is_integral<Size>::value>::type>

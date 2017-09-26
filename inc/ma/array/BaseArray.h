@@ -58,30 +58,19 @@ namespace ma
             ShapeT shape_;
             ContainerT container_;
 
-        public:
-            //Void constructor
-            //
-            // BaseArray(DataT val):
-            //     shape_(1), container_(1, AllocT())
-            // {
-            //     copy::memCopy<DataT>(*this, val);
-            // }
+        protected:
+            explicit BaseArray():
+                shape_(0), container_()
+            {}
 
-            explicit BaseArray(AllocT const & alloc = AllocT()):
+            explicit BaseArray(AllocT const & alloc):
                 shape_(0), container_(shape_.size(), alloc)
-            {
-                // std::cout << "constructor\n";
-            }
-
-            //Size constructor
+            {}
 
             template<typename L>
-            explicit BaseArray(L const & size, AllocT const & alloc = AllocT()):
+            explicit BaseArray(L const & size, AllocT const & alloc):
                 shape_(size), container_(shape_.size(), alloc)
-            {
-                // std::cout << "constructor\n";
-
-            }
+            {}
 
             //Size & data copy contructor
 
@@ -90,28 +79,21 @@ namespace ma
                 typename L, typename Data,
                 typename = typename std::enable_if
                 <
-                    !std::is_same<Data, ContainerT>::value &&
                     !detail::has_same_alloc<Data, AllocT>::value
                 >::type
             >
-            explicit BaseArray(L const & size, Data const & data, AllocT const & alloc = AllocT()):
+            explicit BaseArray(L const & size, Data const & data, AllocT const & alloc):
                 shape_(size), container_(shape_.size(), alloc)
             {
-                // std::cout << "constructor\n";
-
                 copy::memCopy<DataT>(*this, data);
             }
 
-            //Size & container contructor
-
             template<typename L>
-            explicit BaseArray(L const & size, ContainerT & container):
+            explicit BaseArray(L const & size, ContainerT container):
                 shape_(size), container_(container)
-            {
-                // std::cout << "constructor\n";
+            {}
 
-            }
-
+public:
             BaseArray(BaseArrayT const &) = default;
             BaseArray(BaseArrayT &&) = default;
 
@@ -121,12 +103,12 @@ namespace ma
             ~BaseArray(){}
 
             template<typename... R>
-            BaseArrayT at(R&&... ranges)
+            BaseArrayT at(R&&... ranges) const
             {
                 return BaseArrayT(shape_.subShape(std::forward<R>(ranges)...), container_);
             }
 
-            BaseArrayT operator[](SizeT pos)
+            BaseArrayT operator[](SizeT pos) const
             {
                 return BaseArrayT(shape_.subShape(pos), container_);
             }
@@ -319,7 +301,7 @@ namespace ma
     <
         typename T, typename Shape, typename Alloc, typename Container
     >
-    void printArray(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> & a, int margin, int spacing)
+    void printArray(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> const & a, int margin, int spacing)
     {
         auto shape = a.shape();
 
@@ -347,11 +329,24 @@ namespace ma
         s.put(']');
     }
 
+    // template
+    // <
+    //     typename T, typename Shape, typename Alloc, typename Container
+    // >
+    // std::ostream& operator<<(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> & a)
+    // {
+    //     if(a.size() > 0)
+    //         printArray(s, a, 1, a.shape().size() - 1);
+    //     else
+    //         s << "[]";
+    //     return s;
+    // }
+
     template
     <
         typename T, typename Shape, typename Alloc, typename Container
     >
-    std::ostream& operator<<(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> & a)
+    std::ostream& operator<<(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> const & a)
     {
         if(a.size() > 0)
             printArray(s, a, 1, a.shape().size() - 1);
@@ -364,13 +359,12 @@ namespace ma
     <
         typename T, typename Shape, typename Alloc, typename Container
     >
-    std::ostream& operator<<(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> && a)
+    void printArray(std::ostream& s, array::BaseArray<T, Shape, Alloc, Container> const & a)
     {
         if(a.size() > 0)
             printArray(s, a, 1, a.shape().size() - 1);
         else
             s << "[]";
-        return s;
     }
 
 }

@@ -78,8 +78,8 @@ namespace ma
                 container_(std::make_shared<ContainerT>(init.begin(), init.end(), alloc))
             {}
 
-            SharedContainer(SharedContainerT const & bd):container_(bd.container_){}
-            SharedContainer(SharedContainerT && bd):container_(std::move(bd.container_)){}
+            SharedContainer(SharedContainerT const & bd) = default;
+            SharedContainer(SharedContainerT && bd) = default;
 
             // SharedContainer(SharedContainerT const & bd,
             // AllocT const & alloc = AllocT()):container_(bd.container_, alloc){}
