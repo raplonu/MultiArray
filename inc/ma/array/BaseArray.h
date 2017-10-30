@@ -112,14 +112,6 @@ public:
             {
                 return BaseArrayT(shape_.subShape(pos), container_);
             }
-            //
-            // void operator=(DataT val)
-            // {
-            //     std::cout << "yeah\n";
-            //     value(0) = val;
-            //     // return *this;
-            // }
-
             operator reference()
             {
                 return value(0);
@@ -129,12 +121,6 @@ public:
             {
                 return value(0);
             }
-
-            // template<typename OData, typename... Args>
-            // void copyTo(OData & data, Args... args) const
-            // {
-            //     copy::memCopy<DataT>(data, *this, args...);
-            // }
 
             template<typename OData, typename... Args>
             void copyTo(OData && data, Args... args) const
