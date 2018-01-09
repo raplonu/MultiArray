@@ -1,7 +1,7 @@
-#include <catch.hpp>
-#include <ma/ma>
-
+#include <gtest/gtest.h>
 #include <vector>
+
+#include <ma/ma>
 
 using namespace std;
 using namespace ma;
@@ -14,28 +14,28 @@ using Shape = MShape<Range>;
 
 using SIterator = ShapeIterator<typename vector<int>::iterator, Shape>;
 
-TEST_CASE( "Shape iterator test", "[Shape iterator]" )
+namespace
 {
     Shape s({2,3,4});
     vector<int> v(2*3*4);
     SIterator it(v.begin(), s, 0);
 
-    SECTION( "good point" )
+    TEST(ShapeIteratorTest, GoodPoint)
     {
-        REQUIRE(*it == *v.begin());
+        EXPECT_EQ(*it, *v.begin());
     }
 
-    SECTION( "Sub Position complex" )
+    TEST(ShapeIteratorTest, SubPositionComplex)
     {
         auto sub = s.subShape(1, vector<int>{1,2,2,0}, 2);
         SIterator sit(v.begin(), sub, 0);
 
-        REQUIRE(sit.pos_at(0) == 18);
+        EXPECT_EQ(sit.pos_at(0), 18);
         ++sit;
-        REQUIRE(sit.pos_at(0) == 22);
+        EXPECT_EQ(sit.pos_at(0), 22);
         ++sit;
-        REQUIRE(sit.pos_at(0) == 22);
+        EXPECT_EQ(sit.pos_at(0), 22);
         ++sit;
-        REQUIRE(sit.pos_at(0) == 14);
+        EXPECT_EQ(sit.pos_at(0), 14);
     }
 }

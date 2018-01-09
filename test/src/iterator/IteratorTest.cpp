@@ -1,62 +1,52 @@
-#include <catch.hpp>
+#include <gtest/gtest.h>
 #include <ma/ma>
 
 using namespace ma::iterator;
 
-TEST_CASE( "Iterator", "Iterator]" )
+namespace
 {
 
-    Iterator li(5);
 
-    REQUIRE( *li == 5 );
 
-    SECTION( "LinearIterator base addition" )
+    TEST(IteratorTest, LinearIteratorBaseAddition)
     {
+        Iterator li(5);
+
+        EXPECT_EQ( *li, 5 );
+
         ++li;
 
-        REQUIRE( *li == 6 );
+        EXPECT_EQ( *li, 6 );
 
         li += -2;
 
-        REQUIRE( *li == 4 );
+        EXPECT_EQ( *li, 4 );
     }
 
-    SECTION( "Iterator comparaison" )
+    TEST(IteratorTest, IteratorComparaison)
     {
         Iterator li1(5), li2(5);
 
-        REQUIRE( li1 == li2 );
+        EXPECT_TRUE( li1 == li2 );
 
         li1++;
 
-        REQUIRE( li1 != li2 );
+        EXPECT_TRUE( li1 != li2 );
 
-        REQUIRE( li1 == ++li2 );
+        EXPECT_TRUE( li1 == ++li2 );
     }
 
-    SECTION( "Iterator comparaison" )
-    {
-        Iterator li1(5), li2(5);
-
-        REQUIRE( li1 == li2 );
-
-        li1++;
-
-        REQUIRE( li1 != li2 );
-
-    }
-
-    SECTION( "Iterator step" )
+    TEST(IteratorTest, IteratorStep)
     {
         Iterator li1(5, -1);
 
         ++li1;
 
-        REQUIRE( *li1 == 4 );
+        EXPECT_EQ( *li1, 4 );
 
         li1 += -2;
 
-        REQUIRE( *li1 == 6 );
+        EXPECT_EQ( *li1, 6 );
 
     }
 }

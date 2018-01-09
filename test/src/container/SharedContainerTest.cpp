@@ -1,44 +1,41 @@
-#include <catch.hpp>
-#include <iostream>
+#include <gtest/gtest.h>
 #include <ma/ma>
-
 
 using namespace std;
 using namespace ma;
 using namespace ma::container;
 
-
-TEST_CASE( "Shared Container work like container", "[Shared Container]" )
+namespace
 {
     SharedContainer<int> sc{0,1,2,3,4,5,6};
 
-    SECTION( "can access value" )
+    TEST(SharedContainerTest, CanAccessValue)
     {
-        REQUIRE(sc[0] == 0);
-        REQUIRE(sc[1] == 1);
-        REQUIRE(sc[2] == 2);
-        REQUIRE(sc[6] == 6);
+        EXPECT_EQ(sc[0], 0);
+        EXPECT_EQ(sc[1], 1);
+        EXPECT_EQ(sc[2], 2);
+        EXPECT_EQ(sc[6], 6);
     }
 
-    SECTION( "can change value" )
+    TEST(SharedContainerTest, CanChangeValue)
     {
         sc[0] = 666;
-        REQUIRE(sc[0] == 666);
+        EXPECT_EQ(sc[0], 666);
     }
 
 
-    SECTION( "share the data" )
+    TEST(SharedContainerTest, ShareTheData)
     {
         SharedContainer<int> sc1(sc);
         sc[0] = 888;
-        REQUIRE(sc1[0] == 888);
+        EXPECT_EQ(sc1[0], 888);
     }
 
-    SECTION( "data is sync in to way" )
+    TEST(SharedContainerTest, DataIsSyncInToWay)
     {
         SharedContainer<int> sc1(sc);
         sc1[4] = 128;
-        REQUIRE(sc[4] == 128);
+        EXPECT_EQ(sc[4], 128);
     }
 
 }
