@@ -8,6 +8,8 @@ endif()
 
 set (CMAKE_CXX_STANDARD 11)
 
+project(MultiArray)
+
 add_library(MultiArray INTERFACE)
 
 #target_sources(MultiArray INTERFACE "${PROJECT_SOURCE_DIR}/inc/ma/ma")
