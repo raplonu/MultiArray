@@ -15,16 +15,8 @@ namespace ma
         using SizeT = std::size_t;
         using DiffT = std::ptrdiff_t;
 
-        // struct ShapeConstructT{};
-        // struct DataConstructT{};
-        // struct ShapeDataConstructT{};
-
         struct All{};
         struct Delay{};
-
-        // static ShapeConstructT shapeConstruct;
-        // static DataConstructT dataConstruct;
-        // static ShapeDataConstructT shapeDataConstruct;
 
         template<typename T>
         using DefaultAlloc = std::allocator<T>;

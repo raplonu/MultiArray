@@ -199,6 +199,11 @@ public:
                 return container_;
             }
 
+            AllocT get_allocator() const
+            {
+                return container().get_allocator();
+            }
+
             reference value( SizeT pos = 0)
             {
                 return container_.at(shape_.at(pos));
