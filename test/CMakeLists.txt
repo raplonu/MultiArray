@@ -1,9 +1,6 @@
+project(MultiArrayTest)
 
-project(MA_TEST)
-
-find_package(GTest)
-
-enable_testing()
+find_package(GTest REQUIRED)
 
 set(MA_TEST_SRC
     src/array/ArrayTest.cpp
@@ -25,10 +22,16 @@ set(MA_TEST_SRC
     src/shape/SimpleShapeTest.cpp
 )
 
-add_executable(MA_TEST
+add_executable(MultiArrayTest
     ${MA_TEST_SRC}
 )
 
-
-target_link_libraries(MA_TEST
+target_link_libraries(MultiArrayTest
     PRIVATE GTest::GTest GTest::Main MultiArray)
+
+
+gtest_add_tests(TARGET MultiArrayTest
+TEST_SUFFIX .noArgs
+TEST_LIST   noArgsTests
+)
+set_tests_properties(${noArgsTests}   PROPERTIES TIMEOUT 10)
