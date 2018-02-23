@@ -1,5 +1,4 @@
-#include <catch.hpp>
-#include <iostream>
+#include <gtest/gtest.h>
 #include <ma/ma>
 
 using namespace std;
@@ -7,39 +6,39 @@ using namespace ma;
 using namespace ma::shape;
 
 
-TEST_CASE( "Simple Shape test", "[Simple Shape]" )
+namespace
 {
     SimpleShape ss{100};
 
-    SECTION( "good size" )
+    TEST(SimpleShapeTest, GoodSize)
     {
-        REQUIRE(ss.size() == 100);
-        REQUIRE(ss.baseSize() == 100);
+        EXPECT_EQ(ss.size(), 100);
+        EXPECT_EQ(ss.baseSize(), 100);
 
-        REQUIRE(ss.at(0) == 0);
-        REQUIRE(ss.at(99) == 99);
+        EXPECT_EQ(ss.at(0), 0);
+        EXPECT_EQ(ss.at(99), 99);
     }
 
-    SECTION( "make sub shape" )
+    TEST(SimpleShapeTest, MakeSubShape)
     {
         SimpleShape ss1(ss.subShape(10, 90));
 
-        REQUIRE(ss1.size() == 80);
-        REQUIRE(ss1.baseSize() == 100);
+        EXPECT_EQ(ss1.size(), 80);
+        EXPECT_EQ(ss1.baseSize(), 100);
 
-        REQUIRE(ss1.at(0) == 10);
-        REQUIRE(ss1.at(79) == 89);
+        EXPECT_EQ(ss1.at(0), 10);
+        EXPECT_EQ(ss1.at(79), 89);
     }
 
-    SECTION( "can reset" )
+    TEST(SimpleShapeTest, CanReset)
     {
         SimpleShape ss1(ss.subShape(10, 90));
         ss1.reset();
 
-        REQUIRE(ss1.size() == 100);
-        REQUIRE(ss1.baseSize() == 100);
+        EXPECT_EQ(ss1.size(), 100);
+        EXPECT_EQ(ss1.baseSize(), 100);
 
-        REQUIRE(ss1.at(0) == 0);
-        REQUIRE(ss1.at(99) == 99);
+        EXPECT_EQ(ss1.at(0), 0);
+        EXPECT_EQ(ss1.at(99), 99);
     }
 }

@@ -271,7 +271,7 @@ namespace ma
 
             Range select(Range const & ri) const
             {
-                return {std::move(range_->selectRange(*(ri.range_)))};
+                return {range_->selectRange(*(ri.range_))};
             }
         };
     }

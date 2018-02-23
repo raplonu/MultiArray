@@ -1,28 +1,28 @@
-#include <catch.hpp>
+#include <gtest/gtest.h>
 #include <ma/ma>
 
 using namespace ma::range;
 
-TEST_CASE( "LinearRange", "[LinearRange]" )
+namespace
 {
     LinearRange lr(4);
 
-    SECTION( "LinearRange base loop" )
+    TEST(LinearRangeTest, LinearRangeBaseLoop)
     {
         int sum(0);
 
         for(auto e : lr)
             sum += e;
 
-        REQUIRE( sum == 6 );
-        REQUIRE( lr.begin() + 4 == lr.end());
+        EXPECT_EQ( sum, 6 );
+        EXPECT_EQ( lr.begin() + 4, lr.end());
     }
 
-    SECTION( "LinearRange negative step" )
+    TEST(LinearRangeTest, LinearRangeNegativeStep)
     {
         LinearRange nlr(10, -1);
 
-        REQUIRE( nlr[-10] == 0 );
+        EXPECT_EQ( nlr[-10], 0 );
 
     }
 }

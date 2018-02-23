@@ -1,7 +1,7 @@
-// #include <catch.hpp>
-// #include <ma>
-//
+// #include <gtest/gtest.h>
 // #include <vector>
+//
+// #include <ma/ma>
 //
 // using namespace std;
 // using namespace ma;
@@ -66,17 +66,17 @@
 //     }
 // }
 //
-// TEST_CASE( "Custom array", "[Custom array]" )
+// namespace
 // {
 //     Pointer<int> p1(3, 1);
 //
 //     BasePointer<int, MeAlloc<int>> bp1(3, p1);
 //
-//     SECTION( "All value is 1" )
+//     TEST( "All value is 1" )
 //     {
-//         REQUIRE(bp1.valueAt(0) == 1);
-//         REQUIRE(bp1.valueAt(1) == 1);
-//         REQUIRE(bp1.valueAt(2) == 1);
+//         EXPECT_EQ(bp1.valueAt(0), 1);
+//         EXPECT_EQ(bp1.valueAt(1), 1);
+//         EXPECT_EQ(bp1.valueAt(2), 1);
 //     }
 //
 // }

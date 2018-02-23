@@ -1,3 +1,2 @@
-test/build/
-test/obj/
-*.gch
+build
+

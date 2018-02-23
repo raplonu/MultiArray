@@ -139,7 +139,7 @@ namespace ma
         template<typename Dim>
         struct ResetDimVect<Dim>
         {
-            static void todo(Dim * dim)
+            static void todo(Dim *)
             {}
         };
 

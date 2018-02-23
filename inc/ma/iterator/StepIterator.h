@@ -114,7 +114,7 @@ namespace ma
                 return *this;
             }
 
-            ConstIteratorT& operator+=(SizeT step)
+            ConstIteratorT& operator+=(SizeT)
             {
                 return *this;
             }

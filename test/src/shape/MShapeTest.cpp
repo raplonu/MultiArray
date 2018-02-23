@@ -1,7 +1,7 @@
-#include <catch.hpp>
-#include <ma/ma>
-
+#include <gtest/gtest.h>
 #include <vector>
+
+#include <ma/ma>
 
 using namespace std;
 using namespace ma;
@@ -9,118 +9,115 @@ using namespace ma;
 using namespace ma::shape;
 using namespace ma::range;
 
-TEST_CASE( "Linear Space", "[Space]" )
+namespace
 {
-    MShape<LinearRange> s({2,3,4});
+    MShape<LinearRange> ls({2,3,4});
 
-    SECTION( "Right number of dimension" )
+    TEST(MShapeLinearTest, RightNumberOfDimension)
     {
-        REQUIRE(s.nbDim() == 3);
-        REQUIRE(s.nbActiveDim() == 3);
+        EXPECT_EQ(ls.nbDim(), 3);
+        EXPECT_EQ(ls.nbActiveDim(), 3);
     }
 
-    SECTION( "Right size" )
+    TEST(MShapeLinearTest, RightSize)
     {
-        REQUIRE(s.size() == 2 * 3 * 4);
-        REQUIRE(s.size() == s.baseSize());
+        EXPECT_EQ(ls.size(), 2 * 3 * 4);
+        EXPECT_EQ(ls.size(), ls.baseSize());
     }
 
-    SECTION( "Position" )
+    TEST(MShapeLinearTest, Position)
     {
-        REQUIRE(s.at(0) == 0);
+        EXPECT_EQ(ls.at(0), 0);
 
-        REQUIRE(s.at(13) == 13);
+        EXPECT_EQ(ls.at(13), 13);
 
-        REQUIRE(s.at(s.size() - 1) == (s.size() - 1));
+        EXPECT_EQ(ls.at(ls.size() - 1), (ls.size() - 1));
     }
 
-    SECTION( "Right dimension after closing" )
+    TEST(MShapeLinearTest, RightDimensionAfterClosing)
     {
-        auto sub = s.subShape(1);
+        auto sub = ls.subShape(1);
 
-        REQUIRE(sub.nbActiveDim() == 2);
+        EXPECT_EQ(sub.nbActiveDim(), 2);
 
-        REQUIRE(sub.baseSize() == 2 * 3 * 4);
+        EXPECT_EQ(sub.baseSize(), 2 * 3 * 4);
 
-        REQUIRE(sub.size() == 3 * 4);
+        EXPECT_EQ(sub.size(), 3 * 4);
     }
 
-    SECTION( "Sub Position" )
+    TEST(MShapeLinearTest, SubPosition)
     {
-        auto sub = s.subShape(1);
+        auto sub = ls.subShape(1);
 
-        REQUIRE(sub.at(0) == 12);
+        EXPECT_EQ(sub.at(0), 12);
 
-        REQUIRE(sub.at(4) == 12 + 4);
+        EXPECT_EQ(sub.at(4), 12 + 4);
 
-        REQUIRE(sub.at(sub.size() - 1) == (12 + sub.size() - 1));
+        EXPECT_EQ(sub.at(sub.size() - 1), (12 + sub.size() - 1));
     }
 
-    SECTION( "Right dimension after select" )
+    TEST(MShapeLinearTest, RightDimensionAfterSelect)
     {
-        auto sub = s.subShape(1, L(1,3), 2);
+        auto sub = ls.subShape(1, L(1,3), 2);
 
-        REQUIRE(sub.nbActiveDim() == 1);
+        EXPECT_EQ(sub.nbActiveDim(), 1);
 
-        REQUIRE(sub.baseSize() == 2 * 3 * 4);
+        EXPECT_EQ(sub.baseSize(), 2 * 3 * 4);
 
-        REQUIRE(sub.size() == 2);
+        EXPECT_EQ(sub.size(), 2);
     }
 
-    SECTION( "Sub Position complex" )
+    TEST(MShapeLinearTest, SubPositionComplex)
     {
-        auto sub = s.subShape(1, L(1,3), 2);
+        auto sub = ls.subShape(1, L(1,3), 2);
 
-        REQUIRE(sub.at(0) == 18);
+        EXPECT_EQ(sub.at(0), 18);
 
-        REQUIRE(sub.at(1) == 22);
+        EXPECT_EQ(sub.at(1), 22);
     }
-}
 
-TEST_CASE( "Non linear Space", "[Space]" )
-{
     MShape<Range> s({2,3,4});
 
-    SECTION( "Right number of dimension" )
+    TEST(MShapeTest, RightNumberOfDimension)
     {
-        REQUIRE(s.nbDim() == 3);
-        REQUIRE(s.nbActiveDim() == 3);
+        EXPECT_EQ(s.nbDim(), 3);
+        EXPECT_EQ(s.nbActiveDim(), 3);
     }
 
-    SECTION( "Right size" )
+    TEST(MShapeTest, RightSize)
     {
-        REQUIRE(s.size() == 2 * 3 * 4);
-        REQUIRE(s.size() == s.baseSize());
+        EXPECT_EQ(s.size(), 2 * 3 * 4);
+        EXPECT_EQ(s.size(), s.baseSize());
     }
 
-    SECTION( "Right dimension after closing" )
+    TEST(MShapeTest, RightDimensionAfterClosing)
     {
         auto sub = s.subShape(1);
 
-        REQUIRE(sub.nbActiveDim() == 2);
+        EXPECT_EQ(sub.nbActiveDim(), 2);
 
-        REQUIRE(sub.baseSize() == 2 * 3 * 4);
+        EXPECT_EQ(sub.baseSize(), 2 * 3 * 4);
 
-        REQUIRE(sub.size() == 3 * 4);
+        EXPECT_EQ(sub.size(), 3 * 4);
     }
 
-    SECTION( "Right dimension after select" )
+    TEST(MShapeTest, RightDimensionAfterSelect)
     {
         auto sub = s.subShape(1, vector<int>{2,0}, 2);
 
-        REQUIRE(sub.nbActiveDim() == 1);
+        EXPECT_EQ(sub.nbActiveDim(), 1);
 
-        REQUIRE(sub.baseSize() == 2 * 3 * 4);
+        EXPECT_EQ(sub.baseSize(), 2 * 3 * 4);
 
-        REQUIRE(sub.size() == 2);
+        EXPECT_EQ(sub.size(), 2);
     }
 
-    SECTION( "Sub Position complex" )
+    TEST(MShapeTest, SubPositionComplex)
     {
         auto sub = s.subShape(1, vector<int>{2,0}, 2);
 
-        REQUIRE(sub.at(0) == 22);
+        EXPECT_EQ(sub.at(0), 22);
 
-        REQUIRE(sub.at(1) == 14);
+        EXPECT_EQ(sub.at(1), 14);
     }
 }

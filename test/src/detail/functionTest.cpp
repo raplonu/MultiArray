@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <gtest/gtest.h>
 #include <ma/ma>
 
 #include <vector>
@@ -14,39 +14,39 @@ struct Toto
 
 unsigned int size(Toto const & t){ return t.syze(); }
 
-TEST_CASE( "Sizes find size's args", "[sizes]" )
+namespace
 {
-    SECTION( "Test with one arg" )
+    TEST(FunctionTest, TestWithOneArg)
     {
         vector<int> v(5);
 
-        REQUIRE( detail::sizes(v) == v.size() );
+        EXPECT_EQ( detail::sizes(v), v.size() );
     }
 
-    SECTION( "Test with multiple args" )
+    TEST(FunctionTest, TestWithMultipleArgs)
     {
         vector<int> v(5);
         list<int> l(5);
 
-        REQUIRE( detail::sizes(v, l, v) == v.size() );
+        EXPECT_EQ( detail::sizes(v, l, v), v.size() );
     }
 
-    SECTION( "Test with multiple args and non sized args" )
+    TEST(FunctionTest, TestWithMultipleArgsAndNonSizedArgs)
     {
         vector<int> v(5);
 
-        REQUIRE( detail::sizes(v, 10, Toto()) == v.size() );
+        EXPECT_EQ( detail::sizes(v, 10, Toto()), v.size() );
     }
 
-    SECTION( "Detect when sizes aren't equal" )
+    TEST(FunctionTest, DetectWhenSizesArentEqual )
     {
         vector<int> v1(5), v2(6);
 
-        REQUIRE_THROWS_AS(detail::sizes(v1, v2), std::length_error);
+        EXPECT_THROW(detail::sizes(v1, v2), std::length_error);
     }
 
-    SECTION( "Find with other sizes method" )
+    TEST(FunctionTest, FindWithOtherSizesMethod )
     {
-        REQUIRE(detail::sizes( Toto() ) == 5);
+        EXPECT_EQ(detail::sizes( Toto() ), 5);
     }
 }

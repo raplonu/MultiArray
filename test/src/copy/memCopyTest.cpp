@@ -1,48 +1,47 @@
-#include <catch.hpp>
-#include <iostream>
-#include <ma/ma>
-
+#include <gtest/gtest.h>
 #include <vector>
+
+#include <ma/ma>
 
 using namespace std;
 using namespace ma;
 
-TEST_CASE( "memCopyPlain test", "[memCopy]" )
+namespace
 {
 
-    SECTION( "std container mem copy" )
+    TEST(MemCopyTest, STDContainerMemCopy)
     {
         vector<int> v1 (3,1), v2 (3,0);
         copy::memCopy<int>(v2, v1);
 
-        REQUIRE(v2[0] == 1);
-        REQUIRE(v2[1] == 1);
-        REQUIRE(v2[2] == 1);
+        EXPECT_EQ(v2[0], 1);
+        EXPECT_EQ(v2[1], 1);
+        EXPECT_EQ(v2[2], 1);
     }
 
-    SECTION( "std container fill" )
+    TEST(MemCopyTest, STDContainerFill)
     {
         vector<int> v (3,0);
         copy::memCopy<int>(v, 42);
 
-        REQUIRE(v[0] == 42);
-        REQUIRE(v[1] == 42);
-        REQUIRE(v[2] == 42);
+        EXPECT_EQ(v[0], 42);
+        EXPECT_EQ(v[1], 42);
+        EXPECT_EQ(v[2], 42);
     }
 
-    SECTION( "std pointer mem copy" )
+    TEST(MemCopyTest, STDPointerMemCopy)
     {
         vector<int> v1 (3,1), v2 (4,0);
         int *p(v2.data());
         copy::memCopy<int>(p, v1);
 
-        REQUIRE(v2[0] == 1);
-        REQUIRE(v2[1] == 1);
-        REQUIRE(v2[2] == 1);
-        REQUIRE(v2[3] == 0);
+        EXPECT_EQ(v2[0], 1);
+        EXPECT_EQ(v2[1], 1);
+        EXPECT_EQ(v2[2], 1);
+        EXPECT_EQ(v2[3], 0);
     }
 
-    SECTION( "std array mem copy" )
+    TEST(MemCopyTest, STDArrayMemCopy)
     {
         vector<int> v1 (3,1);
         SArray<int> sa(4);
@@ -51,49 +50,45 @@ TEST_CASE( "memCopyPlain test", "[memCopy]" )
 
         copy::memCopy<int>(sub, v1);
 
-        REQUIRE(sa.value(0) == 1);
-        REQUIRE(sa.value(1) == 1);
-        REQUIRE(sa.value(2) == 1);
-        REQUIRE(sa.value(3) == 0);
+        EXPECT_EQ(sa.value(0), 1);
+        EXPECT_EQ(sa.value(1), 1);
+        EXPECT_EQ(sa.value(2), 1);
+        EXPECT_EQ(sa.value(3), 0);
     }
-}
 
-TEST_CASE( "memCopyStep test", "[memCopy]" )
-{
-
-    SECTION( "std container mem copy" )
+    TEST(MemCopyTest, STDContainerMemCopyStep)
     {
         vector<int> v1 (3,1), v2 (3,0);
         copy::memCopyStep<int>(v2, v1);
 
-        REQUIRE(v2[0] == 1);
-        REQUIRE(v2[1] == 1);
-        REQUIRE(v2[2] == 1);
+        EXPECT_EQ(v2[0], 1);
+        EXPECT_EQ(v2[1], 1);
+        EXPECT_EQ(v2[2], 1);
     }
 
-    SECTION( "std container fill" )
+    TEST(MemCopyTest, STDContainerFillStep)
     {
         vector<int> v (3,0);
         copy::memCopyStep<int>(v, 42);
 
-        REQUIRE(v[0] == 42);
-        REQUIRE(v[1] == 42);
-        REQUIRE(v[2] == 42);
+        EXPECT_EQ(v[0], 42);
+        EXPECT_EQ(v[1], 42);
+        EXPECT_EQ(v[2], 42);
     }
 
-    SECTION( "std pointer mem copy" )
+    TEST(MemCopyTest, STDPointerMemCopyStep)
     {
         vector<int> v1 (3,1), v2 (4,0);
         int *p(v2.data());
         copy::memCopyStep<int>(p, v1);
 
-        REQUIRE(v2[0] == 1);
-        REQUIRE(v2[1] == 1);
-        REQUIRE(v2[2] == 1);
-        REQUIRE(v2[3] == 0);
+        EXPECT_EQ(v2[0], 1);
+        EXPECT_EQ(v2[1], 1);
+        EXPECT_EQ(v2[2], 1);
+        EXPECT_EQ(v2[3], 0);
     }
 
-    SECTION( "std array mem copy" )
+    TEST(MemCopyTest, STDArrayMemCopyStep)
     {
         vector<int> v1 (3,1);
         MArray<int> sa(6);
@@ -102,15 +97,15 @@ TEST_CASE( "memCopyStep test", "[memCopy]" )
 
         copy::memCopyStep<int>(sub, v1);
 
-        REQUIRE(sa.value(0) == 1);
-        REQUIRE(sa.value(1) == 0);
-        REQUIRE(sa.value(2) == 1);
-        REQUIRE(sa.value(3) == 0);
-        REQUIRE(sa.value(4) == 1);
-        REQUIRE(sa.value(5) == 0);
+        EXPECT_EQ(sa.value(0), 1);
+        EXPECT_EQ(sa.value(1), 0);
+        EXPECT_EQ(sa.value(2), 1);
+        EXPECT_EQ(sa.value(3), 0);
+        EXPECT_EQ(sa.value(4), 1);
+        EXPECT_EQ(sa.value(5), 0);
     }
 
-    SECTION( "multi dim std array mem copy" )
+    TEST(MemCopyTest, MultiDimSTDArrayMemCopyStep)
     {
         vector<int> v1 (4,1);
         MArray<int> sa({4,4}, 0);
@@ -119,21 +114,21 @@ TEST_CASE( "memCopyStep test", "[memCopy]" )
 
         copy::memCopyStep<int>(sub, v1);
 
-        REQUIRE(sa.value(0) == 0);
-        REQUIRE(sa.value(1) == 0);
-        REQUIRE(sa.value(2) == 0);
-        REQUIRE(sa.value(3) == 0);
-        REQUIRE(sa.value(4) == 0);
-        REQUIRE(sa.value(5) == 1);
-        REQUIRE(sa.value(6) == 1);
-        REQUIRE(sa.value(7) == 0);
-        REQUIRE(sa.value(8) == 0);
-        REQUIRE(sa.value(9) == 1);
-        REQUIRE(sa.value(10) == 1);
-        REQUIRE(sa.value(11) == 0);
-        REQUIRE(sa.value(12) == 0);
-        REQUIRE(sa.value(13) == 0);
-        REQUIRE(sa.value(14) == 0);
-        REQUIRE(sa.value(15) == 0);
+        EXPECT_EQ(sa.value(0), 0);
+        EXPECT_EQ(sa.value(1), 0);
+        EXPECT_EQ(sa.value(2), 0);
+        EXPECT_EQ(sa.value(3), 0);
+        EXPECT_EQ(sa.value(4), 0);
+        EXPECT_EQ(sa.value(5), 1);
+        EXPECT_EQ(sa.value(6), 1);
+        EXPECT_EQ(sa.value(7), 0);
+        EXPECT_EQ(sa.value(8), 0);
+        EXPECT_EQ(sa.value(9), 1);
+        EXPECT_EQ(sa.value(10), 1);
+        EXPECT_EQ(sa.value(11), 0);
+        EXPECT_EQ(sa.value(12), 0);
+        EXPECT_EQ(sa.value(13), 0);
+        EXPECT_EQ(sa.value(14), 0);
+        EXPECT_EQ(sa.value(15), 0);
     }
 }
