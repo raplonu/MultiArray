@@ -15,13 +15,13 @@ namespace ma
             template<typename D>
             D makeDim(D const & dim, range::FullLinearIndice range)
             {
-                return dim.select(D(range::LinearRange(std::get<0>(range), std::get<1>(range), std::get<2>(range))));
+                return dim.select(D(range::LinearRange(range.begin, range.end, range.step)));
             }
 
             template<typename D>
             D makeDim(D const & dim, range::DelayLinearIndice range)
             {
-                return dim.select(D(range::LinearRange(std::get<0>(range), dim.size(), std::get<1>(range))));
+                return dim.select(D(range::LinearRange(range.begin, dim.size(), range.step)));
             }
 
             template<typename D, typename Size, typename = typename std::enable_if<std::is_integral<Size>::value>::type>
