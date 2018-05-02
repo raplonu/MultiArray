@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <algorithm>
-#include <tuple>
+// #include <tuple>
 
 #include <ma/range/LinearRange.h>
 
@@ -11,27 +11,40 @@ namespace ma
 {
     namespace range
     {
-        using FullLinearIndice = std::tuple<SizeT, SizeT, DiffT>;
-        using DelayLinearIndice = std::tuple<SizeT, DiffT>;
+        // using FullLinearIndice = std::tuple<SizeT, SizeT, DiffT>;
+        // using DelayLinearIndice = std::tuple<SizeT, DiffT>;
+
+        struct FullLinearIndice
+        {
+            SizeT begin;
+            SizeT end;
+            DiffT step;
+        };
+
+        struct DelayLinearIndice
+        {
+            SizeT begin;
+            DiffT step;
+        };
 
         inline FullLinearIndice L(SizeT stop)
         {
-            return std::make_tuple(0, stop, 1);
+            return FullLinearIndice{0, stop, 1};
         }
 
         inline FullLinearIndice L(SizeT start, SizeT stop)
         {
-            return std::make_tuple(start, stop, (stop >= start)?1:-1);
+            return FullLinearIndice{start, stop, (stop >= start)?1:-1};
         }
 
         inline FullLinearIndice L(SizeT start, SizeT stop, DiffT step)
         {
-            return std::make_tuple(start, stop, step);
+            return FullLinearIndice{start, stop, step};
         }
 
         inline DelayLinearIndice L(SizeT start, detail::Delay_, DiffT step = 1)
         {
-            return std::make_tuple(start, step);
+            return DelayLinearIndice{start, step};
         }
 
         template<typename... I>
