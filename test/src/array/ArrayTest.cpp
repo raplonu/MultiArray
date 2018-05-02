@@ -11,7 +11,7 @@ namespace
     TEST(ArrayTest, STDContainerMemCopy)
     {
         SArray<int> sa(5, {1,2,3,4,5});
-        MArray<int> ma({2,2}, sa.at(1, delay));
+        MArray<int> ma({2,2}, sa.at(1, Delay));
 
         EXPECT_EQ(sa[0], 1);
         EXPECT_EQ(sa[1], 2);

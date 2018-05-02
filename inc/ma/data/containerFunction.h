@@ -15,7 +15,7 @@ namespace ma
         template<typename T> //force template property
         void copy(T * dst, T const * src, SizeT size)
         {
-            std::memcpy(dst, src, size * sizeof(T));
+            std::copy_n(src, size, dst);// * sizeof(T));
         }
 
         template<typename T> //force template property

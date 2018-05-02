@@ -37,7 +37,7 @@ namespace ma
             }
 
             template<typename D>
-            D makeDim(D const & dim, detail::All const &)
+            D makeDim(D const & dim, detail::All_ const &)
             {
                 return dim;
             }

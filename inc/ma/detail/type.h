@@ -15,8 +15,8 @@ namespace ma
         using SizeT = std::size_t;
         using DiffT = std::ptrdiff_t;
 
-        struct All{};
-        struct Delay{};
+        enum All_{All, Auto};
+        enum Delay_{Delay};
 
         template<typename T>
         using DefaultAlloc = std::allocator<T>;
@@ -29,9 +29,13 @@ namespace ma
     using detail::SizeT;
     using detail::DiffT;
 
-    static detail::All All;
-    static detail::All Auto;
-    static detail::Delay delay;
+    using detail::All;
+    using detail::Auto;
+    using detail::Delay;
+
+    // static detail::All All;
+    // static detail::All Auto;
+    // static detail::Delay delay;
 }
 
 #endif //MA_DETAIL_TYPE_H
