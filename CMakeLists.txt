@@ -9,14 +9,14 @@ else()
     add_compile_options(-W -Wall)
 endif()
 
-set (CMAKE_CXX_STANDARD 11)
-
 # MultiArray #
 ##############
 
 project(MultiArray VERSION 0.1 LANGUAGES CXX)
 
 add_library(MultiArray INTERFACE)
+
+target_compile_features(MultiArray INTERFACE cxx_std_11)
 
 target_include_directories(MultiArray INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>  
