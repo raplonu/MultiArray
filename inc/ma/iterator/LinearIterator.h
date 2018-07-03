@@ -1,5 +1,5 @@
-#ifndef LINEAR_ITERATOR_H
-#define LINEAR_ITERATOR_H
+#ifndef MA_ITERATOR_LINEAR_ITERATOR_H
+#define MA_ITERATOR_LINEAR_ITERATOR_H
 
 #include <ma/type.h>
 
@@ -160,7 +160,10 @@ namespace ma
             return !li1.equal(li2);
         }
 
+        template<typename T>
+        using IsNotLinearIterator = enable_if_t<!is_same<T, LinearIterator>::value>;
+
     }
 }
 
-#endif //LINEAR_ITERATOR_H
+#endif //MA_ITERATOR_LINEAR_ITERATOR_H

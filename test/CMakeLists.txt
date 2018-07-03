@@ -12,7 +12,9 @@ set(MA_TEST_SRC
     # src/detail/functionTest.cpp
     # src/dimension/DimensionTest.cpp
     # src/iterator/IteratorTest.cpp
+    src/iterator/iteratorFunctionTest.cpp
     src/iterator/LinearIteratorTest.cpp
+    src/iterator/IteratorTest.cpp
     # src/iterator/ShapeIteratorTest.cpp
     # src/iterator/StepIteratorTest.cpp
     # src/ma/ArrayTest.cpp
