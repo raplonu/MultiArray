@@ -35,16 +35,16 @@ namespace ma
             size_type size_;
 
         public:
-            explicit Container(const Allocator& allocator = Allocator()) noexcept :
+            constexpr explicit Container(const Allocator& allocator = Allocator()) noexcept :
                 allocator_(allocator), pointer_(), size_(0)
             {}
 
-            explicit Container(size_type size, const Allocator& allocator = Allocator()):
+            constexpr explicit Container(size_type size, const Allocator& allocator = Allocator()):
                 allocator_(allocator), pointer_(allocator_.allocate(size)), size_(size)
             {}
 
-            Container(const Container&) = default;
-            Container(Container&&) noexcept = default;
+            constexpr Container(const Container&) = default;
+            constexpr Container(Container&&) noexcept = default;
 
             Container & operator=(const Container&) = default;
             Container & operator=(Container&&) noexcept = default;
@@ -57,8 +57,8 @@ namespace ma
             pointer data() noexcept { return pointer_; }
             const_pointer data() const noexcept { return pointer_; }
 
-            size_type size() const noexcept { return size_; }
-            allocator_type get_allocator() const { return allocator_; }
+            constexpr size_type size() const noexcept { return size_; }
+            constexpr allocator_type get_allocator() const { return allocator_; }
         };
     }
 }

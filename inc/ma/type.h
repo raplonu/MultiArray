@@ -6,7 +6,7 @@
 
 namespace ma
 {
-    using SizeT = std::size_t;
+    using SizeT = std::ptrdiff_t;
     using DiffT = std::ptrdiff_t;
 
     enum All{all, aut};

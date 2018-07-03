@@ -35,16 +35,16 @@ namespace ma
             shared_container container_;
 
         public:
-            explicit SharedContainer(const Allocator& allocator = Allocator()) noexcept :
+            constexpr explicit SharedContainer(const Allocator& allocator = Allocator()) noexcept :
                 container_(std::make_shared<container_type>(allocator))
             {}
 
-            explicit SharedContainer(size_type size, const Allocator& allocator = Allocator()):
+            constexpr explicit SharedContainer(size_type size, const Allocator& allocator = Allocator()):
                 container_(std::make_shared<container_type>(size, allocator))
             {}
 
-            SharedContainer(const SharedContainer&) noexcept = default;
-            SharedContainer(SharedContainer&&) noexcept = default;
+            constexpr SharedContainer(const SharedContainer&) noexcept = default;
+            constexpr SharedContainer(SharedContainer&&) noexcept = default;
 
             SharedContainer & operator=(const SharedContainer&) noexcept = default;
             SharedContainer & operator=(SharedContainer&&) noexcept = default;
@@ -54,8 +54,8 @@ namespace ma
             pointer data() noexcept { return container_->data(); }
             const_pointer data() const noexcept { return container_->data(); }
 
-            size_type size() const noexcept { return container_->size(); }
-            allocator_type get_allocator() const { return container_->get_allocator(); }
+            constexpr size_type size() const noexcept { return container_->size(); }
+            constexpr allocator_type get_allocator() const { return container_->get_allocator(); }
         };
     }
 }
