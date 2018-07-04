@@ -1,8 +1,15 @@
 #ifndef MA_CONFIG_H
 #define MA_CONFIG_H
 
-//#define NDEBUG
+// #define NDEBUG
 #include <cassert>
+
+#ifdef NDEBUG
+#define CONSTASSERT constexpr
+#else
+#define CONSTASSERT
+#endif
+
 
 #define MA_CXX14 (__cplusplus >= 201402L)
 #define MA_CXX17 (__cplusplus >= 201703L)

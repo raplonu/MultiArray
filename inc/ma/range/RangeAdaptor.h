@@ -20,37 +20,62 @@ namespace ma
         {
         public:
             using LinearRange::LinearRange;
+
+            template<typename LR>
+            constexpr explicit RangeAdaptor(LR && lr) noexcept :
+                LinearRange(std::forward<LR>(lr))
+            {}
+            
+            using LinearRange::operator[];
         };
 
         template<typename T>
         class RangeAdaptor
         {
+            using const_iterator = typename T::const_iterator;
+            using iterator = typename T::iterator;
+
             T range_;
 
             bool active_;
             bool contiguous_;
             bool hasStep_;
             DiffT step_;
-            SizeT rangedElement_;
+            SizeT rangedElementNb_;
 
         public:
             template<typename Range>
-            constexpr explicit RangeAdaptor(Range && range) noexcept :
+            CONSTASSERT explicit RangeAdaptor(Range && range) noexcept :
                 range_(std::forward<Range>(range)),
                 active_(rangeActive(range_)),
-                contiguous_(rangeContiguous(range_)), hasStep_(rangeHasStep(range_)),
-                step_(rangeStep(range_)), rangedElement_(rangeNbRangedElement(range_))
+                contiguous_(rangeContiguousFromZero(range_)), hasStep_(rangeHasStep(range_)),
+                step_(rangeStep(range_)), rangedElementNb_(rangeRangedElementNb(range_))
             {
                 //Check if range is empty because it put the range into the UB world
                 assert(!empty(range));
             }
 
-            constexpr bool isActive() const
+            constexpr const_iterator begin() const
+            {
+                return begin(range_);
+            }
+
+            constexpr const_iterator end() const
+            {
+                return end(range_);
+            }
+
+            constexpr SizeT size() const noexcept
+            {
+                return size(range_);
+            }
+
+            constexpr bool active() const
             {
                 return active_;
             }
 
-            constexpr bool isComplete(SizeT totalLength) const
+            constexpr bool complete(SizeT totalLength) const
             {
                 return contiguous_ && (T::size() == totalLength);
             }
@@ -75,9 +100,9 @@ namespace ma
                 return step_;
             }
 
-            constexpr SizeT rangedElement() const
+            constexpr SizeT rangedElementNb() const
             {
-                return rangedElement_;
+                return rangedElementNb_;
             }
         };
     }

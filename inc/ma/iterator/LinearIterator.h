@@ -118,7 +118,6 @@ namespace ma
             }
         };
 
-
         inline LinearIterator operator+(DiffT pos, LinearIterator li)
         {
             return li.add(pos);
@@ -165,6 +164,18 @@ namespace ma
         using IsNotLinearIterator = enable_if_t<!is_same<T, LinearIterator>::value>;
 
     }
+}
+
+namespace std
+{
+    template<> struct iterator_traits<ma::iterator::LinearIterator>
+    {
+            using value_type = ma::SizeT;
+            using difference_type = ma::DiffT;
+            using pointer = void;
+            using reference = void;
+            using iterator_category = std::random_access_iterator_tag;
+    };
 }
 
 #endif //MA_ITERATOR_LINEAR_ITERATOR_H

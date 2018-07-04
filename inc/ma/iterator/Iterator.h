@@ -93,7 +93,7 @@ namespace ma
             template<
                 typename T, typename BaseT = decay_t<T>,
                 typename = EnableDifferent<Iterator, BaseT>,
-                typename = IsRandomIt<T>
+                typename = IsRandomIt<BaseT>
             >
             Iterator(T && it)
                 :it_(new IteratorImpl<BaseT>(std::forward<T>(it)))

@@ -47,6 +47,8 @@ namespace ma
             constexpr LinearRange(const LinearRange &) noexcept = default;
             LinearRange& operator=(const LinearRange &) noexcept = default;
 
+            ~LinearRange() = default;
+
             constexpr SizeT operator[](SizeT pos) const noexcept
             {
                 return start_ + pos * step_;
@@ -92,7 +94,7 @@ namespace ma
                 return contiguousFromZero() && (stop_ == totalLength);
             }
 
-            constexpr SizeT nbRangedElement() const noexcept
+            constexpr SizeT rangedElementNb() const noexcept
             {
                 return (step_ == 1)?max<SizeT>(size(), 1) : 1;
             }

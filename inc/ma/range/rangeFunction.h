@@ -105,7 +105,7 @@ namespace ma
 
         constexpr inline SizeT rangeRangedElementNb(const LinearRange & range) noexcept
         {
-            return range.nbRangedElement();
+            return range.rangedElementNb();
         }
 
         namespace impl
