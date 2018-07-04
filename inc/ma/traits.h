@@ -21,18 +21,34 @@ namespace ma
 
     using std::is_base_of;
     using std::is_same;
-
-    template<typename T1, typename T2>
-    using EnableDifferent = enable_if_t<!is_same<T1, T2>::value>;
+    using std::is_const;
 
     template<typename T>
     using IteratorCategory = typename std::iterator_traits<T>::iterator_category;
 
     template<typename T>
-    using IsBidirectIt = enable_if_t<is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value>;
+    using DiffType = typename std::iterator_traits<T>::difference_type ;
 
-    template<typename T>
-    using IsRandomIt = enable_if_t<is_same<IteratorCategory<T>, std::random_access_iterator_tag>::value>;
+    template<typename T, typename TT = void>
+    using IsConst = enable_if_t<is_const<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsNotConst = enable_if_t<not is_const<T>::value, TT>;
+
+    template<typename T1, typename T2, typename TT = void>
+    using EnableDifferent = enable_if_t<!is_same<T1, T2>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsBidirectIt = enable_if_t<is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsNotBidirectIt = enable_if_t<not is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsRandomIt = enable_if_t<is_same<IteratorCategory<T>, std::random_access_iterator_tag>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsNotRandomIt = enable_if_t<not is_same<IteratorCategory<T>, std::random_access_iterator_tag>::value, TT>;
 
     // namespace impl
     // {

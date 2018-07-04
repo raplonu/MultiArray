@@ -16,6 +16,7 @@ set(MA_TEST_SRC
     src/iterator/LinearIteratorTest.cpp
     src/iterator/IteratorTest.cpp
     src/range/LinearRangeTest.cpp
+    src/range/rangeFunctionTest.cpp
     # src/iterator/ShapeIteratorTest.cpp
     # src/iterator/StepIteratorTest.cpp
     # src/ma/ArrayTest.cpp

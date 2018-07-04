@@ -18,8 +18,8 @@ namespace ma
         class LinearRange
         {
         public:
-            using iterator = iterator::LinearIterator;
             using const_iterator = iterator::LinearIterator;
+            using iterator = iterator::LinearIterator;
 
         protected:
             SizeT start_;
@@ -72,16 +72,24 @@ namespace ma
                 return (stop_ - start_) / step_;
             }
 
+            constexpr bool empty() const noexcept
+            {
+                return stop_ == start_;
+            }
+
             constexpr bool active() const noexcept
             {
                 return stop_ != start_;
             }
 
+            constexpr bool contiguousFromZero() const noexcept
+            {
+                return (start_ == 0) && (step_ == 1);
+            }
+
             constexpr bool complete(SizeT totalLength) const noexcept
             {
-                return (start_ == 0)
-                    && (stop_ == totalLength)
-                    && (step_ == 1);
+                return contiguousFromZero() && (stop_ == totalLength);
             }
 
             constexpr SizeT nbRangedElement() const noexcept

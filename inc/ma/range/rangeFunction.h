@@ -28,15 +28,15 @@ namespace ma
         /**
          * Test if range have only contiguous
          **/
-        constexpr inline bool rangeContiguous(const LinearRange & lr)
+        constexpr inline bool rangeContiguousFromZero(const LinearRange & lr)
         {
-            return lr.step() == 1;
+            return lr.contiguousFromZero();
         }
 
         template<typename T, typename = IsNotLinearRange<T>>
-        bool rangeContiguous(const T & range)
+        bool rangeContiguousFromZero(const T & range)
         {
-            for(auto e : LinearRange(size(range))
+            for(auto e : LinearRange(size(range)))
                 if(SizeT(range[e]) != e)
                     return false;
 
@@ -51,20 +51,90 @@ namespace ma
             return true;
         }
 
-        template<typename T, typename = IsNotLinearRange<T>>
-        constexpr bool rangeHasStep(const T & range)
+        namespace impl
         {
-            constexpr auto it(begin(range));
-            constexpr DiffT step(*next(it) - *it);
-            constexpr SizeT lastE(*it);
+            template<typename T>
+            struct diff_not_equal_t
+            {
+                T ref_;
 
-            for(++it; it != end(range); ++it)
-                if(step != DiffT(*it) - DiffT(lastE))
-            		return false;
-                else
-                	lastE = *it;
+                constexpr explicit diff_not_equal_t(T ref) noexcept: ref_(ref){}
 
-            return true;
+                template<typename TT>
+                constexpr bool operator()(const TT & lhs, const TT & rhs) const noexcept
+                {
+                    return (rhs - lhs) != ref_;
+                }
+            };
+
+            template<typename T>
+            constexpr diff_not_equal_t<T> diff_not_equal(T ref)
+            {
+                return diff_not_equal_t<T>(std::move(ref));
+            }
+        }
+
+        template<typename T, typename = IsNotLinearRange<T>>
+        MLCONSTEXPR bool rangeHasStep(const T & range)
+        {
+            auto first = ma::begin(range);
+            auto second = ma::next(first);
+            auto last = ma::end(range);
+
+            //Range is empty or 1 element ?
+            if(empty(range) || second == last) return true;
+
+            auto step = *second - *first;
+
+            return (std::adjacent_find(first, last, impl::diff_not_equal(step)) == last);
+        }
+
+        constexpr inline DiffT rangeStep(const LinearRange & range) noexcept
+        {
+            return range.step();
+        }
+
+        template<typename T, typename = IsNotLinearRange<T>>
+        MLCONSTEXPR DiffT rangeStep(T const & range)
+        {
+            auto first = ma::begin(range), second = ma::next(first), last = ma::end(range);
+
+            //Range is empty or 1 element ? maybe return 0 !!!!
+            return (first == last || second == last) ? 1 : *second - *first;
+        }
+
+        constexpr inline SizeT rangeRangedElementNb(const LinearRange & range) noexcept
+        {
+            return range.nbRangedElement();
+        }
+
+        namespace impl
+        {
+            struct is_not_contiguous
+            {
+                template<typename TT>
+                constexpr bool operator()(const TT & lhs, const TT & rhs) const noexcept
+                {
+                    return lhs + 1 != rhs;
+                }
+            };
+
+        }
+
+        template<typename T, typename = IsNotLinearRange<T>>
+        MLCONSTEXPR SizeT rangeRangedElementNb(const T & range)
+        {
+            auto first = ma::begin(range), step = first, last = ma::end(range);
+
+            SizeT rangedElementNb = size(range);
+
+            while((step = std::adjacent_find(first, last, impl::is_not_contiguous())) != last)
+            {
+                rangedElementNb = min(rangedElementNb, ma::distance(first, ++step));
+                first = step;
+            }
+
+            return min(rangedElementNb, ma::distance(first, step));
         }
 
 
@@ -110,33 +180,7 @@ namespace ma
         //     return std::vector<SizeT>{i...};
         // }
 
-        // inline SizeT rangeNbRangedElement(LinearRange const & range)
-        // {
-        //     return range.nbRangedElement();
-        // }
 
-        // template
-        // <
-        //     typename T,
-        //     typename = typename std::enable_if<!std::is_base_of<LinearRange, T>::value>::type
-        // >
-        // SizeT rangeNbRangedElement(T const & range)
-        // {
-        //     SizeT rangedE(range.size()), lastRangedE(0), lastVal(range.front());
-
-        //     for_each(++(range.begin()), range.end(),
-        //         [&](SizeT pos)
-        //         {
-        //             if(pos == lastVal + 1)
-        //                 ++lastRangedE;
-        //             else
-        //                 rangedE = std::min(rangedE, lastRangedE);
-        //             lastVal = pos;
-        //         }
-        //     );
-
-        //     return std::max(rangedE, 1ul);
-        // }
 
 
         // inline bool rangeComplete(LinearRange const & lr, SizeT totalLength)
@@ -158,21 +202,7 @@ namespace ma
         // }
 
 
-        // inline DiffT rangeStep(LinearRange const & range)
-        // {
-        //     return range.step();
-        // }
 
-        // template
-        // <
-        //     typename T,
-        //     typename = typename std::enable_if<!std::is_base_of<LinearRange, T>::value>::type
-        // >
-        // inline DiffT rangeStep(T const & range)
-        // {
-        //     auto it(range.begin());
-        //     return *next(it) - *it;
-        // }
     }
 
     // using range::L;

@@ -1,16 +1,11 @@
 #ifndef MA_FUNCTION_H
 #define MA_FUNCTION_H
 
-// #include <type_traits>
-// #include <memory>
-// #include <vector>
 // #include <numeric>
-// #include <iostream>
-
 #include <iterator>
 #include <algorithm>
 
-
+#include <ma/config.h>
 #include <ma/type.h>
 #include <ma/traits.h>
 
@@ -23,12 +18,12 @@ namespace ma
     using std::begin;
     using std::end;
     #else
-    template< class C >
+    template< class C , typename = IsNotConst<C>>
     constexpr auto begin( C& c ) -> decltype(c.begin()) { return c.begin(); }
     template< class C >
     constexpr auto begin( const C& c ) -> decltype(c.begin()) { return c.begin(); }
 
-    template< class C >
+    template< class C , typename = IsNotConst<C>>
     constexpr auto end( C& c ) -> decltype(c.end()) { return c.end(); }
     template< class C >
     constexpr auto end( const C& c ) -> decltype(c.end()) { return c.end(); }
@@ -94,12 +89,38 @@ namespace ma
     #endif
 
     /**
+     * Empty function
+     **/
+    #if MA_CXX17
+    using std::empty;
+    #else
+    template <class C> 
+    constexpr auto empty(const C& c) -> decltype(c.empty())
+    {
+        return c.empty();
+    }
+
+    template <class T, std::size_t N> 
+    constexpr bool empty(const T (&array)[N]) noexcept
+    {
+        return false;
+    }
+
+    template <class E> 
+    constexpr bool empty(std::initializer_list<E> il) noexcept
+    {
+        return il.size() == 0;
+    }
+    #endif    
+
+
+    /**
      * Advance function : push forward an iterator n times
      **/
     #if MA_CXX17
     using std::advance;
     #else
-    template< class InputIt, class Distance, typename = IsBidirectIt<InputIt>>
+    template< class InputIt, class Distance, typename = IsBidirectIt<InputIt>, typename = IsNotRandomIt<InputIt>>
     constexpr void advance( InputIt& it, Distance n )
     {
         if(n >= 0)
@@ -126,11 +147,33 @@ namespace ma
     using std::next;
     #else
     template<class ForwardIt>
-    constexpr ForwardIt next(ForwardIt it,
-                typename std::iterator_traits<ForwardIt>::difference_type n = 1)
+    MLCONSTEXPR ForwardIt next(ForwardIt it, DiffType<ForwardIt> n = 1)
     {
-        advance(it, n);
+        ma::advance(it, n);
         return it;
+    }
+    #endif
+
+    /**
+     * Distance function
+     **/
+    #if MA_CXX17
+    using std::distance;
+    #else
+    template<typename T>
+    constexpr  IsRandomIt<T, SizeT> distance(const T & t1, const T & t2) noexcept
+    {
+        return static_cast<SizeT>(t2 - t1);
+    }
+
+    template<typename T>
+    constexpr IsNotRandomIt<T, SizeT> distance(const T & t1, const T & t2) noexcept
+    {
+        SizeT res{};
+
+        while(t1++ != t2) ++res;
+
+        return res;
     }
     #endif
 

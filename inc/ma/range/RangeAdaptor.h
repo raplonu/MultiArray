@@ -4,6 +4,8 @@
 // #include <vector>
 // #include <list>
 
+#include <ma/config.h>
+
 #include <ma/range/LinearRange.h>
 #include <ma/range/rangeFunction.h>
 
@@ -38,7 +40,10 @@ namespace ma
                 active_(rangeActive(range_)),
                 contiguous_(rangeContiguous(range_)), hasStep_(rangeHasStep(range_)),
                 step_(rangeStep(range_)), rangedElement_(rangeNbRangedElement(range_))
-            {}
+            {
+                //Check if range is empty because it put the range into the UB world
+                assert(!empty(range));
+            }
 
             constexpr bool isActive() const
             {
