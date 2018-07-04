@@ -11,6 +11,8 @@
 
 namespace ma
 {
+    using std::move;
+    using std::forward;
     /**
      * Begin & End function
      **/
@@ -82,7 +84,7 @@ namespace ma
     }
 
     template <class T, std::size_t N>
-    constexpr SizeT size(const T (&array)[N]) noexcept
+    constexpr SizeT size(const T (&)[N]) noexcept
     {
         return N;
     }
@@ -101,7 +103,7 @@ namespace ma
     }
 
     template <class T, std::size_t N> 
-    constexpr bool empty(const T (&array)[N]) noexcept
+    constexpr bool empty(const T (&)[N]) noexcept
     {
         return false;
     }
@@ -121,7 +123,7 @@ namespace ma
     using std::advance;
     #else
     template< class InputIt, class Distance, typename = IsBidirectIt<InputIt>, typename = IsNotRandomIt<InputIt>>
-    constexpr void advance( InputIt& it, Distance n )
+    CONSTEXPR14 void advance(InputIt & it, Distance n)
     {
         if(n >= 0)
             for(SizeT i(0); i < n; ++i)
@@ -132,7 +134,7 @@ namespace ma
     }
 
     template< class InputIt, class Distance, typename = IsRandomIt<InputIt>>
-    constexpr void advance( InputIt& it, Distance n )
+    CONSTEXPR14 void advance(InputIt & it, Distance n)
     {
         it += n;
     }
@@ -147,7 +149,7 @@ namespace ma
     using std::next;
     #else
     template<class ForwardIt>
-    MLCONSTEXPR ForwardIt next(ForwardIt it, DiffType<ForwardIt> n = 1)
+    CONSTEXPR14 ForwardIt next(ForwardIt it, DiffType<ForwardIt> n = 1)
     {
         ma::advance(it, n);
         return it;
@@ -167,13 +169,10 @@ namespace ma
     }
 
     template<typename T>
-    constexpr IsNotRandomIt<T, SizeT> distance(const T & t1, const T & t2) noexcept
+    constexpr IsNotRandomIt<T, SizeT> distance(T t1, T t2) noexcept
     {
-        SizeT res{};
-
-        while(t1++ != t2) ++res;
-
-        return res;
+        //Force to use recurtion because of c++11 constexpr limitation
+        return (t1 != t2) ? 0 : distance(++t1, t2) + 1;
     }
     #endif
 

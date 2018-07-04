@@ -32,6 +32,7 @@ namespace ma
         template<typename T>
         class RangeAdaptor
         {
+            using value_type = typename T::value_type;
             using const_iterator = typename T::const_iterator;
             using iterator = typename T::iterator;
 
@@ -52,22 +53,22 @@ namespace ma
                 step_(rangeStep(range_)), rangedElementNb_(rangeRangedElementNb(range_))
             {
                 //Check if range is empty because it put the range into the UB world
-                assert(!empty(range));
+                massert(!empty(range_));
             }
 
             constexpr const_iterator begin() const
             {
-                return begin(range_);
+                return ma::begin(range_);
             }
 
             constexpr const_iterator end() const
             {
-                return end(range_);
+                return ma::end(range_);
             }
 
             constexpr SizeT size() const noexcept
             {
-                return size(range_);
+                return ma::size(range_);
             }
 
             constexpr bool active() const
@@ -77,7 +78,7 @@ namespace ma
 
             constexpr bool complete(SizeT totalLength) const
             {
-                return contiguous_ && (T::size() == totalLength);
+                return contiguous_ && (size() == totalLength);
             }
 
             constexpr bool hasStep() const
@@ -87,12 +88,12 @@ namespace ma
 
             constexpr SizeT start() const
             {
-                return T::front();
+                return range_.front();
             }
 
             constexpr SizeT stop() const
             {
-                return T::back() + step_;
+                return range_.back() + step_;
             }
 
             constexpr DiffT step() const
@@ -103,6 +104,11 @@ namespace ma
             constexpr SizeT rangedElementNb() const
             {
                 return rangedElementNb_;
+            }
+
+            constexpr value_type operator[](SizeT pos) const
+            {
+                return range_[pos];
             }
         };
     }

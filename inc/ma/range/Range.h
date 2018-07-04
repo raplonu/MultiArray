@@ -137,7 +137,7 @@ namespace ma
 
             }
 
-            uRange selectVectRange(RangeInterface const & r) const
+            uRange selectVectRange(const RangeInterface & r) const
             {
                 VectRange res(r.size());
 
@@ -159,6 +159,8 @@ namespace ma
             return uRange(new RangeImpl<decay_t<Range>>(std::forward<Range>(range)));
         }
 
+        template<typename> struct TOTO;
+
         class Range
         {
         public:
@@ -167,11 +169,12 @@ namespace ma
         protected:
             uRange range_;
 
-
-            Range(uRange range) noexcept :
+            explicit Range(uRange && range) noexcept :
                 range_(std::move(range))
             {}
+
         public:
+
             explicit Range():
                 range_(makeRangeImpl(LinearRange()))
             {}
@@ -187,16 +190,16 @@ namespace ma
                 range_(makeRangeImpl(LinearRange(start, stop, step)))
             {}
 
-            template<typename T, typename = IsRandomIt<T>>
+            template<typename T, typename = IsNotEquivalent<T, Range>, typename = IsIterable<T>>
             explicit Range(T && range):
                 range_(makeRangeImpl(range))
             {}
 
-            explicit Range(const Range & range):
+            Range(const Range & range):
                 range_(range.clone())
             {}
 
-            explicit Range(Range && range) = default;
+            Range(Range && range) = default;
 
             Range & operator=(const Range & range)
             {
@@ -260,7 +263,7 @@ namespace ma
 
             Range select(const Range & r) const
             {
-                return {range_->selectRange(*r.range_)};
+                return Range(range_->selectRange(*r.range_));
             }
         };
     }

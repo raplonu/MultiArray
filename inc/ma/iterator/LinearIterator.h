@@ -20,142 +20,142 @@ namespace ma
             DiffT step_;
 
         public:
-            constexpr explicit LinearIterator(SizeT start = 0, DiffT step = 1) noexcept:
+            constexpr explicit LinearIterator(SizeT start = 0, DiffT step = 1) noexcept :
                 start_(start), step_(step)
             {}
 
             constexpr LinearIterator(const LinearIterator &) noexcept = default;
             LinearIterator & operator=(const LinearIterator &) noexcept = default;
 
-            constexpr DiffT shift(DiffT pos) const
+            constexpr DiffT shift(DiffT pos) const noexcept
             {
                 return step_ * pos;
             }
 
-            constexpr SizeT value(DiffT pos = 0) const
+            constexpr SizeT value(DiffT pos = 0) const noexcept
             {
                 return start_ + shift(pos);
             }
 
-            constexpr LinearIterator add(DiffT pos) const
+            constexpr LinearIterator add(DiffT pos) const noexcept
             {
                 return LinearIterator(value(pos), step_);
             }
 
-            LinearIterator & increase(DiffT pos)
+            LinearIterator & increase(DiffT pos) noexcept
             {
                 start_ = value(pos);
                 return *this;
             }
 
-            constexpr bool superiorStrict(LinearIterator const & it) const
+            constexpr bool superiorStrict(LinearIterator const & it) const noexcept
             {
                 return start_ > it.start_;
             }
 
-            constexpr bool equal(LinearIterator const & it) const
+            constexpr bool equal(LinearIterator const & it) const noexcept
             {
                 return start_ == it.start_;
             }
 
-            constexpr LinearIterator operator[](DiffT pos) const
+            constexpr LinearIterator operator[](DiffT pos) const noexcept
             {
                 return LinearIterator(value(pos), step_);
             }
 
-            constexpr SizeT operator*() const
+            constexpr SizeT operator*() const noexcept
             {
                 return start_;
             }
 
-            LinearIterator& operator++()
+            LinearIterator& operator++() noexcept
             {
                 return increase(1);
             }
 
-            LinearIterator operator++(int)
+            LinearIterator operator++(int) noexcept
             {
                 LinearIterator oli(start_, step_);
                 increase(1);
                 return oli;
             }
 
-            LinearIterator& operator--()
+            LinearIterator& operator--() noexcept
             {
                 return increase(-1);
             }
 
-            LinearIterator operator--(int)
+            LinearIterator operator--(int) noexcept
             {
                 LinearIterator oli(start_, step_);
                 increase(-1);
                 return oli;
             }
 
-            LinearIterator& operator+=(DiffT pos)
+            LinearIterator& operator+=(DiffT pos) noexcept
             {
                 return increase(pos);
             }
 
-            LinearIterator& operator-=(DiffT pos)
+            LinearIterator& operator-=(DiffT pos) noexcept
             {
                 return increase(-pos);
             }
 
-            constexpr LinearIterator operator+(DiffT pos)
+            constexpr LinearIterator operator+(DiffT pos) const noexcept
             {
                 return add(pos);
             }
 
-            constexpr LinearIterator operator-(DiffT pos)
+            constexpr LinearIterator operator-(DiffT pos) const noexcept
             {
                 return add(-pos);
             }
 
-            constexpr DiffT operator-(const LinearIterator & oli)
+            constexpr DiffT operator-(const LinearIterator & oli) const noexcept
             {
                 return start_ - *oli;
             }
         };
 
-        inline LinearIterator operator+(DiffT pos, LinearIterator li)
+        inline LinearIterator operator+(DiffT pos, const LinearIterator & li) noexcept
         {
             return li.add(pos);
         }
 
 
-        inline LinearIterator operator-(DiffT pos, LinearIterator li)
+        inline LinearIterator operator-(DiffT pos, const LinearIterator & li) noexcept
         {
             return li.add(-pos);
         }
 
 
-        inline bool operator>(LinearIterator const & li1, LinearIterator const & li2)
+        inline bool operator>(const LinearIterator & li1, const LinearIterator & li2) noexcept
         {
             return li1.superiorStrict(li2);
         }
 
-        inline bool operator<(LinearIterator const & li1, LinearIterator const & li2)
+        inline bool operator<(LinearIterator const & li1, LinearIterator const & li2) noexcept
         {
             return li2.superiorStrict(li1);
         }
 
-        inline bool operator>=(LinearIterator const & li1, LinearIterator const & li2)
+        inline bool operator>=(LinearIterator const & li1, LinearIterator const & li2) noexcept
         {
             return !li2.superiorStrict(li1);
         }
 
-        inline bool operator<=(LinearIterator const & li1, LinearIterator const & li2)
+        inline bool operator<=(LinearIterator const & li1, LinearIterator const & li2) noexcept
         {
             return !li1.superiorStrict(li2);
         }
 
-        inline bool operator==(LinearIterator const & li1, LinearIterator const & li2)
+        inline bool operator==(LinearIterator const & li1, LinearIterator const & li2) noexcept
         {
             return li1.equal(li2);
         }
 
-        inline bool operator!=(LinearIterator const & li1, LinearIterator const & li2)
+        inline bool operator!=(LinearIterator const & li1, LinearIterator const & li2) noexcept
         {
             return !li1.equal(li2);
         }

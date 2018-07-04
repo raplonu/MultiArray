@@ -75,7 +75,7 @@ namespace ma
         }
 
         template<typename T, typename = IsNotLinearRange<T>>
-        MLCONSTEXPR bool rangeHasStep(const T & range)
+        CONSTEXPR14 bool rangeHasStep(const T & range)
         {
             auto first = ma::begin(range);
             auto second = ma::next(first);
@@ -95,7 +95,7 @@ namespace ma
         }
 
         template<typename T, typename = IsNotLinearRange<T>>
-        MLCONSTEXPR DiffT rangeStep(T const & range)
+        CONSTEXPR14 DiffT rangeStep(T const & range)
         {
             auto first = ma::begin(range), second = ma::next(first), last = ma::end(range);
 
@@ -122,7 +122,7 @@ namespace ma
         }
 
         template<typename T, typename = IsNotLinearRange<T>>
-        MLCONSTEXPR SizeT rangeRangedElementNb(const T & range)
+        CONSTEXPR14 SizeT rangeRangedElementNb(const T & range)
         {
             auto first = ma::begin(range), step = first, last = ma::end(range);
 

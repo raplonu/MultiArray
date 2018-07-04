@@ -22,6 +22,13 @@ namespace ma
     using std::is_base_of;
     using std::is_same;
     using std::is_const;
+    using std::is_literal_type;
+
+    template<typename T>
+    using IsNotLiteral = enable_if_t<not is_literal_type<T>::value>;
+
+    template<typename T1, typename T2>
+    using IsNotEquivalent = enable_if_t<not is_same<decay_t<T1>, decay_t<T2>>::value>;
 
     template<typename T>
     using IteratorCategory = typename std::iterator_traits<T>::iterator_category;
@@ -49,6 +56,28 @@ namespace ma
 
     template<typename T, typename TT = void>
     using IsNotRandomIt = enable_if_t<not is_same<IteratorCategory<T>, std::random_access_iterator_tag>::value, TT>;
+
+    namespace impl
+    {
+        template <typename T>
+        auto is_iterable_impl(int)
+        -> decltype (
+            begin(std::declval<T&>()) != end(std::declval<T&>()), // begin/end and operator !=
+            void(), // Handle evil operator ,
+            ++std::declval<decltype(begin(std::declval<T&>()))&>(), // operator ++
+            void(*begin(std::declval<T&>())), // operator*
+            void(std::declval<T&>()[0]), //operator[]
+            std::true_type{});
+
+        template <typename T>
+        std::false_type is_iterable_impl(...);
+    }
+
+    template <typename T>
+    using is_iterable = decltype(impl::is_iterable_impl<T>(0));
+
+    template<typename T>
+    using IsIterable = enable_if_t<is_iterable<T>::value>;
 
     // namespace impl
     // {
@@ -92,27 +121,7 @@ namespace ma
     // template <typename T>
     // using has_comtigous_met = decltype(impl::has_comtigous_met_impl<T>(0));
 
-    // namespace impl
-    // {
-    //     // To allow ADL with custom begin/end
-    //     using std::begin;
-    //     using std::end;
-
-    //     template <typename T>
-    //     auto is_iterable_impl(int)
-    //     -> decltype (
-    //         begin(std::declval<T&>()) != end(std::declval<T&>()), // begin/end and operator !=
-    //         void(), // Handle evil operator ,
-    //         ++std::declval<decltype(begin(std::declval<T&>()))&>(), // operator ++
-    //         void(*begin(std::declval<T&>())), // operator*
-    //         std::true_type{});
-
-    //     template <typename T>
-    //     std::false_type is_iterable_impl(...);
-    // }
-
-    // template <typename T>
-    // using is_iterable = decltype(impl::is_iterable_impl<T>(0));
+    
 
     // //Detect full contiguous alloc like raw ptr, vector, array
     // template<typename T>

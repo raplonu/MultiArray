@@ -59,6 +59,32 @@ namespace
         EXPECT_FALSE(r.complete(3));
     }
 
+    TEST(RangeTest, VectorRange)
+    {
+        VectRange v{0,1,2,3,4,5};
+        Range r(v);
 
+        EXPECT_EQ(r.begin() + 6, r.end());
+
+        EXPECT_EQ(r.size(), v.size());
+        // Stop is change from -5 to -4 to be equal to start + step * N with N interger
+        EXPECT_EQ(r.stop(), 6);
+        EXPECT_TRUE(r.complete(6));
+    }
+
+    TEST(RangeTest, MergeRange)
+    {
+        VectRange v1{0,1,3,2}; //Not contiguous
+        Range r1(v1);
+
+        VectRange v2{0,1,3,2}; //will reorder element 3 and 4 of v1
+        Range r2(v2);
+
+        EXPECT_FALSE(r1.complete(4));
+
+        Range r3 = r1.select(r2);
+
+        EXPECT_TRUE(r3.complete(4));
+    }
 }
 
