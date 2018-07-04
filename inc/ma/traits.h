@@ -9,14 +9,14 @@
 namespace ma
 {
     #if MA_CXX14
+    using std::decay_t;
+    using std::enable_if_t;
+    #else
     template< typename T >
     using decay_t = typename std::decay<T>::type;
 
     template< bool B, typename T = void >
     using enable_if_t = typename std::enable_if<B,T>::type;
-    #else
-    using std::decay_t;
-    using std::enable_if_t;
     #endif
 
     using std::is_base_of;
@@ -27,6 +27,9 @@ namespace ma
 
     template<typename T>
     using IteratorCategory = typename std::iterator_traits<T>::iterator_category;
+
+    template<typename T>
+    using IsBidirectIt = enable_if_t<is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value>;
 
     template<typename T>
     using IsRandomIt = enable_if_t<is_same<IteratorCategory<T>, std::random_access_iterator_tag>::value>;

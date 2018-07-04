@@ -7,12 +7,132 @@
 // #include <numeric>
 // #include <iostream>
 
+#include <iterator>
+#include <algorithm>
+
+
 #include <ma/type.h>
 #include <ma/traits.h>
 
 namespace ma
 {
+    /**
+     * Begin & End function
+     **/
+    #if MA_CXX17
+    using std::begin;
+    using std::end;
+    #else
+    template< class C >
+    constexpr auto begin( C& c ) -> decltype(c.begin()) { return c.begin(); }
+    template< class C >
+    constexpr auto begin( const C& c ) -> decltype(c.begin()) { return c.begin(); }
+
+    template< class C >
+    constexpr auto end( C& c ) -> decltype(c.end()) { return c.end(); }
+    template< class C >
+    constexpr auto end( const C& c ) -> decltype(c.end()) { return c.end(); }
+    #if MA_CXX14
+    using std::begin;
+    using std::end; 
+    #else
+    template< class T, std::size_t N >
+    constexpr T* begin( T (&array)[N] ) noexcept { return array; }
+    template< class T, std::size_t N >
+    constexpr T* end( T (&array)[N] ) noexcept { return array + N; }
+    #endif
+    #endif
     
+    /**
+     * Absolute function
+     **/
+    template<typename T>
+    constexpr T abs(T t) noexcept
+    {
+        return (t < 0)?-t:t;
+    }
+
+    /**
+     * Min & Max function
+     **/
+
+    #if MA_CXX14
+    using std::max;
+    using std::min;
+    #else
+    template<typename T>
+    constexpr const T & max(const T & t1, const T & t2) noexcept
+    {
+        return (t1 > t2)?t1:t2;
+    }
+
+    template<typename T>
+    constexpr const T & min(const T & t1, const T & t2) noexcept
+    {
+        return (t1 < t2)?t1:t2;
+    }
+    #endif
+
+    /**
+     * Size function
+     **/
+
+    #if MA_CXX17
+    using std::size;
+    #else
+    template <typename  C> 
+    constexpr SizeT size(const C& c)
+    {
+        return c.size();
+    }
+
+    template <class T, std::size_t N>
+    constexpr SizeT size(const T (&array)[N]) noexcept
+    {
+        return N;
+    }
+    #endif
+
+    /**
+     * Advance function : push forward an iterator n times
+     **/
+    #if MA_CXX17
+    using std::advance;
+    #else
+    template< class InputIt, class Distance, typename = IsBidirectIt<InputIt>>
+    constexpr void advance( InputIt& it, Distance n )
+    {
+        if(n >= 0)
+            for(SizeT i(0); i < n; ++i)
+                ++it;
+        else
+            for(SizeT i(0); i < -n; ++i)
+                --it;
+    }
+
+    template< class InputIt, class Distance, typename = IsRandomIt<InputIt>>
+    constexpr void advance( InputIt& it, Distance n )
+    {
+        it += n;
+    }
+    #endif
+
+
+    /**
+     * Next function : return it + n
+     **/
+
+    #if MA_CXX17
+    using std::next;
+    #else
+    template<class ForwardIt>
+    constexpr ForwardIt next(ForwardIt it,
+                typename std::iterator_traits<ForwardIt>::difference_type n = 1)
+    {
+        advance(it, n);
+        return it;
+    }
+    #endif
 
     // template<typename T>
     // auto size(T const & t) -> decltype(t.size())

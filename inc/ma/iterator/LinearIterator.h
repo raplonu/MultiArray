@@ -2,6 +2,7 @@
 #define MA_ITERATOR_LINEAR_ITERATOR_H
 
 #include <ma/type.h>
+#include <ma/traits.h>
 
 namespace ma
 {

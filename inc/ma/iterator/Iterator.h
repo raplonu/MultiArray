@@ -14,6 +14,10 @@ namespace ma
 {
     namespace iterator
     {
+        class IteratorInterface;
+
+        using uIterator = std::unique_ptr<IteratorInterface>;
+
         class IteratorInterface
         {
         public:
@@ -23,15 +27,13 @@ namespace ma
 
             virtual IteratorInterface& increase(DiffT pos) = 0;
 
-            virtual std::unique_ptr<IteratorInterface> clone() const = 0;
+            virtual uIterator clone() const = 0;
 
             /**
              * aim to compare if iterator is equal
              **/
             virtual SizeT id() const = 0;
         };
-
-        using uIterator = std::unique_ptr<IteratorInterface>;
 
         template<typename Iterator>
         class IteratorImpl : public IteratorInterface
