@@ -4,6 +4,8 @@
 #include <cstddef> //size_t & ptrdiff_t
 #include <memory> // allocator
 
+#include <vector>
+
 namespace ma
 {
     using SizeT = std::ptrdiff_t;
@@ -14,6 +16,8 @@ namespace ma
 
     template<typename T>
     using DefaultAlloc = std::allocator<T>;
+
+    using VectRange = std::vector<SizeT>;
 }
 
 #endif //MA_TYPE_H

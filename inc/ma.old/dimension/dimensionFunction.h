@@ -10,6 +10,9 @@ namespace ma
 {
     namespace dimension
     {
+        template<typename Range>
+        using VectDimension = std::vector<Dimension<Range>>;
+        
         namespace impl
         {
             template<typename D>

@@ -2,7 +2,6 @@
 #define MA_RANGE_RANGE_H
 
 #include <memory>
-#include <vector>
 
 #include <ma/iterator/Iterator.h>
 
@@ -16,8 +15,6 @@ namespace ma
         class Range;
 
         using uRange = std::unique_ptr<RangeInterface>;
-
-        using VectRange = std::vector<SizeT>;
 
         class RangeInterface
         {

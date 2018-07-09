@@ -11,6 +11,9 @@ set(MA_TEST_SRC
     src/range/LinearRangeTest.cpp
     src/range/rangeFunctionTest.cpp
     src/range/RangeTest.cpp
+    src/dimension/DimensionTest.cpp
+    src/dimension/BasicShapeTest.cpp
+    src/dimension/dimensionFunctionTest.cpp
 )
 
 add_executable(MultiArrayTest

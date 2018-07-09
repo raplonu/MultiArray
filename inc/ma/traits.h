@@ -23,9 +23,13 @@ namespace ma
     using std::is_same;
     using std::is_const;
     using std::is_literal_type;
+    using std::is_integral;
 
-    template<typename T>
-    using IsNotLiteral = enable_if_t<not is_literal_type<T>::value>;
+    template<typename T, typename TT = void>
+    using IsIntegral = enable_if_t<is_integral<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsNotIntegral = enable_if_t<not is_integral<T>::value, TT>;
 
     template<typename T1, typename T2>
     using IsNotEquivalent = enable_if_t<not is_same<decay_t<T1>, decay_t<T2>>::value>;
@@ -66,7 +70,6 @@ namespace ma
             void(), // Handle evil operator ,
             ++std::declval<decltype(begin(std::declval<T&>()))&>(), // operator ++
             void(*begin(std::declval<T&>())), // operator*
-            void(std::declval<T&>()[0]), //operator[]
             std::true_type{});
 
         template <typename T>
@@ -76,8 +79,11 @@ namespace ma
     template <typename T>
     using is_iterable = decltype(impl::is_iterable_impl<T>(0));
 
-    template<typename T>
-    using IsIterable = enable_if_t<is_iterable<T>::value>;
+    template<typename T, typename TT = void>
+    using IsIterable = enable_if_t<is_iterable<T>::value, TT>;
+    
+    template<typename T, typename TT = void>
+    using IsNotIterable = enable_if_t<not is_iterable<T>::value, TT>;
 
     // namespace impl
     // {

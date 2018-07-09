@@ -166,16 +166,13 @@ namespace ma
     }
 }
 
-namespace std
+template<> struct std::iterator_traits<ma::iterator::LinearIterator>
 {
-    template<> struct iterator_traits<ma::iterator::LinearIterator>
-    {
-            using value_type = ma::SizeT;
-            using difference_type = ma::DiffT;
-            using pointer = void;
-            using reference = void;
-            using iterator_category = std::random_access_iterator_tag;
-    };
-}
+        using value_type = ma::SizeT;
+        using difference_type = ma::DiffT;
+        using pointer = void;
+        using reference = void;
+        using iterator_category = std::random_access_iterator_tag;
+};
 
 #endif //MA_ITERATOR_LINEAR_ITERATOR_H
