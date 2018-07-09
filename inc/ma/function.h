@@ -209,6 +209,45 @@ namespace ma
     using std::copy;
 
 
+    /**
+     * ptrOf function : extract ptr for types
+     **/
+    template<typename T>
+    T * ptrOf(T * data)
+    {
+        return data;
+    }
+    template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
+    decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
+    {
+        return &(*data);
+    }
+
+    template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
+    decltype(std::declval<Data&>().data()) ptrOf(Data & data)
+    {
+        return data.data();
+    }
+
+    template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
+    decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
+    {
+        return data.begin();
+    }
+
+    template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
+    decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
+    {
+        return data.ptr();
+    }
+
+    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().get())>::type>
+    // decltype(std::declval<Data&>().get()) ptrOf(Data & data)
+    // {
+    //     return data.get();
+    // }
+
+
 
     // template<typename T>
     // auto size(T const & t) -> decltype(t.size())
@@ -383,41 +422,7 @@ namespace ma
     //     return impl::Steps<false, T...>::get(0, t...);
     // }
 
-    // template<typename T>//, typename = typename detail::enable_pointer<T>::type>
-    // T * ptrOf(T * data)
-    // {
-    //     return data;
-    // }
 
-    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
-    // decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
-    // {
-    //     return &(*data);
-    // }
-
-    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
-    // decltype(std::declval<Data&>().data()) ptrOf(Data & data)
-    // {
-    //     return data.data();
-    // }
-
-    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
-    // decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
-    // {
-    //     return data.begin();
-    // }
-
-    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
-    // decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
-    // {
-    //     return data.ptr();
-    // }
-
-    // // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().get())>::type>
-    // // decltype(std::declval<Data&>().get()) ptrOf(Data & data)
-    // // {
-    // //     return data.get();
-    // // }
 
     // template<typename T>
     // T convert(T t)
