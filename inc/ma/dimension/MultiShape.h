@@ -12,239 +12,235 @@ namespace ma
         class MultiShape
         {
         protected:
-            std::vector<Dimension<Range>> dims_;
+            VectDimension<Range> dims_;
 
         public:
             constexpr explicit MultiShape() noexcept = default;
 
-            template<typename L, typename = IsIterable<L>>
+            template<typename L>
             explicit MultiShape(L && lengths):
+                dims_(initVectDim<Range>(forward<L>(lengths)))
+            {}
+
+            template<typename L, std::size_t N >
+            explicit MultiShape(const L (&lengths)[N]):
                 dims_(initVectDim<Range>(lengths))
             {}
 
-            template
-            <
-                typename L,
-                typename = enable_if_t<!std::is_base_of<MultiShape, L>::value>::type
-            >
-            MultiShape(L && lengths):
-                dims_(dimension::initDimVect<DimT>(lengths)), offset_(0)
+            explicit MultiShape(const BasicShape & b):
+                dims_(1, Range(b.start(), b.stop()))
             {}
 
-            template<typename L>
-            MultiShape(std::initializer_list<L> const & lengths, SizeT offset = 0):
-                dims_(dimension::initDimVect<DimT>(lengths)), offset_(offset)
-            {}
-
-            MultiShape(SimpleShape const & sShape):
-                dims_(1, RangeT(sShape.start(), sShape.stop())), offset_(0)
-            {}
 
         protected:
-            MultiShape(DimVect && dims, SizeT offset):
-                dims_(std::move(dims)), offset_(offset)
+            MultiShape(VectDimension && dims):
+                dims_(move(dims))
             {}
 
         public:
-            MultiShape(const MultiShape &) = default;
-            MultiShape(MultiShape &&) = default;
+            constexpr MultiShape(const MultiShape &) noexcept = default;
+            constexpr MultiShape(MultiShape &&) noexcept = default;
 
-            MultiShape& operator=(const MultiShape &) = default;
-            MultiShape& operator=(MultiShape &&) = default;
-
-            SizeT at(SizeT pos) const
-            {
-                if(pos > size())
-                    throw std::out_of_range("Error!!!!!");
-
-                SizeT
-                    off(0), dim(0),
-                    restSize(size());
-
-                while(pos != 0)
-                {
-                    restSize /= sizeAt(dim);
-                    off = off * baseSizeAt(dim) + dims_[dim][pos / restSize];
-                    pos %= restSize;
-                    ++dim;
-                }
-
-                for(; dim < nbDim(); ++dim)
-                    off = off * baseSizeAt(dim) + dims_[dim][0];
-
-                return offset_ + off;
-            }
+            MultiShape& operator=(const MultiShape &) noexcept = default;
+            MultiShape& operator=(MultiShape &&) noexcept = default;
 
             template<typename... R>
-            MultiShape subShape(R&&... ranges) const
+            MultiShape subShape(R && ... ranges) const
             {
-                return MultiShape(selectDimensions(dims_, ranges...), offset_);
+                return MultiShape(selectDimensions(dims_, forward<R>(ranges)...));
             }
 
-            SizeT size() const
-            {
-                return prodSize([](DimT const & d){return std::max(d.size(), 1ul);});
-            }
+            
 
-            SizeT baseSize() const
-            {
-                return prodSize([](DimT const & e){return e.baseSize();});
-            }
-
-            SizeT step() const
-            {
-                return contiguousDataLength();
-            }
-
-            bool isContigous() const
-            {
-                return contiguousDataLength() == size();
-            }
-
-            SizeT nbDim() const
-            {
-                return dims_.size();
-            }
-
-            SizeT nbActiveDim() const
-            {
-                SizeT nb(0);
-                for(auto const & e : dims_)
-                    if(e.isActive())
-                        ++nb;
-                return nb;
-            }
-
-            template<typename Fn>
-            SizeT prodSize(Fn sizeF) const
-            {
-                if(nbDim() == 0)
-                    return 0;
-
-                SizeT size(1);
-                for(auto const & e : dims_)
-                    size *= sizeF(e);
-
-                return size;
-            }
-
-            // SizeT firstActiveDim() const
+            // SizeT at(SizeT pos) const noexcept
             // {
-            //     for(SizeT dim(0); dim < nbDim(); ++dim)
-            //         if(isActiveDim(dim))
-            //             return dim;
-            //     return 0;
+            //     if(pos > size())
+            //         throw std::out_of_range("Error!!!!!");
+
+            //     SizeT
+            //         off(0), dim(0),
+            //         restSize(size());
+
+            //     while(pos != 0)
+            //     {
+            //         restSize /= sizeAt(dim);
+            //         off = off * baseSizeAt(dim) + dims_[dim][pos / restSize];
+            //         pos %= restSize;
+            //         ++dim;
+            //     }
+
+            //     for(; dim < nbDim(); ++dim)
+            //         off = off * baseSizeAt(dim) + dims_[dim][0];
+
+            //     return offset_ + off;
             // }
 
-            bool isActiveDim(SizeT dim) const
-            {
-                return dims_[dim].isActive();
-            }
-
-            SizeT sizeAt(SizeT dim) const
-            {
-                return std::max(dims_[dim].size(), 1ul);
-            }
-
-            SizeT baseSizeAt(SizeT dim) const
-            {
-                return dims_[dim].baseSize();
-            }
-
-            SizeT nbRangedElementAt(SizeT dim) const
-            {
-                return dims_[dim].nbRangedElement();
-            }
-
-            SizeT baseOffset() const
-            {
-                return at(0);
-            }
 
 
+            // SizeT size() const
+            // {
+            //     return prodSize([](DimT const & d){return std::max(d.size(), 1ul);});
+            // }
 
-            SizeT nbCompleteDim() const
-            {
-                SizeT nb(0);
-                for(auto const & e : dims_)
-                    if(e.isComplete())
-                        ++nb;
-                return nb;
-            }
+            // SizeT baseSize() const
+            // {
+            //     return prodSize([](DimT const & e){return e.baseSize();});
+            // }
 
-            SizeT nbRangedDim() const
-            {
-                SizeT nb(0), dim(dims_.size());
-                while((dim-- > 0) && dims_[dim].isComplete())
-                    ++nb;
-                return nb;
-            }
+            // SizeT step() const
+            // {
+            //     return contiguousDataLength();
+            // }
 
-            SizeT nbNotRangedDim() const
-            {
-                return dims_.size() - nbRangedDim();
-            }
+            // bool isContigous() const
+            // {
+            //     return contiguousDataLength() == size();
+            // }
 
-            SizeVect baseShape(SizeT nbDim) const
-            {
-                SizeVect shape(nbDim);
+            // SizeT nbDim() const
+            // {
+            //     return dims_.size();
+            // }
 
-                std::transform(
-                    dims_.begin(), dims_.begin() + nbDim, shape.begin(),
-                    [](DimT const &dim){return dim.size();}
-                );
+            // SizeT nbActiveDim() const
+            // {
+            //     SizeT nb(0);
+            //     for(auto const & e : dims_)
+            //         if(e.isActive())
+            //             ++nb;
+            //     return nb;
+            // }
 
-                return shape;
-            }
+            // template<typename Fn>
+            // SizeT prodSize(Fn sizeF) const
+            // {
+            //     if(nbDim() == 0)
+            //         return 0;
 
-            SizeVect baseShape() const
-            {
-                return baseShape(nbDim());
-            }
+            //     SizeT size(1);
+            //     for(auto const & e : dims_)
+            //         size *= sizeF(e);
 
-            SizeVect shape(SizeT nbDimMax) const
-            {
-                SizeVect shape(nbDimMax);
+            //     return size;
+            // }
 
-                SizeT activeDim(0);
-                for(SizeT dim(0); activeDim < nbDimMax && dim < nbDim(); ++dim)
-                    if(dims_[dim].isActive())
-                        shape[activeDim++] = dims_[dim].size();
+            // // SizeT firstActiveDim() const
+            // // {
+            // //     for(SizeT dim(0); dim < nbDim(); ++dim)
+            // //         if(isActiveDim(dim))
+            // //             return dim;
+            // //     return 0;
+            // // }
 
-                return shape;
-            }
+            // bool isActiveDim(SizeT dim) const
+            // {
+            //     return dims_[dim].isActive();
+            // }
 
-            SizeVect shape() const
-            {
-                return shape(nbActiveDim());
-            }
+            // SizeT sizeAt(SizeT dim) const
+            // {
+            //     return std::max(dims_[dim].size(), 1ul);
+            // }
 
-            SizeT contiguousDataLength(SizeT lastDim = 0) const
-            {
-                SizeT cdl(1), dim(dims_.size());
+            // SizeT baseSizeAt(SizeT dim) const
+            // {
+            //     return dims_[dim].baseSize();
+            // }
 
-                while((--dim > lastDim) && dims_[dim].isComplete())
-                    cdl *= sizeAt(dim);
+            // SizeT nbRangedElementAt(SizeT dim) const
+            // {
+            //     return dims_[dim].nbRangedElement();
+            // }
 
-                return cdl * nbRangedElementAt(dim);
-            }
+            // SizeT baseOffset() const
+            // {
+            //     return at(0);
+            // }
 
-            //dimNb, dimStep
-            std::pair<SizeT, SizeT> getDim(SizeT step) const
-            {
-                SizeT dim(dims_.size()), lastStep;
 
-                do
-                {
-                    step = (lastStep = step) / sizeAt(--dim);
-                }
-                while(step != 0 && dim != 0);
 
-                if((sizeAt(dim) % lastStep) != 0)
-                    throw std::length_error("Size doesn't fit shape");
+            // SizeT nbCompleteDim() const
+            // {
+            //     SizeT nb(0);
+            //     for(auto const & e : dims_)
+            //         if(e.isComplete())
+            //             ++nb;
+            //     return nb;
+            // }
 
-                return std::make_pair(dim + 1, lastStep);
-            }
+            // SizeT nbRangedDim() const
+            // {
+            //     SizeT nb(0), dim(dims_.size());
+            //     while((dim-- > 0) && dims_[dim].isComplete())
+            //         ++nb;
+            //     return nb;
+            // }
+
+            // SizeT nbNotRangedDim() const
+            // {
+            //     return dims_.size() - nbRangedDim();
+            // }
+
+            // SizeVect baseShape(SizeT nbDim) const
+            // {
+            //     SizeVect shape(nbDim);
+
+            //     std::transform(
+            //         dims_.begin(), dims_.begin() + nbDim, shape.begin(),
+            //         [](DimT const &dim){return dim.size();}
+            //     );
+
+            //     return shape;
+            // }
+
+            // SizeVect baseShape() const
+            // {
+            //     return baseShape(nbDim());
+            // }
+
+            // SizeVect shape(SizeT nbDimMax) const
+            // {
+            //     SizeVect shape(nbDimMax);
+
+            //     SizeT activeDim(0);
+            //     for(SizeT dim(0); activeDim < nbDimMax && dim < nbDim(); ++dim)
+            //         if(dims_[dim].isActive())
+            //             shape[activeDim++] = dims_[dim].size();
+
+            //     return shape;
+            // }
+
+            // SizeVect shape() const
+            // {
+            //     return shape(nbActiveDim());
+            // }
+
+            // SizeT contiguousDataLength(SizeT lastDim = 0) const
+            // {
+            //     SizeT cdl(1), dim(dims_.size());
+
+            //     while((--dim > lastDim) && dims_[dim].isComplete())
+            //         cdl *= sizeAt(dim);
+
+            //     return cdl * nbRangedElementAt(dim);
+            // }
+
+            // //dimNb, dimStep
+            // std::pair<SizeT, SizeT> getDim(SizeT step) const
+            // {
+            //     SizeT dim(dims_.size()), lastStep;
+
+            //     do
+            //     {
+            //         step = (lastStep = step) / sizeAt(--dim);
+            //     }
+            //     while(step != 0 && dim != 0);
+
+            //     if((sizeAt(dim) % lastStep) != 0)
+            //         throw std::length_error("Size doesn't fit shape");
+
+            //     return std::make_pair(dim + 1, lastStep);
+            // }
         };
     }
 }

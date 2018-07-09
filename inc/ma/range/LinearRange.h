@@ -104,6 +104,16 @@ namespace ma
                 return true;
             }
 
+            constexpr SizeT front() const noexcept
+            {
+                return start_;
+            }
+
+            constexpr SizeT back() const noexcept
+            {
+                return stop_;
+            }
+
             constexpr SizeT start() const noexcept
             {
                 return start_;

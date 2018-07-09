@@ -19,6 +19,11 @@ namespace ma
             T range_;
             SizeT length_;
 
+            template<typename TT>
+            constexpr explicit Dimension(TT && range, SizeT size) noexcept :
+                range_(std::forward<TT>(range)), length_(size)
+            {}
+
         public:
             constexpr explicit Dimension() noexcept :
                 range_(), length_(0)
@@ -26,16 +31,6 @@ namespace ma
 
             constexpr Dimension(SizeT length) noexcept :
                 range_(length), length_(length)
-            {}
-
-            template<typename TT>
-            constexpr explicit Dimension(TT && range) noexcept :
-                range_(std::forward<TT>(range)), length_(range_.size())
-            {}
-
-            template<typename TT>
-            constexpr explicit Dimension(TT && range, SizeT size) noexcept :
-                range_(std::forward<TT>(range)), length_(size)
             {}
 
             constexpr Dimension(const Dimension &) noexcept = default;
@@ -65,9 +60,29 @@ namespace ma
                 return range_.begin();
             }
 
+            iterator begin() noexcept
+            {
+                return range_.begin();
+            }
+
             constexpr const_iterator end() const noexcept
             {
                 return range_.end();
+            }
+
+            iterator end() noexcept
+            {
+                return range_.end();
+            }
+
+            constexpr SizeT front() const noexcept
+            {
+                return range_.front();
+            }
+
+            constexpr SizeT back() const noexcept
+            {
+                return range_.back();
             }
 
             constexpr SizeT operator[](SizeT pos) const noexcept
@@ -92,7 +107,7 @@ namespace ma
 
             constexpr Dimension select(const T & range) const noexcept
             {
-                return (range.active()) ? Dimension(range_.select(range), length_) : closeAt(range_[range[0]]);
+                return (range.active()) ? Dimension(range_.select(range), length_) : closeAt(range_[range.front());
 
             }
 

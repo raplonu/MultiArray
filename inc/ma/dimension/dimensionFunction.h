@@ -4,6 +4,9 @@
 #include <ma/type.h>
 #include <ma/traits.h>
 
+#include <ma/range/LinearRange.h>
+#include <ma/range/Range.h>
+
 #include <ma/dimension/Dimension.h>
 
 namespace ma
@@ -13,6 +16,15 @@ namespace ma
         template<typename Range>
         using VectDimension = std::vector<Dimension<Range>>;
 
+        template<typename Range>
+        using DimItIn = typename VectDimension<Range>::iterator;
+
+        template<typename Range>
+        using DimItOut = typename VectDimension<Range>::const_iterator;
+
+        /**
+         * VectDimension initialization
+         **/
         template<typename Range, typename L, typename = IsIntegral<L>>
         VectDimension<Range> initVectDim(L length) {
             return VectDimension<Range>(1, length);
@@ -24,99 +36,104 @@ namespace ma
             return VectDimension<Range>(ma::begin(lengths), ma::end(lengths));
         }
 
-        // namespace impl
-        // {
-        //     template<typename D>
-        //     D makeDim(D const & dim, range::FullLinearIndice range)
-        //     {
-        //         return dim.select(D(range::LinearRange(range.begin, range.end, range.step)));
-        //     }
+        template<typename Range, typename L, std::size_t N >
+        VectDimension<Range> initVectDim(const L (&lengths)[N])
+        {
+            return VectDimension<Range>(ma::begin(lengths), ma::end(lengths));
+        }
 
-        //     template<typename D>
-        //     D makeDim(D const & dim, range::DelayLinearIndice range)
-        //     {
-        //         return dim.select(D(range::LinearRange(range.begin, dim.size(), range.step)));
-        //     }
+        /**
+         * Sub Dimension initialization
+         **/
+        template<typename Range>
+        Dimension<Range> makeDim(const Dimension<Range> & dim, const range::LinearRange & range)
+        {
+            return dim.select(range);
+        }
 
-        //     template<typename D, typename Size, typename = typename std::enable_if<std::is_integral<Size>::value>::type>
-        //     D makeDim(D const & dim, Size range)
-        //     {
-        //         return dim.closeAt(range);
-        //     }
+        template<typename Range>
+        Dimension<Range> makeDim(const Dimension<Range> & dim, const range::DelayLinearIndice & range)
+        {
+            return dim.select(range::LinearRange(range.begin, dim.back(), range.step));
+        }
 
-        //     template<typename D, typename R, typename = typename std::enable_if<!std::is_integral<R>::value>::type>
-        //     D makeDim(D const & dim, R const & range)
-        //     {
-        //         return dim.select(D(range));
-        //     }
+        template<typename Range>//, typename Size, typename = typename std::enable_if<std::is_integral<Size>::value>::type>
+        Dimension<Range> makeDim(const Dimension<Range> & dim, SizeT pos)
+        {
+            return dim.closeAt(pos);
+        }
 
-        //     template<typename D>
-        //     D makeDim(D const & dim, detail::All_ const &)
-        //     {
-        //         return dim;
-        //     }
+        template<typename ORange>
+        Dimension<range::Range> makeDim(const Dimension<range::Range> & dim, ORange && range)
+        {
+            return dim.select(range::Range(forward<ORange>(range)));
+        }
 
-        //     template<typename... R> struct SelectRange;
+        template<typename Range>
+        Dimension<Range> makeDim(const Dimension<Range> & dim, All)
+        {
+            return dim;
+        }
 
-        //     template<typename F, typename... R>
-        //     struct SelectRange<F, R...>
-        //     {
-        //         template<typename D>
-        //         static void select
-        //         (
-        //             D newDimIT, D dimIT, D stopIT,
-        //             F && fRange, R&&... ranges
-        //         ){
-        //             //ERROR
-        //             if(dimIT == stopIT)
-        //                 return;
+        namespace impl
+        {
+            template<typename Range, typename... R> struct SelectRange;
 
-        //             if(dimIT->isActive())
-        //             {
-        //                 *newDimIT = makeDim(*dimIT, fRange);
-        //                 SelectRange<R...>::select
-        //                 (
-        //                     ++newDimIT, ++dimIT, stopIT,
-        //                     std::forward<R>(ranges)...
-        //                 );
-        //             }
-        //             else
-        //             {
-        //                 *newDimIT = *dimIT;
-        //                 SelectRange<F, R...>::select
-        //                 (
-        //                     ++newDimIT, ++dimIT, stopIT,
-        //                     std::forward<F>(fRange), std::forward<R>(ranges)...
-        //                 );
-        //             }
-        //         }
-        //     };
+            template<typename Range, typename Head, typename... Tail>
+            struct SelectRange<Range, Head, Tail...>
+            {
+                static void select
+                (
+                    DimItIn<Range> out, DimItOut<Range> first, DimItOut<Range> last,
+                    Head && head, Tail&&... tail
+                ) noexcept {
+                    // ERROR
+                    massert(first != last);
 
-        //     template<>
-        //     struct SelectRange<>
-        //     {
-        //         template<typename D>
-        //         static void select(D newDimIT, D dimIT, D stopIT)
-        //         {
-        //             while(dimIT != stopIT)
-        //                 *(newDimIT++) = *(dimIT++);
-        //         }
-        //     };
-        // }
+                    if(first->active())
+                    {
+                        *out = makeDim(*first, head);
+                        SelectRange<Range, Tail...>::select
+                        (
+                            ++out, ++first, last,
+                            forward<Tail>(tail)...
+                        );
+                    }
+                    else
+                    {
+                        *out = *first;
+                        SelectRange<Range, Head, Tail...>::select
+                        (
+                            ++out, ++first, last,
+                            forward<Head>(head), forward<Tail>(tail)...
+                        );
+                    }
+                }
+            };
 
-        // template<typename D, typename... R>
-        // std::vector<D> selectDimensions(std::vector<D> dims, R&&... ranges)
-        // {
-        //     std::vector<D> newDims(dims.size());
+            template<typename Range>
+            struct SelectRange<Range>
+            {
+                static void select(DimItIn<Range> out, DimItOut<Range> first, DimItOut<Range> last) noexcept
+                {
+                    ma::copy(first, last, out);
+                }
+            };
+        }
 
-        //     impl::SelectRange<R...>::select
-        //     (
-        //         newDims.begin(), dims.begin(), dims.end(),
-        //         std::forward<R>(ranges)...
-        //     );
+        template<typename Range, typename... R>
+        VectDimension<Range> selectDimensions(const VectDimension<Range> & dims, R&&... ranges)
+        {
+            VectDimension<Range> nDims(dims.size());
 
-        //     return newDims;
-        // }
+            impl::SelectRange<Range, R...>::select
+            (
+                nDims.begin(), dims.begin(), dims.end(),
+                forward<R>(ranges)...
+            );
+
+            return nDims;
+        }
 
 
 

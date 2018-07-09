@@ -2,7 +2,7 @@
 #define MA_CONFIG_H
 
 // #define NDEBUG
-#include <cassert>
+#include <cassert>      // assert
 
 /**
  * Replace ((void)0) to {} to allow constexpr with assert

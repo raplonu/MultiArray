@@ -36,11 +36,13 @@ namespace ma
         template<typename T, typename = IsNotLinearRange<T>>
         bool rangeContiguousFromZero(const T & range)
         {
-            for(auto e : LinearRange(size(range)))
-                if(SizeT(range[e]) != e)
-                    return false;
 
-            return true;
+            return std::mismatch(ma::begin(range), ma::end(range), LinearRange(size(range)).begin()).first == ma::end(range);
+            // for(auto e : LinearRange(size(range)))
+            //     if(SizeT(range[e]) != e)
+            //         return false;
+
+            // return true;
         }
 
         /**
@@ -148,16 +150,39 @@ namespace ma
         //     DiffT step;
         // };
 
-        // struct DelayLinearIndice
-        // {
-        //     SizeT begin;
-        //     DiffT step;
-        // };
+        struct DelayLinearIndice
+        {
+            SizeT begin;
+            DiffT step;
+        };
 
-        // inline FullLinearIndice L(SizeT stop)
-        // {
-        //     return FullLinearIndice{0, stop, 1};
-        // }
+        constexpr inline LinearRange L(SizeT stop) noexcept
+        {
+            return LinearRange(stop);
+        }
+
+        constexpr inline LinearRange L(SizeT start, SizeT stop) noexcept
+        {
+            return LinearRange(start, stop);
+        }
+
+        constexpr inline LinearRange L(SizeT start, SizeT stop, DiffT step) noexcept
+        {
+            return LinearRange(start, stop, step);
+        }
+
+        constexpr inline DelayLinearIndice L(SizeT start, Delay, DiffT step = 1) noexcept
+        {
+            return DelayLinearIndice{start, step};
+        }
+
+        template<typename... I>
+        ArrayRange<sizeof...(I)> A(I... i)
+        {
+            return ArrayRange<sizeof...(I)>{i...};
+        }
+
+
 
         // inline FullLinearIndice L(SizeT start, SizeT stop)
         // {
@@ -174,11 +199,7 @@ namespace ma
         //     return DelayLinearIndice{start, step};
         // }
 
-        // template<typename... I>
-        // std::vector<SizeT> V(I... i)
-        // {
-        //     return std::vector<SizeT>{i...};
-        // }
+        
 
 
 

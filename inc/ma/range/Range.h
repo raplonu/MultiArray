@@ -161,6 +161,7 @@ namespace ma
         class Range
         {
         public:
+            using const_iterator = iterator::Iterator;
             using iterator = iterator::Iterator;
 
         protected:

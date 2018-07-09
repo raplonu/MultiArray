@@ -21,14 +21,14 @@ namespace ma
     using std::end;
     #else
     template< class C , typename = IsNotConst<C>>
-    constexpr auto begin( C& c ) -> decltype(c.begin()) { return c.begin(); }
+    constexpr auto begin( C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
     template< class C >
-    constexpr auto begin( const C& c ) -> decltype(c.begin()) { return c.begin(); }
+    constexpr auto begin( const C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
 
     template< class C , typename = IsNotConst<C>>
-    constexpr auto end( C& c ) -> decltype(c.end()) { return c.end(); }
+    constexpr auto end( C& c ) noexcept -> decltype(c.end()) { return c.end(); }
     template< class C >
-    constexpr auto end( const C& c ) -> decltype(c.end()) { return c.end(); }
+    constexpr auto end( const C& c ) noexcept -> decltype(c.end()) { return c.end(); }
     #if MA_CXX14
     using std::begin;
     using std::end; 
@@ -39,6 +39,33 @@ namespace ma
     constexpr T* end( T (&array)[N] ) noexcept { return array + N; }
     #endif
     #endif
+
+    /**
+     * Front & Back function
+     **/
+    template<typename C>
+    constexpr auto front(C & c) -> decltype(c.front()) { return c.front(); }
+
+    template<typename C>
+    constexpr auto front(const C & c) -> decltype(c.front()) { return c.front(); }
+
+    template<typename C>
+    constexpr auto back(C & c) -> decltype(c.back()) { return c.back(); }
+    
+    template<typename C>
+    constexpr auto back(const C & c) -> decltype(c.back()) { return c.back(); }
+
+    template< class T, std::size_t N >
+    constexpr T & front( T (&array)[N] ) noexcept { return array[0]; }
+
+    template< class T, std::size_t N >
+    constexpr const T & front( const T (&array)[N] ) noexcept { return array[0]; }
+
+    template< class T, std::size_t N >
+    constexpr T & back( T (&array)[N] ) noexcept { return array[N - 1]; }
+
+    template< class T, std::size_t N >
+    constexpr const T & back( const T (&array)[N] ) noexcept { return array[N - 1]; }
     
     /**
      * Absolute function
@@ -175,6 +202,11 @@ namespace ma
         return (t1 != t2) ? 0 : distance(++t1, t2) + 1;
     }
     #endif
+
+    /**
+     * Copy function
+     **/
+    using std::copy;
 
 
 
