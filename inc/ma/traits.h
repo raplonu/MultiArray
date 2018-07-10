@@ -24,6 +24,7 @@ namespace ma
     using std::is_const;
     using std::is_literal_type;
     using std::is_integral;
+    using std::is_pointer;
 
     template<typename T, typename TT = void>
     using IsIntegral = enable_if_t<is_integral<T>::value, TT>;
@@ -47,7 +48,10 @@ namespace ma
     using IsNotConst = enable_if_t<not is_const<T>::value, TT>;
 
     template<typename T1, typename T2, typename TT = void>
-    using EnableDifferent = enable_if_t<not is_same<T1, T2>::value, TT>;
+    using IsSame = enable_if_t<is_same<T1, T2>::value, TT>;
+
+    template<typename T1, typename T2, typename TT = void>
+    using IsNotSame = enable_if_t<not is_same<T1, T2>::value, TT>;
 
     template<typename T, typename TT = void>
     using IsBidirectIt = enable_if_t<is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value, TT>;
@@ -60,6 +64,12 @@ namespace ma
 
     template<typename T, typename TT = void>
     using IsNotRandomIt = enable_if_t<not is_same<IteratorCategory<T>, std::random_access_iterator_tag>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsPointer = enable_if_t<is_pointer<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsNotPointer = enable_if_t<not is_pointer<T>::value, TT>;
 
     namespace impl
     {

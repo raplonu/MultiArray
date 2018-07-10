@@ -212,11 +212,13 @@ namespace ma
     /**
      * ptrOf function : extract ptr for types
      **/
-    template<typename T>
-    T * ptrOf(T * data)
+    template<typename Data, typename = IsPointer<Data>>
+    Data ptrOf(Data data)
     {
         return data;
     }
+
+    
     template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
     decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
     {
@@ -240,6 +242,31 @@ namespace ma
     {
         return data.ptr();
     }
+
+        
+    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
+    // decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
+    // {
+    //     return &(*data);
+    // }
+
+    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
+    // decltype(std::declval<Data&>().data()) ptrOf(Data & data)
+    // {
+    //     return data.data();
+    // }
+
+    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
+    // decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
+    // {
+    //     return data.begin();
+    // }
+
+    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
+    // decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
+    // {
+    //     return data.ptr();
+    // }
 
     // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().get())>::type>
     // decltype(std::declval<Data&>().get()) ptrOf(Data & data)

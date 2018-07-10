@@ -92,7 +92,7 @@ namespace ma
 
             template<
                 typename T, typename BaseT = decay_t<T>,
-                typename = EnableDifferent<Iterator, BaseT>,
+                typename = IsNotSame<Iterator, BaseT>,
                 typename = IsRandomIt<BaseT>
             >
             Iterator(T && it)
