@@ -14,6 +14,7 @@ set(MA_TEST_SRC
     src/dimension/DimensionTest.cpp
     src/dimension/BasicShapeTest.cpp
     src/dimension/dimensionFunctionTest.cpp
+    src/array/ArrayViewTest.cpp
 )
 
 add_executable(MultiArrayTest

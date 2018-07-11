@@ -11,12 +11,25 @@ namespace ma
     #if MA_CXX14
     using std::decay_t;
     using std::enable_if_t;
+    using std::add_lvalue_reference_t;
+    using std::add_rvalue_reference_t;
+    using std::conditional_t;
+
     #else
     template< typename T >
     using decay_t = typename std::decay<T>::type;
 
     template< bool B, typename T = void >
     using enable_if_t = typename std::enable_if<B,T>::type;
+
+    template< class T >
+    using add_lvalue_reference_t = typename std::add_lvalue_reference<T>::type;
+
+    template< class T >
+    using add_rvalue_reference_t = typename std::add_rvalue_reference<T>::type;
+
+    template< bool B, class T, class F >
+    using conditional_t = typename std::conditional<B,T,F>::type;
     #endif
 
     using std::is_base_of;
@@ -94,6 +107,30 @@ namespace ma
     
     template<typename T, typename TT = void>
     using IsNotIterable = enable_if_t<not is_iterable<T>::value, TT>;
+
+
+    template<typename Alloc>
+    struct allocator_traits : std::allocator_traits<Alloc>
+    {
+        using Base = std::allocator_traits<Alloc>;
+
+        using value_type = typename Base::value_type;
+
+        using pointer = typename Base::pointer;
+        using const_pointer = typename Base::const_pointer;
+
+        template<typename T>
+        using DummyRef = decltype(*std::declval<T&>());
+
+        template<typename T>
+        using SameThanValue = is_same<T, value_type>;
+
+        template<typename PTR>
+        using Reference = conditional_t<SameThanValue<DummyRef<PTR>>::value, DummyRef<PTR>, add_lvalue_reference_t<PTR>>;
+
+        using reference = Reference<pointer>;
+        using const_reference = Reference<const_pointer>;
+    };
 
     // namespace impl
     // {

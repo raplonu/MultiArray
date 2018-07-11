@@ -1,6 +1,10 @@
 #ifndef MA_ARRAY_ARRAY_VIEW
 #define MA_ARRAY_ARRAY_VIEW
 
+#include <ma/type.h>
+#include <ma/traits.h>
+#include <ma/function.h>
+
 namespace ma
 {
     namespace array
@@ -12,8 +16,10 @@ namespace ma
             using value_type = T;
             using allocator_type = Allocator;
 
-            using allocator_trait = std::allocator_traits<allocator_type>;
+            using allocator_trait = ma::allocator_traits<allocator_type>;
 
+            using reference         = typename allocator_trait::reference;
+            using const_reference         = typename allocator_trait::const_reference;
 
             using pointer            = typename allocator_trait::pointer;
             using const_pointer      = typename allocator_trait::const_pointer;
@@ -47,8 +53,8 @@ namespace ma
             ArrayView& operator=(ArrayView &&) noexcept = default;
 
         protected:
-            constexpr explicit ArrayView(Shape && shape, Iterator it) noexcept :
-                shape_(move(shape)), it_(it)
+            constexpr explicit ArrayView(Shape && shape, pointer ptr) noexcept :
+                shape_(move(shape)), ptr_(ptr)
             {}
 
         public:
@@ -57,22 +63,42 @@ namespace ma
             template<typename... R>
             ArrayView at(R&&...ranges) const
             {
-                return ArrayView(shape_.subShape(forward<R>(ranges)...), it_);
+                return ArrayView(shape_.subShape(forward<R>(ranges)...), ptr_);
             }
 
             ArrayView operator[](SizeT pos) const
             {
-                return ArrayView(shape_.subShape(pos), it_);
+                return ArrayView(shape_.closeAt(pos), ptr_);
             }
 
-            constexpr pointer ptr()
+            reference value(SizeT pos = 0)
             {
-                return ptrOf<T>(it_);
+                return *(ptr_ + shape_.at(pos));
             }
 
-            constexpr const_pointer ptr() const
+            const_reference value(SizeT pos = 0) const
             {
-                return ptrOf<T>(it_);
+                return *(ptr_ + shape_.at(pos));
+            }
+
+            pointer ptr() noexcept
+            {
+                return ptr_;
+            }
+
+            constexpr const_pointer ptr() const noexcept
+            {
+                return ptr_;
+            }
+
+            constexpr SizeT size() const noexcept
+            {
+                return shape_.size();
+            }
+
+            VectRange shape() const
+            {
+                return shape_.shape();
             }
 
 

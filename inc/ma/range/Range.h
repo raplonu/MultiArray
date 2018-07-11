@@ -125,12 +125,10 @@ namespace ma
 
             uRange selectLinearRange(const RangeInterface & r) const
             {
-                return uRange(new RangeImpl<LinearRange>(LinearRange
-                (
-                    range_.start() + r.start() * range_.step(),
-                    range_.start() + r.stop()  * range_.step(),
-                    range_.step() * r.step()
-                )));
+                return uRange(new RangeImpl<LinearRange>(
+                    LinearRange(range_.start(), range_.stop(), range_.step())
+                    .select(r.start(), r.stop(), r.step())
+                ));
 
             }
 
@@ -262,6 +260,12 @@ namespace ma
             Range select(const Range & r) const
             {
                 return Range(range_->selectRange(*r.range_));
+            }
+
+            Range closeAt(SizeT pos) const
+            {
+                SizeT nStart = range_->start() + pos;
+                return Range(nStart, nStart, 1);
             }
         };
     }

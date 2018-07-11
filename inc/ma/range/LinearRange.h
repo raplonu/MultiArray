@@ -142,6 +142,11 @@ namespace ma
             {
                 return select(lr.start_, lr.stop_, lr.step_);
             }
+
+            constexpr LinearRange closeAt(SizeT pos) const noexcept
+            {
+                return LinearRange(start_ + pos, start_ + pos, 1);
+            }
         };
 
         template<typename T>

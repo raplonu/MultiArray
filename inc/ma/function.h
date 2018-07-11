@@ -13,6 +13,7 @@ namespace ma
 {
     using std::move;
     using std::forward;
+
     /**
      * Begin & End function
      **/
@@ -208,40 +209,81 @@ namespace ma
      **/
     using std::copy;
 
+    /**
+     * Special Values
+     **/
+    template<typename T>
+    constexpr T zero() noexcept
+    {
+        return T(0);
+    }
+
+    template<typename T>
+    constexpr T one() noexcept
+    {
+        return T(1);
+    }
+
+    // /**
+    //  * Sum function
+    //  **/
+    // template<typename Range, typename T = typename Range::value_type>
+    // T sum(const Range & range, T init = zero<T>())
+    // {
+    //     return accumulate(ma::begin(range), ma::end(range), init, std::plus<T>());
+    // }
+
+    // /**
+    //  * Product function
+    //  **/
+    // template<typename Range, typename T = typename Range::value_type>
+    // T product(const Range & range, T init = one<T>())
+    // {
+    //     return accumulate(ma::begin(range), ma::end(range), init, std::multiplies<T>());
+    // }
+
 
     /**
      * ptrOf function : extract ptr for types
      **/
-    template<typename Data, typename = IsPointer<Data>>
-    Data ptrOf(Data data)
-    {
-        return data;
-    }
+    // template<typename Data, typename = IsPointer<Data>>
+    // Data ptrOf(Data data)
+    // {
+    //     return data;
+    // }
+
+    // template<typename Data, typename = IsPointer<Data>>
+    // Data ptrOf(Data data)
+    // {
+    //     return data;
+    // }
+
+
 
     
-    template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
-    decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
-    {
-        return &(*data);
-    }
+    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
+    // decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
+    // {
+    //     return &(*data);
+    // }
 
-    template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
-    decltype(std::declval<Data&>().data()) ptrOf(Data & data)
-    {
-        return data.data();
-    }
+    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
+    // decltype(std::declval<Data&>().data()) ptrOf(Data & data)
+    // {
+    //     return data.data();
+    // }
 
-    template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
-    decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
-    {
-        return data.begin();
-    }
+    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
+    // decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
+    // {
+    //     return data.begin();
+    // }
 
-    template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
-    decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
-    {
-        return data.ptr();
-    }
+    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
+    // decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
+    // {
+    //     return data.ptr();
+    // }
 
         
     // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>

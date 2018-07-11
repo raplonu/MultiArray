@@ -38,7 +38,6 @@ namespace ma
 
             T range_;
 
-            bool active_;
             bool contiguous_;
             bool hasStep_;
             DiffT step_;
@@ -48,7 +47,6 @@ namespace ma
             template<typename Range>
             CONSTASSERT explicit RangeAdaptor(Range && range) noexcept :
                 range_(std::forward<Range>(range)),
-                active_(rangeActive(range_)),
                 contiguous_(rangeContiguousFromZero(range_)), hasStep_(rangeHasStep(range_)),
                 step_(rangeStep(range_)), rangedElementNb_(rangeRangedElementNb(range_))
             {
@@ -73,7 +71,8 @@ namespace ma
 
             constexpr bool active() const
             {
-                return active_;
+                //The concept of inactive range is only possible with LinearRange
+                return true;
             }
 
             constexpr bool complete(SizeT totalLength) const
