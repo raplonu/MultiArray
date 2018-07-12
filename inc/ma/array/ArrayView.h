@@ -46,6 +46,11 @@ namespace ma
                 shape_(forward<L>(size)), ptr_(ptr)
             {}
 
+            template<typename Size>
+            explicit ArrayView(const std::initializer_list<Size> & size, pointer ptr) noexcept :
+                shape_(size), ptr_(ptr)
+            {}
+
             ArrayView(const ArrayView &) = default;
             constexpr ArrayView(ArrayView &&) noexcept = default;
             
@@ -83,12 +88,12 @@ namespace ma
 
             pointer ptr() noexcept
             {
-                return ptr_;
+                return ptr_ + shape_.at(0);
             }
 
             constexpr const_pointer ptr() const noexcept
             {
-                return ptr_;
+                return ptr_ + shape_.at(0);
             }
 
             constexpr SizeT size() const noexcept

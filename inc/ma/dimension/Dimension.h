@@ -2,6 +2,7 @@
 #define MA_DIMENSION_DIMENSION_H
 
 #include <ma/type.h>
+#include <ma/function.h>
 
 namespace ma
 {
@@ -47,7 +48,7 @@ namespace ma
 
             constexpr SizeT size() const noexcept
             {
-                return ma::max<SizeT>(range_.size(), 1);
+                return range_.size();
             }
 
             constexpr SizeT baseSize() const noexcept
@@ -107,7 +108,7 @@ namespace ma
 
             constexpr Dimension select(const T & range) const noexcept
             {
-                return range_.select(range), length_);
+                return Dimension(range_.select(range), length_);
             }
 
             constexpr Dimension closeAt(SizeT pos) const noexcept
