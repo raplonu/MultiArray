@@ -4,6 +4,7 @@
 #include <memory> //allocator_traits
 
 #include <ma/type.h>
+#include <ma/traits.h>
 
 namespace ma
 {
@@ -15,7 +16,7 @@ namespace ma
             using value_type = T;
             using allocator_type = Allocator;
 
-            using allocator_trait = std::allocator_traits<allocator_type>;
+            using allocator_trait = ma::allocator_traits<allocator_type>;
 
 
             using pointer            = typename allocator_trait::pointer;
