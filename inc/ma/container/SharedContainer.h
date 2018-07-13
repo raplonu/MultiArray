@@ -16,7 +16,7 @@ namespace ma
             using allocator_type = Allocator;
             using container_type = Container;
 
-            using allocator_trait = std::allocator_traits<allocator_type>;
+            using allocator_trait = ma::allocator_traits<allocator_type>;
 
             using pointer            = typename allocator_trait::pointer;
             using const_pointer      = typename allocator_trait::const_pointer;

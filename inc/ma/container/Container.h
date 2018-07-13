@@ -19,6 +19,9 @@ namespace ma
             using allocator_trait = ma::allocator_traits<allocator_type>;
 
 
+
+            using reference          = typename allocator_trait::reference;
+            using const_reference    = typename allocator_trait::const_reference;
             using pointer            = typename allocator_trait::pointer;
             using const_pointer      = typename allocator_trait::const_pointer;
             using void_pointer       = typename allocator_trait::void_pointer;

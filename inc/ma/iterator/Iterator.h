@@ -8,8 +8,6 @@
 
 #include <ma/iterator/iteratorFunction.h>
 
-#include <iostream>
-
 namespace ma
 {
     namespace iterator

@@ -1,7 +1,7 @@
 #ifndef MA_FUNCTION_H
 #define MA_FUNCTION_H
 
-// #include <numeric>
+#include <numeric>
 #include <iterator>
 #include <algorithm>
 

@@ -55,6 +55,11 @@ namespace ma
                 return MultiShape(selectDimensions(dims_, forward<R>(ranges)...));
             }
 
+            MultiShape closeAt(SizeT pos) const
+            {
+                return MultiShape(selectDimensions(dims_, pos));
+            }
+
             
             SizeT at(SizeT pos) const noexcept
             {
@@ -70,7 +75,7 @@ namespace ma
                     ++dim;
                 }
 
-                for(; dim < nbDim(); ++dim)
+                for(; dim < dimNb(); ++dim)
                     off = off * baseSizeAt(dim) + dims_[dim][0];
 
                 return off;
@@ -78,12 +83,12 @@ namespace ma
 
             SizeT size() const
             {
-                return prodDim([](const DimensionT & d){return d.size();});
+                return prodDim([](SizeT s, const DimensionT & d){return s * ma::max<SizeT>(d.size(), 1);});
             }
 
             SizeT baseSize() const
             {
-                return prodDim([](const DimensionT & e){return d.baseSize();});
+                return prodDim([](SizeT s, const DimensionT & d){return s * d.baseSize();});
             }
 
             SizeT step() const
@@ -96,32 +101,33 @@ namespace ma
                 return contiguousDataLength() == size();
             }
 
-            SizeT nbDim() const
+            constexpr SizeT dimNb() const noexcept
             {
                 return dims_.size();
             }
 
             SizeT activeDimNb() const
             {
-                return std::count_if(dims_.begin(), dims_.end(), [](const DimensionT & d){return d.active();});
+                return std::count_if(dims_.begin(), dims_.end(),
+                    [](const DimensionT & d){return d.active();});
             }
 
             template<typename Fn>
             SizeT prodDim(Fn fn) const
             {
-                return dims.empty()
+                return dims_.empty()
                     ? 0
-                    : std::accumulate(dims_.begin(), dims_.end(), 1, fn);
+                    : accumulate(dims_.begin(), dims_.end(), 1, fn);
             }
 
-            bool isActiveDim(SizeT dim) const
+            bool activeAt(SizeT dim) const
             {
-                return dims_[dim].isActive();
+                return dims_[dim].active();
             }
 
             SizeT sizeAt(SizeT dim) const
             {
-                return std::max(dims_[dim].size(), 1ul);
+                return ma::max<SizeT>(dims_[dim].size(), 1);
             }
 
             SizeT baseSizeAt(SizeT dim) const
@@ -129,14 +135,24 @@ namespace ma
                 return dims_[dim].baseSize();
             }
 
-            SizeT nbRangedElementAt(SizeT dim) const
+            SizeT rangedElementAtNb(SizeT dim) const
             {
-                return dims_[dim].nbRangedElement();
+                return dims_[dim].rangedElementNb();
             }
 
             SizeT baseOffset() const
             {
                 return at(0);
+            }
+
+            SizeT contiguousDataLength(SizeT lastDim = 0) const
+            {
+                SizeT cdl(1), dim(dims_.size());
+
+                while((--dim > lastDim) && dims_[dim].complete())
+                    cdl *= sizeAt(dim);
+
+                return cdl * rangedElementAtNb(dim);
             }
 
             // SizeT firstActiveDim() const
@@ -204,15 +220,6 @@ namespace ma
             //     return shape(nbActiveDim());
             // }
 
-            SizeT contiguousDataLength(SizeT lastDim = 0) const
-            {
-                SizeT cdl(1), dim(dims_.size());
-
-                while((--dim > lastDim) && dims_[dim].isComplete())
-                    cdl *= sizeAt(dim);
-
-                return cdl * nbRangedElementAt(dim);
-            }
 
             // //dimNb, dimStep
             // std::pair<SizeT, SizeT> getDim(SizeT step) const

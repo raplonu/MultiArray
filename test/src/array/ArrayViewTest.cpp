@@ -27,7 +27,30 @@ namespace
 
         EXPECT_EQ(a.ptr(), nullptr);
         EXPECT_EQ(a.size(), 0);
+    }
 
+    TEST(ArrayViewTest, MultiArrayView1Dim)
+    {
+        std::vector<int> v(10);
+        ArrayView<int, DefaultAlloc<int>, MultiShape<LinearRange>> a(10, v.data());
+
+        EXPECT_EQ(a.ptr(), v.data());
+        EXPECT_EQ(a.size(), 10);
+    }
+
+    TEST(ArrayViewTest, MultiArrayView2Dim)
+    {
+        std::vector<int> v(10);
+        ArrayView<int, DefaultAlloc<int>, MultiShape<LinearRange>> a({2,5}, v.data());
+
+        EXPECT_EQ(a.ptr(), v.data());
+        EXPECT_EQ(a.size(), 10);
+        
+        EXPECT_EQ(a[0].ptr(), v.data());
+        EXPECT_EQ(a[0].size(), 5);
+
+        EXPECT_EQ(a[1].ptr(), v.data() + 5);
+        EXPECT_EQ(a[1].size(), 5);
     }
 }
 
