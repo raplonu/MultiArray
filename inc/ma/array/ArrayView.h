@@ -5,6 +5,8 @@
 #include <ma/traits.h>
 #include <ma/function.h>
 
+#include <ma/iterator/ShapeIterator.h>
+
 namespace ma
 {
     namespace array
@@ -31,6 +33,9 @@ namespace ma
             using propagate_on_container_copy_assignment = typename allocator_trait::propagate_on_container_copy_assignment;
             using propagate_on_container_move_assignment = typename allocator_trait::propagate_on_container_move_assignment;
             using propagate_on_container_swap            = typename allocator_trait::propagate_on_container_swap;
+
+            using const_iterator = iterator::ShapeIterator<const_pointer, Shape>;
+            using iterator = iterator::ShapeIterator<pointer, Shape>;
 
         protected:
             Shape shape_;
@@ -74,6 +79,26 @@ namespace ma
             ArrayView operator[](SizeT pos) const
             {
                 return ArrayView(shape_.closeAt(pos), ptr_);
+            }
+
+            iterator begin()
+            {
+                return iterator(ptr_, shape_, 0);
+            }
+
+            const_iterator begin() const
+            {
+                return const_iterator(ptr_, shape_, 0);
+            }
+
+            iterator end()
+            {
+                return iterator(ptr_, shape_, size());
+            }
+
+            const_iterator end() const
+            {
+                return const_iterator(ptr_, shape_, size());
             }
 
             reference value(SizeT pos = 0)
