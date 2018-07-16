@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.6)
 # Global option #
 #################
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 if(MSVC)
     add_compile_options(/W3 /WX)
 else()
@@ -36,6 +38,10 @@ if (gtest_build_tests)
   # 'make test' or ctest.
   enable_testing()
   add_subdirectory(test)
+endif()
+
+if(benchmark_build)
+    add_subdirectory(benchmark)
 endif()
 
 # Install #

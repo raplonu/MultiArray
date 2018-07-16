@@ -27,7 +27,7 @@ namespace ma
 
         public:
             constexpr explicit Dimension() noexcept :
-                range_(), length_(0)
+                range_(0,0,1), length_(1)
             {}
 
             constexpr Dimension(SizeT length) noexcept :
@@ -48,7 +48,7 @@ namespace ma
 
             constexpr SizeT size() const noexcept
             {
-                return range_.size();
+                return ma::max(range_.size(), SizeT(1));
             }
 
             constexpr SizeT baseSize() const noexcept
@@ -68,7 +68,7 @@ namespace ma
 
             constexpr const_iterator end() const noexcept
             {
-                return range_.end();
+                return active() ? range_.end() : range_.end() + 1;
             }
 
             iterator end() noexcept
@@ -103,7 +103,7 @@ namespace ma
 
             constexpr SizeT rangedElementNb() const noexcept
             {
-                return range_.rangedElementNb();
+                return ma::max(range_.rangedElementNb(), SizeT(1));
             }
 
             constexpr Dimension select(const T & range) const noexcept
@@ -113,7 +113,7 @@ namespace ma
 
             constexpr Dimension closeAt(SizeT pos) const noexcept
             {
-                return Dimension(range_.select(T(pos, pos)), length_);
+                return Dimension(range_.closeAt(pos), length_);
             }
         };
     }

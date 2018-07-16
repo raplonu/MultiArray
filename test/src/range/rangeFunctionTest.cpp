@@ -18,7 +18,7 @@ namespace
         EXPECT_TRUE(rangeContiguousFromZero(r));
         EXPECT_TRUE(rangeHasStep(r));
         EXPECT_EQ(rangeStep(r), 1);
-        EXPECT_EQ(rangeRangedElementNb(r), 1);
+        EXPECT_EQ(rangeRangedElementNb(r), 0);
     }
 
     TEST(rangeFunctionTest, SimpleLinearRangeTest)

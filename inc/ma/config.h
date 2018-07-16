@@ -32,4 +32,6 @@
 #define CONSTEXPR14
 #endif
 
+// #define LIGHTVARIANT 1
+
 #endif //MA_CONFIG_H

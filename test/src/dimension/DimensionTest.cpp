@@ -14,8 +14,8 @@ namespace
         Dimension<LinearRange> d;
 
         EXPECT_FALSE(d.active());
-        EXPECT_EQ(d.size(), 0);
-        EXPECT_EQ(d.baseSize(), 0);
+        EXPECT_EQ(d.size(), 1);
+        EXPECT_EQ(d.baseSize(), 1);
 
         EXPECT_EQ(d.begin(), d.end());
         EXPECT_EQ(*d.begin(), *d.end());
@@ -41,7 +41,7 @@ namespace
         auto d = dd.closeAt(5);
 
         EXPECT_FALSE(d.active());
-        EXPECT_EQ(d.size(), 0);
+        EXPECT_EQ(d.size(), 1);
         EXPECT_EQ(d.baseSize(), 10);
 
         EXPECT_EQ(d.begin(), d.end());

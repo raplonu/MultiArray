@@ -1,4 +1,4 @@
-project(MultiArrayTest)
+project(MultiArrayTest LANGUAGES CXX)
 
 find_package(GTest REQUIRED)
 
@@ -20,6 +20,8 @@ set(MA_TEST_SRC
 add_executable(MultiArrayTest
     ${MA_TEST_SRC}
 )
+
+target_compile_features(MultiArrayTest PRIVATE cxx_std_11)
 
 target_link_libraries(MultiArrayTest
     PRIVATE GTest::GTest GTest::Main MultiArray)

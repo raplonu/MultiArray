@@ -71,7 +71,7 @@ namespace ma
 
             constexpr bool active() const
             {
-                //The concept of inactive range is only possible with LinearRange
+                //The concept of inactive range is only relevant with LinearRange
                 return true;
             }
 

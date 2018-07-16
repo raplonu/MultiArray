@@ -96,7 +96,7 @@ namespace ma
 
             constexpr SizeT rangedElementNb() const noexcept
             {
-                return (step_ == 1)?max<SizeT>(size(), 1) : 1;
+                return (step_ == 1)?size() : 1;
             }
 
             constexpr bool hasStep() const noexcept

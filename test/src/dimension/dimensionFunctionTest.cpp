@@ -68,7 +68,7 @@ namespace
         Dimension<LinearRange> d = makeDim(dim, 5);
 
         EXPECT_FALSE(d.active());
-        EXPECT_EQ(d.size(), 0);
+        EXPECT_EQ(d.size(), 1);
         EXPECT_EQ(d.baseSize(), 10);
 
         EXPECT_EQ(d.begin(), d.end());
