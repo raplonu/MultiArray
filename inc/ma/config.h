@@ -1,14 +1,14 @@
 #ifndef MA_CONFIG_H
 #define MA_CONFIG_H
 
-// #define NDEBUG
+#define NDEBUG
 #include <cassert>      // assert
 
 /**
  * Replace ((void)0) to {} to allow constexpr with assert
  **/
 #ifdef NDEBUG
-#define massert(condition) {}
+#define massert(condition)
 #else
 #define massert(condition) assert(condition)
 #endif
@@ -32,6 +32,6 @@
 #define CONSTEXPR14
 #endif
 
-// #define LIGHTVARIANT 1
+#define LIGHTVARIANT
 
 #endif //MA_CONFIG_H

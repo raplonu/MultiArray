@@ -13,15 +13,11 @@ static void ma_IteratorLegacy(State& state) {
         DoNotOptimize(++it);
 
 }
-// Register the function as a benchmark
 BENCHMARK(ma_IteratorLegacy);
 
-// Define another benchmark
 static void ma_IteratorVariant(State& state) {
     IteratorT<IteratorVariant> it;
-    DoNotOptimize(++it);
-    DoNotOptimize(++it);
     for (auto _ : state){}
-        // DoNotOptimize(++it);
+        DoNotOptimize(++it);
 }
 BENCHMARK(ma_IteratorVariant);

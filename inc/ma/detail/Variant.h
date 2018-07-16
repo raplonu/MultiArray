@@ -2,7 +2,6 @@
 #define MA_DETAIL_VARIANT_H
 
 #include <bitset>
-#include <iostream>
 
 #include <ma/type.h>
 
@@ -23,18 +22,17 @@ namespace ma
             
             void enable() noexcept
             {
-                Base::operator[](0) = 1;
+                Base::operator[](BitNb - 1) = 1;
             }
             
             void disable() noexcept
             {
-                Base::operator[](0) = 0;
+                Base::operator[](BitNb - 1) = 0;
             }
             
             constexpr bool isEnable() const noexcept
             {
-                std::cout << (*this) << std::endl;
-                return Base::operator[](0) == 1;
+                return Base::operator[](BitNb - 1) == 1;
             }
         };
 
@@ -246,7 +244,7 @@ namespace ma
             const Small & small() const noexcept
             {
                 massert(isSmall());
-                
+
                 return impl::small(data_);
             }
 
