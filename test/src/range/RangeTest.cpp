@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <iostream>
 
 #include <ma/range/Range.h>
 
@@ -40,6 +41,8 @@ namespace
     TEST(RangeTest, ReverseSimpleRange)
     {
         Range r(10, 0);
+
+        iterator::Iterator it(10, -1);
 
         EXPECT_EQ(r.begin() + 10, r.end());
 

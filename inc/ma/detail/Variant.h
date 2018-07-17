@@ -36,21 +36,21 @@ namespace ma
             }
         };
 
-        template<std::size_t N>
-        struct MaskLock
-        {
-            Mask<N> & mask_;
+        // template<std::size_t N>
+        // struct MaskLock
+        // {
+        //     Mask<N> & mask_;
             
-            MaskLock(Mask<N> & mask) noexcept : mask_(mask) { mask_.disable(); }
+        //     MaskLock(Mask<N> & mask) noexcept : mask_(mask) { mask_.disable(); }
 
-            ~MaskLock() { mask_.enable(); }
-        };
+        //     ~MaskLock() { mask_.enable(); }
+        // };
 
-        template<std::size_t N>
-        MaskLock<N> mask_lock(Mask<N> & mask)
-        {
-            return MaskLock<N>(mask);
-        }
+        // template<std::size_t N>
+        // MaskLock<N> mask_lock(Mask<N> & mask)
+        // {
+        //     return MaskLock<N>(mask);
+        // }
 
         enum InitSmall {initSmall};
         enum InitBig {initBig};
@@ -139,7 +139,7 @@ namespace ma
                 testSmall();
             }
 
-            CONSTEXPR14 Variant(InitBig, Big * big) noexcept : data_()
+            CONSTEXPR14 Variant(Big * big) noexcept : data_()
             {
                 data_.big = big;
 
@@ -157,6 +157,12 @@ namespace ma
             Variant(Variant && v) noexcept:
                 data_(v.release())
             {}
+
+            Variant& operator=(Variant && v) noexcept
+            {
+                data_ = v.release();
+                return *this;
+            }
 
             ~Variant()
             {

@@ -1,11 +1,11 @@
 #ifndef MA_CONFIG_H
 #define MA_CONFIG_H
 
-#define NDEBUG
+// #define NDEBUG
 #include <cassert>      // assert
 
 /**
- * Replace ((void)0) to {} to allow constexpr with assert
+ * Replace ((void)0) to nothing to allow constexpr with assert
  **/
 #ifdef NDEBUG
 #define massert(condition)

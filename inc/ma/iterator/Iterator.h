@@ -17,6 +17,8 @@ namespace ma
     {
         class IteratorInterface;
 
+        template<typename> class IteratorImpl;
+
         using uIterator = std::unique_ptr<IteratorInterface>;
 
         class IteratorInterface
@@ -35,6 +37,12 @@ namespace ma
              **/
             virtual SizeT id() const = 0;
         };
+
+        template<typename Iterator>
+        uIterator makeIteratorImpl(Iterator && iterator)
+        {
+            return uIterator(new IteratorImpl<decay_t<Iterator>>(std::forward<Iterator>(iterator)));
+        }
 
         template<typename Iterator>
         class IteratorImpl : public IteratorInterface
@@ -62,7 +70,7 @@ namespace ma
 
             uIterator clone() const override
             {
-                return uIterator(new IteratorImpl(it_));
+                return makeIteratorImpl(it_);
             }
 
             SizeT id() const override
@@ -78,9 +86,9 @@ namespace ma
 
             IteratorM iterator_;
 
-            CONSTEXPR14 IteratorVariant(IteratorInterface * ptr) noexcept :
-                iterator_(detail::initBig, ptr)
-            {}
+            // CONSTEXPR14 IteratorVariant(IteratorInterface * ptr) noexcept :
+            //     iterator_(detail::initBig, ptr)
+            // {}
             
         public:
             CONSTEXPR14 IteratorVariant(SizeT start = 0, DiffT step = 1) noexcept :
@@ -97,35 +105,54 @@ namespace ma
                 typename = IsNotSame<LinearIterator, BaseT>
             >
             IteratorVariant(T && it) noexcept :
-                iterator_(detail::initBig, new IteratorImpl<BaseT>(std::forward<T>(it)))
+                iterator_(new IteratorImpl<BaseT>(std::forward<T>(it)))
             {}
 
-            IteratorVariant(const IteratorVariant & it) = default;
+            IteratorVariant(const IteratorVariant & it):
+                iterator_(it.clone())
+            {}
+
             IteratorVariant(IteratorVariant &&) noexcept = default;
+
+            IteratorVariant& operator=(const IteratorVariant & it)
+            {
+                iterator_ = it.clone();
+                return *this;
+            }
+
+            IteratorVariant& operator=(IteratorVariant &&) noexcept = default;
 
             SizeT value(DiffT pos = 0) const
             {
-                return iterator_.isSmall() ? iterator_.small().value(pos) : iterator_.big().value(pos);
+                return iterator_.isSmall()
+                    ? iterator_.small().value(pos)
+                    : iterator_.big().value(pos);
             }
 
             void increase(DiffT pos)
             {
-                if(iterator_.isSmall())
+                if(iterator_.isSmall()){
                     iterator_.small().increase(pos);
+
+                    // Just check if increase is not modifying variant bit ctrl
+                    massert(iterator_.isSmall());
+                }
                 else
                     iterator_.big().increase(pos);
             }
 
-            IteratorVariant clone() const
+            IteratorM clone() const
             {
                 return iterator_.isSmall()
-                    ? *this
-                    : IteratorVariant(iterator_.big().clone().release());
+                    ? IteratorM(detail::initSmall, iterator_.small())
+                    : IteratorM(iterator_.big().clone().release());
             }
 
             SizeT id() const
             {
-                return iterator_.isSmall() ? iteratorId(iterator_.small()) : iterator_.big().id();
+                return iterator_.isSmall()
+                    ? iteratorId(iterator_.small())
+                    : iterator_.big().id();
             }
         };
 
@@ -136,13 +163,13 @@ namespace ma
 
             IteratorM iterator_;
 
-            IteratorLegacy(IteratorM && it) noexcept:
-                iterator_(std::move(it))
-            {}
+            // IteratorLegacy(IteratorM && it) noexcept:
+            //     iterator_(std::move(it))
+            // {}
 
         public:
             IteratorLegacy(SizeT start = 0, DiffT step = 1):
-                iterator_(new IteratorImpl<LinearIterator>(LinearIterator(start, step)))
+                iterator_(makeIteratorImpl(LinearIterator(start, step)))
             {}
 
             template<
@@ -151,8 +178,22 @@ namespace ma
                 typename = IsNotSame<IteratorM, BaseT>
             >
             IteratorLegacy(T && it) noexcept :
-                iterator_(new IteratorImpl<BaseT>(std::forward<T>(it)))
+                iterator_(makeIteratorImpl(std::forward<T>(it)))
             {}
+
+            IteratorLegacy(const IteratorLegacy & it):
+                iterator_(it.clone())
+            {}
+
+            IteratorLegacy(IteratorLegacy && it) noexcept = default;
+
+            IteratorLegacy& operator=(const IteratorLegacy & it)
+            {
+                iterator_ = it.clone();
+                return *this;
+            }
+
+            IteratorLegacy& operator=(IteratorLegacy && it) noexcept = default;
 
             SizeT value(DiffT pos = 0) const
             {
@@ -164,9 +205,9 @@ namespace ma
                 iterator_->increase(pos);
             }
 
-            IteratorLegacy clone() const
+            uIterator clone() const
             {
-                return IteratorLegacy(iterator_->clone());
+                return iterator_->clone();
             }
 
             SizeT id() const
@@ -195,23 +236,11 @@ namespace ma
                 :it_(std::forward<T>(it))
             {}
 
-            IteratorT(const IteratorT & ii)
-                :it_(ii.it_.clone())
-            {}
-
+            IteratorT(const IteratorT & ii) = default;
             IteratorT(IteratorT && ii) = default;
 
-            IteratorT& operator=(const IteratorT & ii)
-            {
-                it_ = ii.clone();
-                return *this;
-            }
-
-            IteratorT& operator=(IteratorT && ii)
-            {
-                it_ = std::move(ii.it_);
-                return *this;
-            }
+            IteratorT& operator=(const IteratorT & ii) = default;
+            IteratorT& operator=(IteratorT && ii) = default;
 
             IteratorT add(DiffT pos) const
             {
@@ -225,6 +254,13 @@ namespace ma
                 return *this;
             }
 
+            IteratorT postIncrease(DiffT pos)
+            {
+                IteratorT tmp(*this);
+                increase(pos);
+                return tmp;
+            }
+
             bool equal(const IteratorT & it) const
             {
                 return it_.id() == it.it_.id();
@@ -235,22 +271,10 @@ namespace ma
             SizeT operator*() const {return it_.value();}
 
             IteratorT& operator++() {return increase(1); }
-            
-            IteratorT operator++(int)
-            {
-                IteratorT tmp(*this);
-                increase(1);
-                return tmp;
-            }
+            IteratorT operator++(int) { return postIncrease(1); }
 
-            IteratorT& operator--() {it_.increase(-1); return *this;}
-
-            IteratorT operator--(int)
-            {
-                IteratorT tmp(*this);
-                increase(-1);
-                return tmp;
-            }
+            IteratorT& operator--() { return increase(-1); }
+            IteratorT operator--(int) { return postIncrease(-1); }
 
             IteratorT& operator+=(DiffT pos) {return increase(pos);}
             IteratorT& operator-=(DiffT pos) {return increase(-pos);}
@@ -272,11 +296,6 @@ namespace ma
             bool operator!=(const IteratorT & li) const
             {
                 return !equal(li);
-            }
-
-            uIterator clone() const
-            {
-                return it_.clone();
             }
         };
 

@@ -24,24 +24,25 @@ namespace ma
         protected:
             SizeT start_;
             SizeT stop_;
-            DiffT step_;
+            HDiffT step_;
+            [[maybe_unused]] HDiffT __nothing;
 
         public:
 
             constexpr explicit LinearRange() noexcept :
-                start_(0), stop_(0), step_(1)
+                start_(0), stop_(0), step_(1), __nothing()
             {}
 
             constexpr explicit LinearRange(SizeT stop) noexcept :
-                start_(0), stop_(stop), step_(1)
+                start_(0), stop_(stop), step_(1), __nothing()
             {}
 
             constexpr explicit LinearRange(SizeT start, SizeT stop) noexcept :
-                start_(start), stop_(stop), step_((stop >= start)?1:-1)
+                start_(start), stop_(stop), step_((stop >= start)?1:-1), __nothing()
             {}
 
             constexpr explicit LinearRange(SizeT start, SizeT stop, DiffT step) noexcept :
-                start_(start), stop_(alignStop(start, stop, step)), step_(step)
+                start_(start), stop_(alignStop(start, stop, step)), step_(step), __nothing()
             {}
 
             constexpr LinearRange(const LinearRange &) noexcept = default;

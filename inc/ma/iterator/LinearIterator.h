@@ -17,11 +17,12 @@ namespace ma
             using iterator_category = std::random_access_iterator_tag;
 
             SizeT start_;
-            DiffT step_;
+            HDiffT step_;
+            [[maybe_unused]] HDiffT __nothing; //discard 2 bytes in order tor put the variant test bit
 
         public:
             constexpr explicit LinearIterator(SizeT start = 0, DiffT step = 1) noexcept :
-                start_(start), step_(step)
+                start_(start), step_(step), __nothing()
             {}
 
             constexpr LinearIterator(const LinearIterator &) noexcept = default;
@@ -44,6 +45,7 @@ namespace ma
 
             LinearIterator & increase(DiffT pos) noexcept
             {
+                // (void)nothing_;
                 start_ = value(pos);
                 return *this;
             }

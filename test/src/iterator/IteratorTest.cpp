@@ -58,5 +58,16 @@ namespace
         it1++;
         EXPECT_EQ(it1, it2);
     }
+
+    // TEST(Iterator, NegativIterator)
+    // {
+    //     Iterator it;
+
+    //     EXPECT_EQ(*it, 0);
+    //     --it;
+    //     EXPECT_EQ(*it, -1);
+    //     ++it;
+    //     EXPECT_EQ(*it, 0);
+    // }
 }
 

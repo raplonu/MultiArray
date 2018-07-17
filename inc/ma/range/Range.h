@@ -12,7 +12,8 @@ namespace ma
     namespace range
     {
         class RangeInterface;
-        class Range;
+        
+        template<typename> class RangeImpl;
 
         using uRange = std::unique_ptr<RangeInterface>;
 
@@ -41,6 +42,12 @@ namespace ma
             virtual SizeT stop() const = 0;
             virtual DiffT step() const = 0;
         };
+
+        template<typename Range>
+        uRange makeRangeImpl(Range && range)
+        {
+            return uRange(new RangeImpl<decay_t<Range>>(std::forward<Range>(range)));
+        }
 
         template<typename T>
         class RangeImpl : public RangeInterface
@@ -144,19 +151,161 @@ namespace ma
                     }
                 );
 
-                return uRange(new RangeImpl<VectRange>(std::move(res)));
+                return makeRangeImpl(std::move(res));
             }
         };
 
-        template<typename Range>
-        uRange makeRangeImpl(Range && range)
+        class RangeVariant
         {
-            return uRange(new RangeImpl<decay_t<Range>>(std::forward<Range>(range)));
-        }
+            using RangeM = detail::Variant<LinearRange, RangeInterface>;
+        public:
+            using const_iterator = iterator::Iterator;
+            using iterator = iterator::Iterator;
 
-        template<typename> struct TOTO;
+        protected:
+            RangeM range_;
 
-        class Range
+            explicit RangeVariant(RangeM && range) noexcept :
+                range_(std::move(range))
+            {}
+
+        public:
+
+            explicit RangeVariant():
+                range_(detail::initSmall)
+            {}
+            explicit RangeVariant(SizeT stop):
+                range_(detail::initSmall, stop)
+            {}
+
+            explicit RangeVariant(SizeT start, SizeT stop):
+                range_(detail::initSmall, start, stop)
+            {}
+
+            explicit RangeVariant(SizeT start, SizeT stop, DiffT step):
+                range_(detail::initSmall, start, stop, step)
+            {}
+
+            explicit RangeVariant(const LinearRange & range):
+                range_(detail::initSmall, range)
+            {}
+
+            template<
+                typename T,
+                typename = IsNotEquivalent<T, RangeVariant>,
+                typename = IsNotEquivalent<T, LinearRange>,
+                typename = IsIterable<T>>
+            explicit RangeVariant(T && range):
+                range_(detail::initBig, makeRangeImpl(std::forward<T>(range)))
+            {}
+
+            RangeVariant(const RangeVariant & range):
+                range_(range.clone())
+            {}
+
+            RangeVariant(RangeVariant && range) = default;
+
+            RangeVariant & operator=(const RangeVariant & range)
+            {
+                range_ = range.clone();
+                return *this;
+            }
+
+            RangeVariant & operator=(RangeVariant && range) = default;
+
+            ~RangeVariant() = default;
+
+            iterator begin() const
+            {
+                return range_.isSmall()
+                    ? iterator(range_.small().begin())
+                    : range_.big().begin();
+            }
+
+            iterator end() const
+            {
+                return range_.isSmall()
+                    ? iterator(range_.small().end())
+                    : range_.big().end();
+            }
+
+            SizeT start() const
+            {
+                return range_.isSmall()
+                    ? range_.small().start()
+                    : range_.big().start();
+            }
+
+            SizeT stop() const
+            {
+                return range_.isSmall()
+                    ? range_.small().stop()
+                    : range_.big().stop();
+            }
+
+            SizeT at(SizeT pos) const
+            {
+                return range_.isSmall()
+                    ? range_.small()[pos]
+                    : range_.big().at(pos);
+            }
+
+            SizeT size() const
+            {
+                return range_.isSmall()
+                    ? range_.small().size()
+                    : range_.big().size();
+            }
+
+            RangeM clone() const
+            {
+                return range_.isSmall()
+                    ? RangeM(detail::initSmall, range_.small())
+                    : RangeM(range_.big().clone().release());
+            }
+
+            bool active() const
+            {
+                return range_.isSmall()
+                    ? range_.small().active()
+                    : range_.big().active();
+            }
+
+            bool complete(SizeT totalLength) const
+            {
+                return range_.isSmall()
+                    ? range_.small().complete(totalLength)
+                    : range_.big().complete(totalLength);
+            }
+
+            SizeT rangedElementNb() const
+            {
+                return range_.isSmall()
+                    ? range_.small().rangedElementNb()
+                    : range_.big().rangedElementNb();
+            }
+
+            RangeVariant select(const RangeVariant & r) const
+            {
+                return range_.isSmall()
+                    ? r.range_.isSmall()
+                        ? RangeVariant(range_.small().select(r.range_.small()))
+                        : RangeVariant(RangeImpl<LinearRange>(range_.small()).selectRange(r.range_.big()).release())
+                    : RangeVariant(range_.big().selectRange(
+                        r.range_.isSmall()
+                            ? RangeImpl<LinearRange>(r.range_.small())
+                            : r.range_.big()).release()
+                    );
+            }
+
+            RangeVariant closeAt(SizeT pos) const
+            {
+                SizeT nStart = start() + pos;
+                return RangeVariant(nStart, nStart, 1);
+            }
+        };
+
+        class RangeLegacy
         {
         public:
             using const_iterator = iterator::Iterator;
@@ -165,47 +314,46 @@ namespace ma
         protected:
             uRange range_;
 
-            explicit Range(uRange && range) noexcept :
+            explicit RangeLegacy(uRange && range) noexcept :
                 range_(std::move(range))
             {}
 
         public:
-
-            explicit Range():
-                range_(makeRangeImpl(LinearRange()))
-            {}
-            explicit Range(SizeT stop):
+            explicit RangeLegacy(SizeT stop):
                 range_(makeRangeImpl(LinearRange(stop)))
             {}
 
-            explicit Range(SizeT start, SizeT stop):
+            explicit RangeLegacy(SizeT start, SizeT stop):
                 range_(makeRangeImpl(LinearRange(start, stop)))
             {}
 
-            explicit Range(SizeT start, SizeT stop, DiffT step):
+            explicit RangeLegacy(SizeT start, SizeT stop, DiffT step):
                 range_(makeRangeImpl(LinearRange(start, stop, step)))
             {}
 
-            template<typename T, typename = IsNotEquivalent<T, Range>, typename = IsIterable<T>>
-            explicit Range(T && range):
-                range_(makeRangeImpl(range))
+            template<
+                typename T, typename BaseT = decay_t<T>,
+                typename = IsNotEquivalent<RangeLegacy, BaseT>
+            >
+            explicit RangeLegacy(T && range):
+                range_(makeRangeImpl(std::forward<T>(range)))
             {}
 
-            Range(const Range & range):
+            RangeLegacy(const RangeLegacy & range):
                 range_(range.clone())
             {}
 
-            Range(Range && range) = default;
+            RangeLegacy(RangeLegacy && range) = default;
 
-            Range & operator=(const Range & range)
+            RangeLegacy & operator=(const RangeLegacy & range)
             {
                 range_ = range.clone();
                 return *this;
             }
 
-            Range & operator=(Range && range) = default;
+            RangeLegacy & operator=(RangeLegacy && range) = default;
 
-            ~Range() = default;
+            ~RangeLegacy() = default;
 
             iterator begin() const
             {
@@ -227,7 +375,7 @@ namespace ma
                 return range_->stop();
             }
 
-            SizeT operator[](SizeT pos) const
+            SizeT at(SizeT pos) const
             {
                 return range_->at(pos);
             }
@@ -257,17 +405,130 @@ namespace ma
                 return range_->rangedElementNb();
             }
 
-            Range select(const Range & r) const
+            RangeLegacy select(const RangeLegacy & r) const
             {
-                return Range(range_->selectRange(*r.range_));
+                return RangeLegacy(range_->selectRange(*r.range_));
             }
 
-            Range closeAt(SizeT pos) const
+            RangeLegacy closeAt(SizeT pos) const
             {
                 SizeT nStart = range_->start() + pos;
-                return Range(nStart, nStart, 1);
+                return RangeLegacy(nStart, nStart, 1);
             }
         };
+
+
+        template<typename Impl>
+        class RangeT
+        {
+        public:
+            using const_iterator = iterator::Iterator;
+            using iterator = iterator::Iterator;
+
+        protected:
+            Impl range_;
+
+            RangeT(Impl && range):
+                range_(std::move(range))
+            {}
+
+        public:
+            explicit RangeT(SizeT stop):
+                range_(stop)
+            {}
+
+            explicit RangeT(SizeT start, SizeT stop):
+                range_(start, stop)
+            {}
+
+            explicit RangeT(SizeT start, SizeT stop, DiffT step):
+                range_(start, stop, step)
+            {}
+
+            template<typename T, typename = IsNotEquivalent<T, RangeT>, typename = IsIterable<T>>
+            explicit RangeT(T && range):
+                range_(std::forward<T>(range))
+            {}
+
+            RangeT(const RangeT & range):
+                range_(range.clone())
+            {}
+
+            RangeT(RangeT && range) = default;
+
+            RangeT & operator=(const RangeT & range)
+            {
+                range_ = range.clone();
+                return *this;
+            }
+
+            RangeT & operator=(RangeT && range) = default;
+
+            ~RangeT() = default;
+
+            iterator begin() const
+            {
+                return range_.begin();
+            }
+
+            iterator end() const
+            {
+                return range_.end();
+            }
+
+            SizeT start() const
+            {
+                return range_.start();
+            }
+
+            SizeT stop() const
+            {
+                return range_.stop();
+            }
+
+            SizeT operator[](SizeT pos) const
+            {
+                return range_.at(pos);
+            }
+
+            SizeT size() const
+            {
+                return range_.size();
+            }
+
+            uRange clone() const
+            {
+                return range_.clone();
+            }
+
+            bool active() const
+            {
+                return range_.active();
+            }
+
+            bool complete(SizeT totalLength) const
+            {
+                return range_.complete(totalLength);
+            }
+
+            SizeT rangedElementNb() const
+            {
+                return range_.rangedElementNb();
+            }
+
+            RangeT select(const RangeT & r) const
+            {
+                return RangeT(range_.select(r.range_));
+            }
+
+            RangeT closeAt(SizeT pos) const
+            {
+                SizeT nStart = range_.start() + pos;
+                return RangeT(nStart, nStart, 1);
+            }
+        };
+
+        using Range = RangeT<RangeLegacy>;
     }
 }
 
