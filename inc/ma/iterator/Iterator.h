@@ -233,7 +233,7 @@ namespace ma
                 typename = IsRandomIt<BaseT>
             >
             IteratorT(T && it)
-                :it_(std::forward<T>(it))
+                :it_(forward<T>(it))
             {}
 
             IteratorT(const IteratorT & ii) = default;

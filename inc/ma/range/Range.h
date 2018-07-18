@@ -568,7 +568,11 @@ namespace ma
             }
         };
 
+        #ifdef LIGHTVARIANT
         using Range = RangeT<RangeVariant>;
+        #else
+        using Range = RangeT<RangeLegacy>;
+        #endif
     }
 }
 
