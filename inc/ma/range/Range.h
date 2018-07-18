@@ -36,6 +36,7 @@ namespace ma
             virtual bool complete(SizeT totalLength) const = 0;
             virtual SizeT rangedElementNb() const = 0;
             virtual uRange selectRange(const RangeInterface & r) const = 0;
+            virtual uRange selectRange(const LinearRange & r) const = 0;
 
             virtual bool hasStep() const = 0;
             virtual SizeT start() const = 0;
@@ -110,6 +111,14 @@ namespace ma
                     return selectVectRange(rb);
             }
 
+            uRange selectRange(const LinearRange & rb) const override
+            {
+                if(hasStep())
+                    return selectLinearRange(rb);
+                else
+                    return selectVectRange(rb);
+            }
+
             bool hasStep() const override
             {
                 return range_.hasStep();
@@ -130,7 +139,8 @@ namespace ma
                 return range_.step();
             }
 
-            uRange selectLinearRange(const RangeInterface & r) const
+            template<typename R>
+            uRange selectLinearRange(const R & r) const
             {
                 return uRange(new RangeImpl<LinearRange>(
                     LinearRange(range_.start(), range_.stop(), range_.step())
@@ -139,7 +149,8 @@ namespace ma
 
             }
 
-            uRange selectVectRange(const RangeInterface & r) const
+            template<typename R>
+            uRange selectVectRange(const R & r) const
             {
                 VectRange res(r.size());
 
@@ -196,7 +207,7 @@ namespace ma
                 typename = IsNotEquivalent<T, LinearRange>,
                 typename = IsIterable<T>>
             explicit RangeVariant(T && range):
-                range_(detail::initBig, makeRangeImpl(std::forward<T>(range)))
+                range_(makeRangeImpl(std::forward<T>(range)).release())
             {}
 
             RangeVariant(const RangeVariant & range):
@@ -285,17 +296,36 @@ namespace ma
                     : range_.big().rangedElementNb();
             }
 
-            RangeVariant select(const RangeVariant & r) const
+            RangeVariant selectRange(const RangeVariant & r) const
             {
-                return range_.isSmall()
-                    ? r.range_.isSmall()
-                        ? RangeVariant(range_.small().select(r.range_.small()))
-                        : RangeVariant(RangeImpl<LinearRange>(range_.small()).selectRange(r.range_.big()).release())
-                    : RangeVariant(range_.big().selectRange(
-                        r.range_.isSmall()
-                            ? RangeImpl<LinearRange>(r.range_.small())
-                            : r.range_.big()).release()
-                    );
+                if(range_.isSmall())
+                {
+                    if(r.range_.isSmall())
+                        return RangeVariant(range_.small().select(r.range_.small()));
+                    else
+                        return RangeVariant(RangeImpl<LinearRange>(range_.small()).selectRange(r.range_.big()).release());
+                }
+                else
+                {
+                    if(r.range_.isSmall())
+                        return RangeVariant(RangeM(range_.big().selectRange(
+                            RangeImpl<LinearRange>(r.range_.small())
+                        ).release()));
+                    else
+                        return RangeVariant(RangeM(range_.big().selectRange(
+                            r.range_.big()
+                        ).release()));
+                }
+            }
+
+            RangeVariant selectRange(const LinearRange & r) const
+            {
+                if(range_.isSmall())
+                    return RangeVariant(range_.small().select(r));
+                else
+                    return RangeVariant(RangeM(range_.big().selectRange(
+                        RangeImpl<LinearRange>(r)
+                    ).release()));
             }
 
             RangeVariant closeAt(SizeT pos) const
@@ -405,9 +435,14 @@ namespace ma
                 return range_->rangedElementNb();
             }
 
-            RangeLegacy select(const RangeLegacy & r) const
+            RangeLegacy selectRange(const RangeLegacy & r) const
             {
                 return RangeLegacy(range_->selectRange(*r.range_));
+            }
+
+            RangeLegacy selectRange(const LinearRange & r) const
+            {
+                return RangeLegacy(range_->selectRange(r));
             }
 
             RangeLegacy closeAt(SizeT pos) const
@@ -433,7 +468,7 @@ namespace ma
             {}
 
         public:
-            explicit RangeT(SizeT stop):
+            explicit RangeT(SizeT stop = 0):
                 range_(stop)
             {}
 
@@ -518,7 +553,12 @@ namespace ma
 
             RangeT select(const RangeT & r) const
             {
-                return RangeT(range_.select(r.range_));
+                return RangeT(range_.selectRange(r.range_));
+            }
+
+            RangeT select(const LinearRange & r) const
+            {
+                return RangeT(range_.selectRange(r));
             }
 
             RangeT closeAt(SizeT pos) const
@@ -528,7 +568,7 @@ namespace ma
             }
         };
 
-        using Range = RangeT<RangeLegacy>;
+        using Range = RangeT<RangeVariant>;
     }
 }
 
