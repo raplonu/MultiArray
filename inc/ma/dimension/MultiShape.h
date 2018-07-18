@@ -6,6 +6,7 @@
 
 #include <ma/dimension/Dimension.h>
 #include <ma/dimension/dimensionFunction.h>
+#include <ma/dimension/BasicShape.h>
 
 namespace ma
 {
@@ -75,15 +76,14 @@ namespace ma
                     ++dim;
                 }
 
-                for(; dim < dimNb(); ++dim)
-                    off = off * baseSizeAt(dim) + dims_[dim][0];
-
-                return off;
+                return ma::accumulate(ma::begin(dims_) + dim, ma::end(dims_), off,
+                    [](SizeT off, const DimensionT & d){return off * d.baseSize() + d[0];}
+                    );
             }
 
             SizeT size() const
             {
-                return prodDim([](SizeT s, const DimensionT & d){return s * ma::max<SizeT>(d.size(), 1);});
+                return prodDim([](SizeT s, const DimensionT & d){return s * d.size();});
             }
 
             SizeT baseSize() const
@@ -96,7 +96,7 @@ namespace ma
                 return contiguousDataLength();
             }
 
-            bool contigous() const
+            bool contiguous() const
             {
                 return contiguousDataLength() == size();
             }
@@ -113,11 +113,11 @@ namespace ma
             }
 
             template<typename Fn>
-            SizeT prodDim(Fn fn) const
+            SizeT prodDim(Fn && fn) const
             {
-                return dims_.empty()
+                return ma::empty(dims_)
                     ? 0
-                    : accumulate(dims_.begin(), dims_.end(), 1, fn);
+                    : accumulate(ma::begin(dims_), ma::end(dims_), 1, forward<Fn>(fn));
             }
 
             bool activeAt(SizeT dim) const
@@ -127,7 +127,7 @@ namespace ma
 
             SizeT sizeAt(SizeT dim) const
             {
-                return ma::max<SizeT>(dims_[dim].size(), 1);
+                return dims_[dim].size();
             }
 
             SizeT baseSizeAt(SizeT dim) const
@@ -203,22 +203,22 @@ namespace ma
             //     return baseShape(nbDim());
             // }
 
-            // SizeVect shape(SizeT nbDimMax) const
-            // {
-            //     SizeVect shape(nbDimMax);
+            VectRange shape(SizeT dimNbMax) const
+            {
+                VectRange shape(dimNbMax);
 
-            //     SizeT activeDim(0);
-            //     for(SizeT dim(0); activeDim < nbDimMax && dim < nbDim(); ++dim)
-            //         if(dims_[dim].isActive())
-            //             shape[activeDim++] = dims_[dim].size();
+                SizeT activeDim(0);
+                for(SizeT dim(0); activeDim < dimNbMax && dim < dimNb(); ++dim)
+                    if(dims_[dim].isActive())
+                        shape[activeDim++] = dims_[dim].size();
 
-            //     return shape;
-            // }
+                return shape;
+            }
 
-            // SizeVect shape() const
-            // {
-            //     return shape(nbActiveDim());
-            // }
+            VectRange shape() const
+            {
+                return shape(activeDimNb());
+            }
 
 
             // //dimNb, dimStep

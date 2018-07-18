@@ -208,6 +208,9 @@ namespace ma
      * Copy function
      **/
     using std::copy;
+    using std::copy_n;
+    using std::fill;
+    using std::fill_n;
 
     /**
      * Special Values
@@ -224,54 +227,143 @@ namespace ma
         return T(1);
     }
 
-    // /**
-    //  * Sum function
-    //  **/
-    // template<typename Range, typename T = typename Range::value_type>
-    // T sum(const Range & range, T init = zero<T>())
-    // {
-    //     return accumulate(ma::begin(range), ma::end(range), init, std::plus<T>());
-    // }
+    /**
+     * Accumulate
+     **/
+    using std::accumulate;
 
-    // /**
-    //  * Product function
-    //  **/
-    // template<typename Range, typename T = typename Range::value_type>
-    // T product(const Range & range, T init = one<T>())
-    // {
-    //     return accumulate(ma::begin(range), ma::end(range), init, std::multiplies<T>());
-    // }
+    /**
+     * Contiguous
+     **/
+    template<typename T>
+    constexpr HasNotContigusMet<T, bool> contiguous(T const &) noexcept { return true; }
+
+    template<typename T>
+    HasContigusMet<T, bool> contiguous(T const & t) noexcept { return t.contiguous(); }
+
+
+    /**
+     * Compare size
+     **/
+
+    inline void compareSize(SizeT s1, SizeT s2)
+    {
+        if(s1 != s2)
+            throw std::length_error("Data hasn't the same size");
+    }
+
+    namespace impl
+    {
+        template <typename T>
+        auto has_size_impl(int) -> decltype (
+            size(std::declval<T&>()),
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_size_impl(...);
+    }
+
+    template <typename T>
+    using has_size = decltype(impl::has_size_impl<T>(0));
+
+
+    template<typename T, typename TT = void>
+    using HasSize = enable_if_t<has_size<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotSize = enable_if_t<not has_size<T>::value, TT>;
+
+    namespace impl
+    {
+
+        template<bool DefaultEnabled, typename T, typename = HasSize<T>>
+        SizeT tryGetSize(const T & t, SizeT defaultSize)
+        {
+            SizeT newSize(size(t));
+
+            if(DefaultEnabled) compareSize(newSize, defaultSize);
+
+            return newSize;
+        }
+
+        template<bool DefaultEnabled, typename T>
+        auto tryGetSize(T const &, SizeT defaultSize) ->
+        typename std::enable_if<!has_size<T>::value, SizeT>::type
+        {
+            return defaultSize;
+        }
+
+
+        template<bool SizeFound, typename... Datas> struct Sizes;
+
+        template<bool SizeFound, typename First, typename... Datas>
+        struct Sizes<SizeFound, First, Datas...>
+        {
+            static SizeT get(SizeT lastSize, const First & f, const Datas &... datas)
+            {
+                SizeT newSize(tryGetSize<SizeFound, First>(f, lastSize));
+
+                return Sizes<SizeFound || has_size<First>::value, Datas...>::get
+                    (newSize, datas...);
+            }
+        };
+
+        //Only for HasSize == true because need to have at least one arg with size
+        template<>
+        struct Sizes<true>
+        {
+            constexpr static SizeT get(SizeT lastSize) noexcept { return lastSize; }
+        };
+
+    }
+
+    template<typename... T>
+    SizeT sizes(const T & ... t)
+    {
+        return impl::Sizes<false, T...>::get(0, t...);
+    }
 
 
     /**
      * ptrOf function : extract ptr for types
      **/
-    // template<typename Data, typename = IsPointer<Data>>
-    // Data ptrOf(Data data)
-    // {
-    //     return data;
-    // }
+    template<typename T>
+    constexpr T * ptrOf(T * data) noexcept
+    {
+        return data;
+    }
 
-    // template<typename Data, typename = IsPointer<Data>>
-    // Data ptrOf(Data data)
-    // {
-    //     return data;
-    // }
+    template<typename T, typename Data, typename = IsRandomIt<Data>>
+    constexpr T * ptrOf(Data data) noexcept
+    {
+        return &(*data);
+    }
 
+    template<typename T, typename Data>
+    auto ptrOf(Data & data) -> decltype(data.data())
+    {
+        return data.data();
+    }
 
+    template<typename T, typename Data>
+    auto ptrOf(Data & data) -> decltype(data.ptr())
+    {
+        return data.ptr();
+    }
+
+    template<typename T, typename Data>
+    auto ptrOf(Data & data) -> decltype(data.begin())
+    {
+        return data.begin();
+    }
+
+    template<typename T, typename Data>
+    auto ptrOf(Data & data) -> decltype(data.get())
+    {
+        return data.get();
+    }
 
     
-    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
-    // decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
-    // {
-    //     return &(*data);
-    // }
-
-    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
-    // decltype(std::declval<Data&>().data()) ptrOf(Data & data)
-    // {
-    //     return data.data();
-    // }
 
     // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
     // decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
@@ -316,85 +408,6 @@ namespace ma
     //     return data.get();
     // }
 
-
-
-    // template<typename T>
-    // auto size(T const & t) -> decltype(t.size())
-    // {
-    //     return t.size();
-    // }
-
-    // inline
-    // void compareSize(SizeT s1, SizeT s2)
-    // {
-    //     if(s1 != s2)
-    //         throw std::length_error("Data hasn't the same size");
-    // }
-
-    // namespace impl
-    // {
-    //     template <typename T>
-    //     auto has_size_impl(int) -> decltype (
-    //         size(std::declval<T&>()),
-    //         std::true_type{});
-
-    //     template <typename T>
-    //     std::false_type has_size_impl(...);
-    // }
-
-    // template <typename T>
-    // using has_size = decltype(impl::has_size_impl<T>(0));
-
-
-    // namespace impl
-    // {
-
-    //     template<bool DefaultEnabled, typename T>
-    //     auto tryGetSize(T const & t, SizeT defaultSize) -> decltype(size(t))
-    //     {
-    //         SizeT newSize(size(t));
-
-    //         if(DefaultEnabled) compareSize(newSize, defaultSize);
-
-    //         return newSize;
-    //     }
-
-    //     template<bool DefaultEnabled, typename T>
-    //     auto tryGetSize(T const &, SizeT defaultSize) ->
-    //     typename std::enable_if<!has_size<T>::value, SizeT>::type
-    //     {
-    //         return defaultSize;
-    //     }
-
-
-    //     template<bool SizeFound, typename... Datas> struct Sizes;
-
-    //     template<bool SizeFound, typename First, typename... Datas>
-    //     struct Sizes<SizeFound, First, Datas...>
-    //     {
-    //         static SizeT get(SizeT lastSize, First const & f, Datas const &... datas)
-    //         {
-    //             SizeT newSize(tryGetSize<SizeFound, First>(f, lastSize));
-
-    //             return Sizes<SizeFound || has_size<First>::value, Datas...>::get
-    //                 (newSize, datas...);
-    //         }
-    //     };
-
-    //     //Only for HasSize == true because need to have at least one arg with size
-    //     template<>
-    //     struct Sizes<true>
-    //     {
-    //         static SizeT get(SizeT lastSize){ return lastSize; }
-    //     };
-
-    // }
-
-    // template<typename... T>
-    // SizeT sizes(T const & ... t)
-    // {
-    //     return impl::Sizes<false, T...>::get(0, t...);
-    // }
 
     // template<typename T>
     // auto step(T const & t) -> decltype(t.step())
@@ -493,35 +506,26 @@ namespace ma
 
 
 
-    // template<typename T>
-    // T convert(T t)
-    // {
-    //     return t;
-    // }
+    template<typename T>
+    constexpr T convert(T t) noexcept
+    {
+        return t;
+    }
 
-    // template<typename T>
-    // T * convert(T * t)
-    // {
-    //     return t;
-    // }
+    template<typename T>
+    constexpr T * convert(T * t) noexcept
+    {
+        return t;
+    }
 
-    // template<typename T, typename Data, typename Ret = typename std::enable_if<!std::is_same<T, Data>::value, decltype(ptrOf<T>(std::declval<Data&>()))>::type>
-    // Ret convert(Data & data) //decltype(ptrOf<T>(std::declval<Data&>()))
-    // {
-    //     return ptrOf<T>(data);
-    // }
+    template<
+        typename T, typename Data,
+        typename Ret = IsNotSame<T, Data, decltype(ptrOf<T>(std::declval<Data&>()))>>
+    constexpr Ret convert(Data & data) noexcept
+    {
+        return ptrOf<T>(data);
+    }
 
-    // template<typename T, typename = decltype(std::declval<T&>().isContigous())>
-    // decltype(std::declval<T&>().isContigous()) isContigous(T const & t)
-    // {
-    //     return t.isContigous();
-    // }
-
-    // template<typename T, typename = typename std::enable_if<!has_comtigous_met<T>::value, bool>::type>
-    // bool isContigous(T const &)
-    // {
-    //     return true;
-    // }
 }
 
 #endif //MA_FUNCTION_H

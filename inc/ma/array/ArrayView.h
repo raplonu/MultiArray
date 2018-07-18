@@ -6,6 +6,7 @@
 #include <ma/function.h>
 
 #include <ma/iterator/ShapeIterator.h>
+#include <ma/algorithm/copy.h>
 
 namespace ma
 {
@@ -129,6 +130,18 @@ namespace ma
             VectRange shape() const
             {
                 return shape_.shape();
+            }
+
+            template<typename OData, typename... Args>
+            void copyTo(OData && data, Args && ... args) const
+            {
+                algorithm::multiCopy<T>(data, *this, forward<Args>(args)...);
+            }
+
+            template<typename OData, typename... Args>
+            void setMem(OData const & data, Args && ... args)
+            {
+                algorithm::multiCopy<T>(*this, data, forward<Args>(args)...);
             }
 
 

@@ -51,11 +51,6 @@ namespace ma
                 return reference_at(0);
             }
 
-            // operator difference_type() const
-            // {
-            //     return pos_at(0);
-            // }
-
             ShapeIterator& operator++() noexcept
             {
                 ++pos_;

@@ -50,7 +50,7 @@ namespace ma
         template<typename DataT, typename DST, typename SRC, typename... Args>
         void memCopy(DST & dst, SRC const & src, Args... args)
         {
-            if(detail::isContigous(dst) && detail::isContigous(src))
+            if(detail::isContiguous(dst) && detail::isContiguous(src))
                 memCopyPlain<DataT>(dst, src, args...);
             else
                 memCopyStep<DataT>(dst, src, args...);

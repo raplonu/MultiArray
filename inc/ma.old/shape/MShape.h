@@ -111,7 +111,7 @@ namespace ma
                 return contiguousDataLength();
             }
 
-            bool isContigous() const
+            bool isContiguous() const
             {
                 return contiguousDataLength() == size();
             }

@@ -242,14 +242,14 @@ namespace ma
             return ptrOf<T>(data);
         }
 
-        template<typename T, typename = decltype(std::declval<T&>().isContigous())>
-        decltype(std::declval<T&>().isContigous()) isContigous(T const & t)
+        template<typename T, typename = decltype(std::declval<T&>().isContiguous())>
+        decltype(std::declval<T&>().isContiguous()) isContiguous(T const & t)
         {
-            return t.isContigous();
+            return t.isContiguous();
         }
 
         template<typename T, typename = typename std::enable_if<!has_comtigous_met<T>::value, bool>::type>
-        bool isContigous(T const &)
+        bool isContiguous(T const &)
         {
             return true;
         }

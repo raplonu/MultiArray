@@ -52,5 +52,16 @@ namespace
         EXPECT_EQ(a[1].ptr(), v.data() + 5);
         EXPECT_EQ(a[1].size(), 5);
     }
+
+    TEST(ArrayViewTest, FillTest)
+    {
+        std::vector<int> v(10);
+        ArrayView<int, DefaultAlloc<int>, MultiShape<LinearRange>> a(10, v.data());
+
+        a.setMem(42);
+        
+        EXPECT_EQ(a.value(0), 42);
+        EXPECT_EQ(v[0], 42);
+    }
 }
 

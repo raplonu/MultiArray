@@ -159,9 +159,9 @@ public:
                 return shape_.step();
             }
 
-            bool isContigous() const
+            bool isContiguous() const
             {
-                return shape_.isContigous();
+                return shape_.isContiguous();
             }
 
             SizeT offset() const

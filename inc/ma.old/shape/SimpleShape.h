@@ -84,7 +84,7 @@ namespace ma
                 return size();
             }
 
-            bool isContigous() const
+            bool isContiguous() const
             {
                 return true;
             }

@@ -121,7 +121,7 @@ namespace ma
             explicit SArray(BaseArray<DataT, OShape, AllocT, ContainerT> & data, AllocT const & alloc = AllocT())
             {
                 BaseT::shape_ = ShapeT(data.offset(), data.size());
-                if( data.isContigous() && (data.container().get_allocator() == alloc) )
+                if( data.isContiguous() && (data.container().get_allocator() == alloc) )
                 {
                     BaseT::container_ = data.container();
                 }

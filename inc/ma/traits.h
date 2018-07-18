@@ -108,6 +108,12 @@ namespace ma
     template<typename T, typename TT = void>
     using IsNotIterable = enable_if_t<not is_iterable<T>::value, TT>;
 
+    template<typename T, typename TT = void>
+    using IsContiguousRange = enable_if_t<
+        is_iterable<T>::value and
+        is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value,
+        TT>;
+
 
     template<typename Alloc>
     struct allocator_traits : std::allocator_traits<Alloc>
@@ -131,6 +137,27 @@ namespace ma
         using reference = Reference<pointer>;
         using const_reference = Reference<const_pointer>;
     };
+
+
+    namespace impl
+    {
+        template <typename T>
+        auto has_comtigous_met_impl(int) -> decltype (
+            std::declval<const T&>().contiguous(),
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_comtigous_met_impl(...);
+    }
+
+    template <typename T>
+    using has_comtigous_met = decltype(impl::has_comtigous_met_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasContigusMet = enable_if_t<has_comtigous_met<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotContigusMet = enable_if_t<not has_comtigous_met<T>::value, TT>;
 
     // namespace impl
     // {
@@ -160,19 +187,6 @@ namespace ma
     // template <typename T>
     // using has_step_met = decltype(impl::has_step_met_impl<T>(0));
 
-    // namespace impl
-    // {
-    //     template <typename T>
-    //     auto has_comtigous_met_impl(int) -> decltype (
-    //         std::declval<T&>().isContigous(),
-    //         std::true_type{});
-
-    //     template <typename T>
-    //     std::false_type has_comtigous_met_impl(...);
-    // }
-
-    // template <typename T>
-    // using has_comtigous_met = decltype(impl::has_comtigous_met_impl<T>(0));
 
     
 

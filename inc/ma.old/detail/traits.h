@@ -41,7 +41,7 @@ namespace ma
         {
             template <typename T>
             auto has_comtigous_met_impl(int) -> decltype (
-                std::declval<T&>().isContigous(),
+                std::declval<T&>().isContiguous(),
                 std::true_type{});
 
             template <typename T>

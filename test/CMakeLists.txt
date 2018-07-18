@@ -13,6 +13,7 @@ set(MA_TEST_SRC
     src/range/RangeTest.cpp
     src/dimension/DimensionTest.cpp
     src/dimension/BasicShapeTest.cpp
+    src/dimension/MultiShapeTest.cpp
     src/dimension/dimensionFunctionTest.cpp
     src/array/ArrayViewTest.cpp
 )

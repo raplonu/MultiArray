@@ -78,7 +78,7 @@ namespace ma
                 return start_ != stop_;
             }
 
-            constexpr bool contigous() const noexcept
+            constexpr bool contiguous() const noexcept
             {
                 return true;
             }
