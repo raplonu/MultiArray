@@ -102,14 +102,14 @@ namespace ma
                 return const_iterator(ptr_, shape_, size());
             }
 
-            reference value(SizeT pos = 0)
+            reference val(SizeT pos = 0)
             {
-                return *(ptr_ + shape_.at(pos));
+                return reference(ptr_[shape_.at(pos)]);
             }
 
-            const_reference value(SizeT pos = 0) const
+            const_reference val(SizeT pos = 0) const
             {
-                return *(ptr_ + shape_.at(pos));
+                return const_reference(*(ptr_ + shape_.at(pos)));
             }
 
             pointer ptr() noexcept
@@ -135,11 +135,11 @@ namespace ma
             template<typename OData, typename... Args>
             void copyTo(OData && data, Args && ... args) const
             {
-                algorithm::multiCopy<T>(data, *this, forward<Args>(args)...);
+                algorithm::multiCopy<T>(forward<OData>(data), *this, forward<Args>(args)...);
             }
 
             template<typename OData, typename... Args>
-            void setMem(OData const & data, Args && ... args)
+            void setMem(const OData & data, Args && ... args)
             {
                 algorithm::multiCopy<T>(*this, data, forward<Args>(args)...);
             }

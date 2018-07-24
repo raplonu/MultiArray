@@ -105,8 +105,8 @@ namespace ma
     #if MA_CXX17
     using std::size;
     #else
-    template <typename  C> 
-    constexpr SizeT size(const C& c)
+    template <typename C> 
+    constexpr auto size(const C& c) -> IsIntegral<decltype(c.size()), SizeT>
     {
         return c.size();
     }
@@ -340,7 +340,7 @@ namespace ma
     }
 
     template<typename T, typename Data>
-    auto ptrOf(Data & data) -> decltype(data.data())
+    auto ptrOf(Data & data) -> IsPointer<decltype(data.data()), decltype(data.data())>
     {
         return data.data();
     }
@@ -352,16 +352,31 @@ namespace ma
     }
 
     template<typename T, typename Data>
-    auto ptrOf(Data & data) -> decltype(data.begin())
+    auto ptrOf(Data & data) -> IsPointer<decltype(data.begin()), decltype(data.begin())>
     {
         return data.begin();
     }
 
     template<typename T, typename Data>
-    auto ptrOf(Data & data) -> decltype(data.get())
+    auto ptrOf(Data & data) -> IsPointer<decltype(data.get()), decltype(data.get())>
     {
         return data.get();
     }
+
+    template<typename T>
+    constexpr T & convert(T & t) noexcept
+    {
+        return t;
+    }
+
+    template<
+        typename T, typename Data,
+        typename Ret = decltype(ptrOf<T>(std::forward<Data>(std::declval<Data&&>())))>
+    constexpr Ret convert(Data && data) noexcept
+    {
+        return ptrOf<T>(std::forward<Data>(data));
+    }
+
 
     
 
@@ -506,25 +521,6 @@ namespace ma
 
 
 
-    template<typename T>
-    constexpr T convert(T t) noexcept
-    {
-        return t;
-    }
-
-    template<typename T>
-    constexpr T * convert(T * t) noexcept
-    {
-        return t;
-    }
-
-    template<
-        typename T, typename Data,
-        typename Ret = IsNotSame<T, Data, decltype(ptrOf<T>(std::declval<Data&>()))>>
-    constexpr Ret convert(Data & data) noexcept
-    {
-        return ptrOf<T>(data);
-    }
 
 }
 

@@ -4,6 +4,7 @@
 #include <ma/dimension/BasicShape.h>
 #include <ma/dimension/MultiShape.h>
 #include <ma/range/LinearRange.h>
+#include <ma/function.h>
 
 using namespace ma;
 using namespace ma::array;
@@ -59,9 +60,25 @@ namespace
         ArrayView<int, DefaultAlloc<int>, MultiShape<LinearRange>> a(10, v.data());
 
         a.setMem(42);
-        
-        EXPECT_EQ(a.value(0), 42);
+
+        EXPECT_EQ(a.val(), 42);
         EXPECT_EQ(v[0], 42);
+    }
+
+    TEST(ArrayViewTest, SetMemFromVectorTest)
+    {
+        std::vector<int> v(10);
+        ArrayView<int, DefaultAlloc<int>, MultiShape<LinearRange>> a(10, v.data());
+
+        std::vector<int> vo(10, 53);
+
+        a.setMem(vo);
+
+        EXPECT_EQ(a.val(), 53);
+        EXPECT_EQ(v[0], 53);
+
+        EXPECT_EQ(a.val(9), 53);
+        EXPECT_EQ(v[9], 53);
     }
 }
 

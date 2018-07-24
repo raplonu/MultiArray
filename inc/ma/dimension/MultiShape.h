@@ -147,6 +147,8 @@ namespace ma
 
             SizeT contiguousDataLength(SizeT lastDim = 0) const
             {
+                if(ma::empty(dims_)) return 0;
+                
                 SizeT cdl(1), dim(dims_.size());
 
                 while((--dim > lastDim) && dims_[dim].complete())

@@ -13,11 +13,10 @@ namespace
     {
         MultiShape<LinearRange> s;
 
-        EXPECT_FALSE(s.contiguous());
+        EXPECT_TRUE(s.contiguous());
         EXPECT_EQ(s.size(), 0);
         EXPECT_EQ(s.baseSize(), 0);
 
-        EXPECT_EQ(s.at(0), 0);
     }
 
     TEST(MultiShapeTest, SimpleMultiShape)

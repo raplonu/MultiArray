@@ -38,12 +38,13 @@ namespace ma
         }
 
         template<typename T, typename DST, typename SRC, typename... Args>
-        void copyPlain(DST & dst, SRC const & src, Args && ... args)
+        void copyPlain(DST && dst, const SRC & src, Args && ... args)
         {
             SizeT size(sizes(dst, src));
 
             setMem<T>(
-                convert<T>(dst), convert<const T>(src),
+                convert<T>(forward<DST>(dst)),
+                convert<const T>(src),
                 size, forward<Args>(args)...
             );
         }
@@ -72,12 +73,12 @@ namespace ma
         // }
 
         template<typename T, typename DST, typename SRC, typename... Args>
-        void multiCopy(DST & dst, SRC const & src, Args && ... args)
+        void multiCopy(DST && dst, const SRC & src, Args && ... args)
         {
             if(contiguous(dst) && contiguous(src))
-                copyPlain<T>(dst, src, forward<Args>(args)...);
+                copyPlain<T>(forward<DST>(dst), src, forward<Args>(args)...);
             // else
-            //     copyStep<T>(dst, src, forward<Args>(args)...);
+            //     copyStep<T>(forward<DST>(dst), src, forward<Args>(args)...);
         }
 
     }

@@ -132,10 +132,13 @@ namespace ma
         using SameThanValue = is_same<T, value_type>;
 
         template<typename PTR>
-        using Reference = conditional_t<SameThanValue<DummyRef<PTR>>::value, DummyRef<PTR>, add_lvalue_reference_t<PTR>>;
+        using Reference = conditional_t<SameThanValue<DummyRef<PTR>>::value,
+                            DummyRef<PTR>,
+                            add_lvalue_reference_t<PTR>
+                        >;
 
-        using reference = Reference<pointer>;
-        using const_reference = Reference<const_pointer>;
+        using reference = DummyRef<pointer>; // Reference<pointer>;
+        using const_reference = DummyRef<const_pointer>; // Reference<const_pointer>;
     };
 
 
