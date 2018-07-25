@@ -144,7 +144,11 @@ namespace ma
                 algorithm::multiCopy<T>(*this, data, forward<Args>(args)...);
             }
 
-
+            template<typename TT, typename... Args>
+            void setMem(const std::initializer_list<TT> & data, Args && ... args)
+            {
+                algorithm::multiCopy<T>(*this, data, forward<Args>(args)...);
+            }
         };
     }
 }

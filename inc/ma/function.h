@@ -106,7 +106,7 @@ namespace ma
     using std::size;
     #else
     template <typename C> 
-    constexpr auto size(const C& c) -> IsIntegral<decltype(c.size()), SizeT>
+    constexpr auto size(const C& c) noexcept -> IsIntegral<decltype(c.size()), SizeT>
     {
         return c.size();
     }
@@ -118,6 +118,63 @@ namespace ma
     }
     #endif
 
+    namespace impl
+    {
+        template <typename T>
+        auto has_size_impl(int) -> decltype (
+            size(std::declval<T&>()),
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_size_impl(...);
+    }
+
+    template <typename T>
+    using has_size = decltype(impl::has_size_impl<T>(0));
+
+
+    template<typename T, typename TT = void>
+    using HasSize = enable_if_t<has_size<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotSize = enable_if_t<not has_size<T>::value, TT>;
+
+    /**
+     * Step function
+     **/
+    template<typename T>
+    constexpr auto step(const T & t) noexcept -> IsIntegral<decltype(t.step()), SizeT>
+    {
+        return t.step();
+    }
+
+    template<typename T, typename = HasNotStepMet<T>>
+    constexpr auto step(T const & t) noexcept -> IsIntegral<decltype(size(t)), SizeT>
+    {
+        return size(t);
+    }
+
+    namespace impl
+    {
+        template <typename T>
+        auto has_step_impl(int) -> decltype (
+            step(std::declval<T&>()),
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_step_impl(...);
+    }
+
+    template <typename T>
+    using has_step = decltype(impl::has_step_impl<T>(0));
+
+
+    template<typename T, typename TT = void>
+    using HasStep = enable_if_t<has_step<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotStep = enable_if_t<not has_step<T>::value, TT>;
+
     /**
      * Empty function
      **/
@@ -125,7 +182,7 @@ namespace ma
     using std::empty;
     #else
     template <class C> 
-    constexpr auto empty(const C& c) -> decltype(c.empty())
+    constexpr auto empty(const C& c) noexcept -> decltype(c.empty())
     {
         return c.empty();
     }
@@ -213,6 +270,11 @@ namespace ma
     using std::fill_n;
 
     /**
+     * Swap function
+     **/
+    using std::swap;
+
+    /**
      * Special Values
      **/
     template<typename T>
@@ -236,42 +298,20 @@ namespace ma
      * Contiguous
      **/
     template<typename T>
-    constexpr HasNotContigusMet<T, bool> contiguous(T const &) noexcept { return true; }
+    constexpr HasNotContiguousMet<T, bool> contiguous(T const &) noexcept { return true; }
 
     template<typename T>
-    HasContigusMet<T, bool> contiguous(T const & t) noexcept { return t.contiguous(); }
+    HasContiguousMet<T, bool> contiguous(T const & t) noexcept { return t.contiguous(); }
 
 
     /**
      * Compare size
      **/
 
-    inline void compareSize(SizeT s1, SizeT s2)
+    inline void throwIfMismatch(SizeT s1, SizeT s2, const std::string & str)
     {
-        if(s1 != s2)
-            throw std::length_error("Data hasn't the same size");
+        if(s1 != s2) throw std::length_error(str);
     }
-
-    namespace impl
-    {
-        template <typename T>
-        auto has_size_impl(int) -> decltype (
-            size(std::declval<T&>()),
-            std::true_type{});
-
-        template <typename T>
-        std::false_type has_size_impl(...);
-    }
-
-    template <typename T>
-    using has_size = decltype(impl::has_size_impl<T>(0));
-
-
-    template<typename T, typename TT = void>
-    using HasSize = enable_if_t<has_size<T>::value, TT>;
-
-    template<typename T, typename TT = void>
-    using HasNotSize = enable_if_t<not has_size<T>::value, TT>;
 
     namespace impl
     {
@@ -281,14 +321,13 @@ namespace ma
         {
             SizeT newSize(size(t));
 
-            if(DefaultEnabled) compareSize(newSize, defaultSize);
+            if(DefaultEnabled) throwIfMismatch(newSize, defaultSize, "Data hasn't the same size");
 
             return newSize;
         }
 
         template<bool DefaultEnabled, typename T>
-        auto tryGetSize(T const &, SizeT defaultSize) ->
-        typename std::enable_if<!has_size<T>::value, SizeT>::type
+        constexpr auto tryGetSize(T const &, SizeT defaultSize) noexcept -> HasNotSize<T, SizeT>
         {
             return defaultSize;
         }
@@ -301,10 +340,10 @@ namespace ma
         {
             static SizeT get(SizeT lastSize, const First & f, const Datas &... datas)
             {
-                SizeT newSize(tryGetSize<SizeFound, First>(f, lastSize));
+                lastSize = tryGetSize<SizeFound>(f, lastSize);
 
                 return Sizes<SizeFound || has_size<First>::value, Datas...>::get
-                    (newSize, datas...);
+                    (lastSize, datas...);
             }
         };
 
@@ -325,6 +364,65 @@ namespace ma
 
 
     /**
+     * Steps
+     **/
+
+    inline SizeT crossStep(SizeT s1, SizeT s2)
+    {
+        if(s1>s2) swap(s1, s2);
+
+        // at this point, s1 <= s2
+
+        throwIfMismatch(s2 % s1, 0, "ERROR : Data hasn't the same step");
+
+        return s1;
+    }
+
+    namespace impl
+    {
+        template<bool DefaultEnabled, typename T>
+        auto tryGetStep(const T & t, SizeT defaultStep) -> HasStep<T, SizeT>
+        {
+            if(DefaultEnabled)
+                return crossStep(step(t), defaultStep);
+            else
+                return step(t);
+        }
+
+        template<bool DefaultEnabled, typename T>
+        constexpr auto tryGetStep(const T &, SizeT defaultStep) noexcept -> HasNotStep<T, SizeT>
+        {
+            return defaultStep;
+        }
+
+        template<bool StepFound, typename... Datas> struct Steps;
+
+        template<bool StepFound, typename First, typename... Datas>
+        struct Steps<StepFound, First, Datas...>
+        {
+            static SizeT get(SizeT lastStep, const First & f, const Datas &... datas)
+            {
+                lastStep = tryGetStep<StepFound>(f, lastStep);
+
+                return Steps<StepFound || has_step<First>::value, Datas...>::get(lastStep, datas...);
+            }
+        };
+
+        //Only for has_step == true because need to have at least one arg with size
+        template<>
+        struct Steps<true>
+        {
+            constexpr static SizeT get(SizeT lastStep) noexcept { return lastStep; }
+        };
+    }
+
+    template<typename... T>
+    SizeT steps(const T & ... t)
+    {
+        return impl::Steps<false, T...>::get(0, t...);
+    }
+
+    /**
      * ptrOf function : extract ptr for types
      **/
     template<typename T>
@@ -334,193 +432,46 @@ namespace ma
     }
 
     template<typename T, typename Data, typename = IsRandomIt<Data>>
-    constexpr T * ptrOf(Data data) noexcept
+    constexpr T * ptrOf(Data && data) noexcept
     {
         return &(*data);
     }
 
     template<typename T, typename Data>
-    auto ptrOf(Data & data) -> IsPointer<decltype(data.data()), decltype(data.data())>
+    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<decltype(data.data()), decltype(data.data())>
     {
         return data.data();
     }
 
     template<typename T, typename Data>
-    auto ptrOf(Data & data) -> decltype(data.ptr())
+    constexpr auto ptrOf(Data && data) noexcept -> decltype(data.ptr())
     {
         return data.ptr();
     }
 
     template<typename T, typename Data>
-    auto ptrOf(Data & data) -> IsPointer<decltype(data.begin()), decltype(data.begin())>
+    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<decltype(data.begin()), decltype(data.begin())>
     {
         return data.begin();
     }
 
     template<typename T, typename Data>
-    auto ptrOf(Data & data) -> IsPointer<decltype(data.get()), decltype(data.get())>
+    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<decltype(data.get()), decltype(data.get())>
     {
         return data.get();
     }
 
-    template<typename T>
-    constexpr T & convert(T & t) noexcept
+    template<typename T, typename TT , typename = IsEquivalent<T, TT>>
+    constexpr auto convert(TT && t) noexcept -> decltype(forward<TT>(t))
     {
-        return t;
+        return forward<TT>(t);
     }
 
-    template<
-        typename T, typename Data,
-        typename Ret = decltype(ptrOf<T>(std::forward<Data>(std::declval<Data&&>())))>
-    constexpr Ret convert(Data && data) noexcept
+    template< typename T, typename Data >
+    constexpr auto convert(Data && data) noexcept -> decltype(ptrOf<T>(std::forward<Data>(data)))
     {
         return ptrOf<T>(std::forward<Data>(data));
     }
-
-
-    
-
-    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
-    // decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
-    // {
-    //     return data.begin();
-    // }
-
-    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
-    // decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
-    // {
-    //     return data.ptr();
-    // }
-
-        
-    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(&(*std::declval<Data&>()))>::type>
-    // decltype(&(*std::declval<Data&>())) ptrOf(Data & data)
-    // {
-    //     return &(*data);
-    // }
-
-    // template<typename T, typename Data, typename = typename detail::enable_pointer<decltype(std::declval<Data&>().data())>::type>
-    // decltype(std::declval<Data&>().data()) ptrOf(Data & data)
-    // {
-    //     return data.data();
-    // }
-
-    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().begin())>::type>
-    // decltype(std::declval<Data&>().begin()) ptrOf(Data & data)
-    // {
-    //     return data.begin();
-    // }
-
-    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().ptr())>::type>
-    // decltype(std::declval<Data&>().ptr()) ptrOf(Data & data)
-    // {
-    //     return data.ptr();
-    // }
-
-    // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().get())>::type>
-    // decltype(std::declval<Data&>().get()) ptrOf(Data & data)
-    // {
-    //     return data.get();
-    // }
-
-
-    // template<typename T>
-    // auto step(T const & t) -> decltype(t.step())
-    // {
-    //     return t.step();
-    // }
-
-    // template<typename T>
-    // auto step(T const & t) ->
-    // typename std::enable_if<!has_step_met<T>::value, decltype(size(t))>::type
-    // {
-    //     return size(t);
-    // }
-
-    // namespace impl
-    // {
-    //     template <typename T>
-    //     auto has_step_impl(int) -> decltype (
-    //         step(std::declval<T&>()),
-    //         std::true_type{});
-
-    //     template <typename T>
-    //     std::false_type has_step_impl(...);
-    // }
-
-    // template <typename T>
-    // using has_step = decltype(impl::has_step_impl<T>(0));
-
-    // inline
-    // SizeT crossStep(SizeT s1, SizeT s2)
-    // {
-    //     SizeT stepMin, stepMax;
-
-    //     if(s1>s2)
-    //     {
-    //         stepMin = s2; stepMax = s1;
-    //     }
-    //     else
-    //     {
-    //         stepMin = s1; stepMax = s2;
-    //     }
-
-    //     if(stepMax % stepMin != 0)
-    //         throw std::length_error("ERROR : Data hasn't the same step");
-
-    //     return stepMin;
-    // }
-
-    // namespace impl
-    // {
-    //     template<bool DefaultEnabled, typename T>
-    //     auto tryGetStep(T const & t, SizeT defaultStep) -> decltype(step(t))
-    //     {
-    //         if(DefaultEnabled)
-    //             return crossStep(step(t), defaultStep);
-    //         else
-    //             return step(t);
-    //     }
-
-    //     template<bool DefaultEnabled, typename T>
-    //     auto tryGetStep(T const &, SizeT defaultStep) ->
-    //     typename std::enable_if<!has_step<T>::value, SizeT>::type
-    //     {
-    //         return defaultStep;
-    //     }
-
-    //     template<bool StepFound, typename... Datas> struct Steps;
-
-    //     template<bool StepFound, typename First, typename... Datas>
-    //     struct Steps<StepFound, First, Datas...>
-    //     {
-    //         static SizeT get(SizeT lastStep, First const & f, Datas const &... datas)
-    //         {
-    //             SizeT newStep(tryGetStep<StepFound, First>(f, lastStep));
-
-    //             return Steps<StepFound || has_step<First>::value, Datas...>::get
-    //                 (newStep, datas...);
-    //         }
-    //     };
-
-    //     //Only for has_step == true because need to have at least one arg with size
-    //     template<>
-    //     struct Steps<true>
-    //     {
-    //         static SizeT get(SizeT lastStep){ return lastStep; }
-    //     };
-
-
-    // }
-
-    // template<typename... T>
-    // SizeT steps(T const & ... t)
-    // {
-    //     return impl::Steps<false, T...>::get(0, t...);
-    // }
-
-
-
 
 }
 

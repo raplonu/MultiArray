@@ -44,10 +44,6 @@ namespace ma
 
     template<typename T, typename TT = void>
     using IsNotIntegral = enable_if_t<not is_integral<T>::value, TT>;
-
-    template<typename T1, typename T2>
-    using IsNotEquivalent = enable_if_t<not is_same<decay_t<T1>, decay_t<T2>>::value>;
-
     template<typename T>
     using IteratorCategory = typename std::iterator_traits<T>::iterator_category;
 
@@ -65,6 +61,12 @@ namespace ma
 
     template<typename T1, typename T2, typename TT = void>
     using IsNotSame = enable_if_t<not is_same<T1, T2>::value, TT>;
+
+    template<typename T1, typename T2, typename TT = void>
+    using IsEquivalent = IsSame<decay_t<T1>, decay_t<T2>, TT>;
+
+    template<typename T1, typename T2, typename TT = void>
+    using IsNotEquivalent = IsNotSame<decay_t<T1>, decay_t<T2>, TT>;
 
     template<typename T, typename TT = void>
     using IsBidirectIt = enable_if_t<is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value, TT>;
@@ -141,26 +143,53 @@ namespace ma
         using const_reference = DummyRef<const_pointer>; // Reference<const_pointer>;
     };
 
+    /**
+     * Contiguous trait
+     **/
 
     namespace impl
     {
         template <typename T>
-        auto has_comtigous_met_impl(int) -> decltype (
+        auto has_contiguous_met_impl(int) -> decltype (
             std::declval<const T&>().contiguous(),
             std::true_type{});
 
         template <typename T>
-        std::false_type has_comtigous_met_impl(...);
+        std::false_type has_contiguous_met_impl(...);
     }
 
     template <typename T>
-    using has_comtigous_met = decltype(impl::has_comtigous_met_impl<T>(0));
+    using has_contiguous_met = decltype(impl::has_contiguous_met_impl<T>(0));
 
     template<typename T, typename TT = void>
-    using HasContigusMet = enable_if_t<has_comtigous_met<T>::value, TT>;
+    using HasContiguousMet = enable_if_t<has_contiguous_met<T>::value, TT>;
 
     template<typename T, typename TT = void>
-    using HasNotContigusMet = enable_if_t<not has_comtigous_met<T>::value, TT>;
+    using HasNotContiguousMet = enable_if_t<not has_contiguous_met<T>::value, TT>;
+
+    /**
+     * Step trait
+     **/
+
+    namespace impl
+    {
+        template <typename T>
+        auto has_step_met_impl(int) -> decltype (
+            std::declval<const T&>().step(),
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_step_met_impl(...);
+    }
+
+    template <typename T>
+    using has_step_met = decltype(impl::has_step_met_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasStepMet = enable_if_t<has_step_met<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotStepMet = enable_if_t<not has_step_met<T>::value, TT>;
 
     // namespace impl
     // {

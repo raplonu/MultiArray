@@ -4,6 +4,8 @@
 #include <ma/traits.h>
 #include <ma/function.h>
 
+#include <ma/iterator/StepIterator.h>
+
 namespace ma
 {
     namespace algorithm
@@ -20,21 +22,17 @@ namespace ma
             ma::fill_n(dst, size, val);
         }
 
-        template<typename T, typename DST, typename... Args>
-        void setMem(DST dst, T val, SizeT size, Args && ... args)
+
+        template< typename T, typename DST, typename SRC, typename = IsNotSame<T, SRC>, typename... Args >
+        void setMem(DST && dst, const SRC & src, SizeT size, Args && ... args)
         {
-            fill<T>( dst, val, size, forward<Args>(args)... );
+            copy<T>(forward<DST>(dst), src, size, forward<Args>(args)...);
         }
 
-        template
-        <
-            typename T, typename DST, typename SRC,
-            typename = IsNotSame<SRC, T>,
-            typename... Args
-        >
-        void setMem(DST dst, SRC src, SizeT size, Args && ... args)
+        template< typename T, typename DST, typename... Args >
+        void setMem(DST dst, const T & src, SizeT size, Args && ... args)
         {
-            copy<T>(dst, src, size, forward<Args>(args)...);
+            fill<T>( forward<DST>(dst), src, size, forward<Args>(args)... );
         }
 
         template<typename T, typename DST, typename SRC, typename... Args>
@@ -49,36 +47,36 @@ namespace ma
             );
         }
 
-        // template<typename T, typename DST, typename SRC, typename... Args>
-        // void copyStep(DST & dst, SRC const & src, Args... args)
-        // {
-        //     SizeT size(detail::sizes(dst, src));
+        template<typename T, typename DST, typename SRC, typename... Args>
+        void copyStep(DST && dst, const SRC & src, Args && ... args)
+        {
+            SizeT size(sizes(dst, src));
 
-        //     SizeT step(detail::steps(dst, src));
+            SizeT step(steps(dst, src));
 
-        //     auto dstBeginIt = iterator::stepIterator<T>(dst, step);
-        //     auto srcBeginIt = iterator::stepIterator<const T>(src, step);
+            auto dstIt = iterator::stepIterator(forward<DST>(dst), step);
+            auto srcIt = iterator::stepIterator(src, step);
 
-        //     for(SizeT it(0); it < size; it += step)
-        //     {
-        //         data::setMem<T>
-        //         (
-        //             detail::convert<T>(dstBeginIt),
-        //             detail::convert<const T>(srcBeginIt),
-        //             step, args...
-        //         );
+            for(SizeT i(0); i < size; i += step)
+            {
+                setMem<T>
+                (
+                    convert<T>(*dstIt),
+                    convert<const T>(*srcIt),
+                    step, args...
+                );
 
-        //         ++dstBeginIt; ++srcBeginIt;
-        //     }
-        // }
+                ++dstIt; ++srcIt;
+            }
+        }
 
         template<typename T, typename DST, typename SRC, typename... Args>
         void multiCopy(DST && dst, const SRC & src, Args && ... args)
         {
             if(contiguous(dst) && contiguous(src))
                 copyPlain<T>(forward<DST>(dst), src, forward<Args>(args)...);
-            // else
-            //     copyStep<T>(forward<DST>(dst), src, forward<Args>(args)...);
+            else
+                copyStep<T>(forward<DST>(dst), src, forward<Args>(args)...);
         }
 
     }
