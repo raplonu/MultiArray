@@ -2,7 +2,6 @@
 #define MA_DATA_CONTAINER_FUNCTION_H
 
 #include <algorithm> //std::fill
-#include <iostream> //std::fill
 #include <cstring>   //std::memcpy
 
 #include <ma/detail/base.h>

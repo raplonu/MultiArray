@@ -1,6 +1,5 @@
 #include <benchmark/benchmark.h>
 
-#include <iostream>
 #include <ma/range/Range.h>
 
 using namespace benchmark;

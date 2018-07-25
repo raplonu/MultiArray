@@ -128,7 +128,7 @@ namespace ma
 
             impl::SelectRange<Range, R...>::select
             (
-                nDims.begin(), dims.begin(), dims.end(),
+                ma::begin(nDims), ma::begin(dims), ma::end(dims),
                 forward<R>(ranges)...
             );
 

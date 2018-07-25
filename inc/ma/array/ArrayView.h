@@ -127,9 +127,19 @@ namespace ma
                 return shape_.size();
             }
 
+            constexpr SizeT step() const noexcept
+            {
+                return shape_.step();
+            }
+
             VectRange shape() const
             {
                 return shape_.shape();
+            }
+
+            constexpr bool contiguous() const noexcept
+            {
+                return shape_.contiguous();
             }
 
             template<typename OData, typename... Args>

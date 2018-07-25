@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <iostream>
 
 #include <ma/range/Range.h>
 

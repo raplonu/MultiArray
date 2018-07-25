@@ -68,12 +68,12 @@ namespace ma
 
             constexpr const_iterator end() const noexcept
             {
-                return active() ? range_.end() : range_.end() + 1;
+                return active() ? range_.end() : (range_.end() + 1);
             }
 
             iterator end() noexcept
             {
-                return range_.end();
+                return active() ? range_.end() : (range_.end() + 1);
             }
 
             constexpr SizeT front() const noexcept

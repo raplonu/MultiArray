@@ -1,6 +1,5 @@
 #include <benchmark/benchmark.h>
 
-#include <iostream>
 #include <ma/iterator/Iterator.h>
 
 using namespace benchmark;

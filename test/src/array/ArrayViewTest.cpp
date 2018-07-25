@@ -137,5 +137,17 @@ namespace
         EXPECT_EQ(a1.val(1), 0);
         EXPECT_EQ(a1.val(2), 2);
     }
+
+    TEST(ArrayViewTest, ArrayViewToArrayViewCpyWithSpace)
+    {
+        std::vector<int> v(6, 0);
+        ArrayView<int, DefaultAlloc<int>, MultiShape<LinearRange>> a({3, 2}, v.data());
+
+        a.at(all, 0).setMem(1);
+
+        EXPECT_EQ(a.val(0), 1);
+        EXPECT_EQ(a.val(2), 1);
+        EXPECT_EQ(a.val(4), 1);
+    }
 }
 

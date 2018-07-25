@@ -17,8 +17,8 @@ namespace
         EXPECT_EQ(d.size(), 1);
         EXPECT_EQ(d.baseSize(), 1);
 
-        EXPECT_EQ(d.begin(), d.end());
-        EXPECT_EQ(*d.begin(), *d.end());
+        EXPECT_EQ(d.begin() + 1, d.end());
+        EXPECT_EQ(*(d.begin() + 1), *d.end());
     }
 
     TEST(DimensionTest, SimpleDimension)
@@ -44,9 +44,9 @@ namespace
         EXPECT_EQ(d.size(), 1);
         EXPECT_EQ(d.baseSize(), 10);
 
-        EXPECT_EQ(d.begin(), d.end());
+        EXPECT_EQ(d.begin() + 1, d.end());
         EXPECT_EQ(*d.begin(), 5);
-        EXPECT_EQ(*d.begin(), *d.end());
+        EXPECT_EQ(*(d.begin() + 1), *d.end());
     }
     
     TEST(DimensionTest, resetDimension)

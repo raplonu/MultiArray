@@ -5,7 +5,6 @@
 #include <memory>
 #include <vector>
 #include <numeric>
-#include <iostream>
 
 #include <ma/detail/type.h>
 #include <ma/detail/traits.h>
@@ -217,12 +216,6 @@ namespace ma
         {
             return data.ptr();
         }
-
-        // template<typename T, typename Data, typename = typename enable_pointer<decltype(std::declval<Data&>().get())>::type>
-        // decltype(std::declval<Data&>().get()) ptrOf(Data & data)
-        // {
-        //     return data.get();
-        // }
 
         template<typename T>
         T convert(T t)
