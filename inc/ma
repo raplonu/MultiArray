@@ -1,0 +1,42 @@
+#ifndef MA_LIB
+#define MA_LIB
+
+#include <ma_api/config.h>
+#include <ma_api/type.h>
+#include <ma_api/traits.h>
+#include <ma_api/function.h>
+
+#include <ma_api/container/Container.h>
+#include <ma_api/container/SharedContainer.h>
+
+#include <ma_api/range/LinearRange.h>
+#include <ma_api/range/Range.h>
+
+#include <ma_api/dimension/BasicShape.h>
+#include <ma_api/dimension/MultiShape.h>
+
+#include <ma_api/array/Array.h>
+#include <ma_api/array/ArrayView.h>
+
+namespace ma
+{
+    using range::L;
+    using range::A;
+
+    using LShape = dimension::MultiShape<range::LinearRange>;
+    using SShape = dimension::MultiShape<range::Range>;
+
+    template<typename T, typename Allocator = DefaultAlloc<T>>
+    using BArray = array::Array<T, container::Container<T, Allocator>, dimension::BasicShape>;
+
+    template<typename T, typename Allocator = DefaultAlloc<T>>
+    using MArray = array::Array<T, container::Container<T, Allocator>, LShape>;
+
+    template<typename T, typename Allocator = DefaultAlloc<T>>
+    using BSharedArray = array::Array<T, container::SharedContainer<T, Allocator>, dimension::BasicShape>;
+
+    template<typename T, typename Allocator = DefaultAlloc<T>>
+    using MSharedArray = array::Array<T, container::SharedContainer<T, Allocator>, LShape>;
+}
+
+#endif //MA_LIB

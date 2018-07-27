@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <ma/container/SharedContainer.h>
+#include <ma_api/container/SharedContainer.h>
 
 using namespace ma;
 using namespace ma::container;

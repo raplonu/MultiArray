@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <ma/dimension/BasicShape.h>
+#include <ma_api/dimension/BasicShape.h>
 
 using namespace ma;
 using namespace ma::dimension;

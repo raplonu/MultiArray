@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <ma/iterator/Iterator.h>
+#include <ma_api/iterator/Iterator.h>
 
 using namespace ma;
 using namespace ma::iterator;

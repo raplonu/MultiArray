@@ -3,7 +3,7 @@
 #include <vector>
 #include <deque>
 
-#include <ma/range/rangeFunction.h>
+#include <ma_api/range/rangeFunction.h>
 
 using namespace ma;
 using namespace ma::range;

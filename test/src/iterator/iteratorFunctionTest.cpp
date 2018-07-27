@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <ma/iterator/LinearIterator.h>
-#include <ma/iterator/iteratorFunction.h>
+#include <ma_api/iterator/LinearIterator.h>
+#include <ma_api/iterator/iteratorFunction.h>
 
 using namespace ma;
 using namespace ma::iterator;

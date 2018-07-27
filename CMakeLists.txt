@@ -49,7 +49,7 @@ endif()
 
 install(TARGETS MultiArray EXPORT MultiArrayTargets)
 
-install(DIRECTORY inc/ma DESTINATION include)
+install(DIRECTORY inc DESTINATION include)
 
 install(EXPORT MultiArrayTargets DESTINATION lib/cmake/MultiArray)
 

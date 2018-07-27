@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <ma/array/ArrayView.h>
-#include <ma/dimension/BasicShape.h>
-#include <ma/dimension/MultiShape.h>
-#include <ma/range/LinearRange.h>
-#include <ma/function.h>
+#include <ma_api/array/ArrayView.h>
+#include <ma_api/dimension/BasicShape.h>
+#include <ma_api/dimension/MultiShape.h>
+#include <ma_api/range/LinearRange.h>
+#include <ma_api/function.h>
 
 using namespace ma;
 using namespace ma::array;

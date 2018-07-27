@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <ma/range/LinearRange.h>
-#include <ma/range/Range.h>
-#include <ma/dimension/dimensionFunction.h>
+#include <ma_api/range/LinearRange.h>
+#include <ma_api/range/Range.h>
+#include <ma_api/dimension/dimensionFunction.h>
 
 using namespace ma;
 using namespace ma::range;

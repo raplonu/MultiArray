@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <ma/range/Range.h>
+#include <ma_api/range/Range.h>
 
 using namespace ma;
 using namespace ma::range;

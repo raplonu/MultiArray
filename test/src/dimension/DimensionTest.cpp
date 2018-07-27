@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <ma/dimension/Dimension.h>
-#include <ma/range/LinearRange.h>
+#include <ma_api/dimension/Dimension.h>
+#include <ma_api/range/LinearRange.h>
 
 using namespace ma;
 using namespace ma::range;
