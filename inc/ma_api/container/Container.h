@@ -1,10 +1,12 @@
 #ifndef MA_CONTAINER_CONTAINER_H
 #define MA_CONTAINER_CONTAINER_H
 
+#include <iostream> //allocator_traits
 #include <memory> //allocator_traits
 
 #include <ma_api/type.h>
 #include <ma_api/traits.h>
+#include <ma_api/function.h>
 
 namespace ma
 {
@@ -47,15 +49,44 @@ namespace ma
                 allocator_(allocator), pointer_(allocator_.allocate(size)), size_(size)
             {}
 
-            constexpr Container(const Container&) = default;
-            constexpr Container(Container&&) noexcept = default;
+            constexpr Container(const Container & oc) :
+                allocator_(oc.allocator_), pointer_(allocator_.allocate(oc.size_)), size_(oc.size_)
+            {}
 
-            Container & operator=(const Container&) = default;
-            Container & operator=(Container&&) noexcept = default;
+            constexpr Container(Container && oc) noexcept :
+                allocator_(std::move(oc.allocator_)), pointer_(exchange(oc.pointer_, pointer(nullptr))), size_(oc.size_)
+            {}
+
+            Container & operator=(const Container & oc)
+            {
+                reset();
+
+                allocator_ = oc.allocator_;
+                size_ = oc.size_;
+
+                pointer_ = allocator_.allocate(size_);
+
+                return *this;
+            }
+
+            Container & operator=(Container && oc) noexcept
+            {
+                allocator_ = std::move(oc.allocator_);
+                size_ = oc.size_;
+
+                pointer_ = exchange(oc.pointer_, pointer(nullptr));
+
+                return *this;
+            }
 
             ~Container()
             {
-                if(pointer_)
+                reset();
+            }
+
+            void reset()
+            {
+                if(ptrValid(pointer_))
                     allocator_.deallocate(pointer_, size_);
             }
 

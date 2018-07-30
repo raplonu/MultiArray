@@ -25,7 +25,7 @@ namespace ma
             SizeT start_;
             SizeT stop_;
             HDiffT step_;
-            [[maybe_unused]] HDiffT __nothing;
+            MAYBE_UNUSED HDiffT __nothing;
 
         public:
 

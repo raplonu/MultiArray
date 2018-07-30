@@ -36,22 +36,6 @@ namespace ma
             }
         };
 
-        // template<std::size_t N>
-        // struct MaskLock
-        // {
-        //     Mask<N> & mask_;
-            
-        //     MaskLock(Mask<N> & mask) noexcept : mask_(mask) { mask_.disable(); }
-
-        //     ~MaskLock() { mask_.enable(); }
-        // };
-
-        // template<std::size_t N>
-        // MaskLock<N> mask_lock(Mask<N> & mask)
-        // {
-        //     return MaskLock<N>(mask);
-        // }
-
         enum InitSmall {initSmall};
         enum InitBig {initBig};
 
@@ -94,21 +78,21 @@ namespace ma
 
         namespace impl
         {
-            template<typename Small, typename Big>
-            Big & big(VariantImpl<Small, Big> vi) noexcept
+            template<typename T>
+            auto big(T vi) noexcept -> decltype(*vi.big)
             {
                 vi.reset();
                 return *vi.big;
             }
 
-            template<typename Small, typename Big>
-            constexpr Small & small(VariantImpl<Small, Big> & vi) noexcept
+            template<typename T>
+            constexpr auto small(T & vi) noexcept -> decltype(vi.small) &
             {
                 return vi.small;
             }
 
-            template<typename Small, typename Big>
-            constexpr const Small & small(const VariantImpl<Small, Big> & vi) noexcept
+            template<typename T>
+            constexpr auto small(const T & vi) noexcept -> const decltype(vi.small) &
             {
                 return vi.small;
             }
@@ -121,11 +105,10 @@ namespace ma
         template<typename Small, typename Big>
         class Variant
         {
-            using VariantImpl = VariantImpl<Small, Big>;
+            using VariantI = VariantImpl<Small, Big>;
 
-            VariantImpl data_;
+            VariantI data_;
 
-            // constexpr Variant(VariantImpl data) noexcept : data_(data){}
         public:
             
             constexpr Variant() noexcept : data_(){}
@@ -169,7 +152,7 @@ namespace ma
                 reset();
             }
 
-            VariantImpl release() noexcept
+            VariantI release() noexcept
             {
                 auto data = data_;
 
@@ -254,19 +237,19 @@ namespace ma
                 return impl::small(data_);
             }
 
-            Big & big()
+            Big & big() const
             {
                 massert(isBig());
                 
                 return impl::big(data_);
             }
 
-            const Big & big() const
-            {
-                massert(isBig());
+            // Big big() const
+            // {
+            //     massert(isBig());
                 
-                return impl::big(data_);
-            }
+            //     return impl::big(data_);
+            // }
         };
     }
 }

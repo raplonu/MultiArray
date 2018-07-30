@@ -10,29 +10,47 @@ namespace ma
 {
     namespace algorithm
     {
-        template<typename T> //force template property
-        void copy(T * dst, T const * src, SizeT size)
+        template<typename T>
+        void copy(T * dst, const T * src, SizeT size)
         {
             ma::copy_n(src, size, dst);
         }
 
-        template<typename T> //force template property
-        void fill(T * dst, T val, SizeT size)
+        template<typename T>
+        void fill(T * dst, const T & val, SizeT size)
         {
             ma::fill_n(dst, size, val);
         }
 
+        template<typename, typename, typename> struct ProxyCopy;
 
-        template< typename T, typename DST, typename SRC, typename = IsNotSame<T, SRC>, typename... Args >
-        void setMem(DST && dst, const SRC & src, SizeT size, Args && ... args)
+        template<typename T>
+        struct ProxyCopy<T, T *, const T *>
         {
-            copy<T>(forward<DST>(dst), src, size, forward<Args>(args)...);
-        }
+            static void copy(T * dst, const T * src, SizeT size)
+            {
+                ma::algorithm::copy(dst, src, size);
+            }
+        };
 
-        template< typename T, typename DST, typename... Args >
-        void setMem(DST dst, const T & src, SizeT size, Args && ... args)
+        template<typename T>
+        struct ProxyCopy<T, T *, const T &>
         {
-            fill<T>( forward<DST>(dst), src, size, forward<Args>(args)... );
+            static void copy(T * dst, const T & src, SizeT size)
+            {
+                ma::algorithm::fill(dst, src, size);
+            }
+        };
+
+        template<typename T, typename DST, typename SRC, typename... Args>
+        void setMem(DST && dst, SRC && src, SizeT size, Args && ... args)
+        {
+            ProxyCopy<T, DST, SRC>::copy
+            (
+                forward<DST>(dst),
+                forward<SRC>(src),
+                size, forward<Args>(args)...
+            );
         }
 
         template<typename T, typename DST, typename SRC, typename... Args>

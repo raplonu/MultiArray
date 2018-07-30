@@ -69,6 +69,21 @@ namespace ma
 
     template< class T, std::size_t N >
     constexpr const T & back( const T (&array)[N] ) noexcept { return array[N - 1]; }
+
+    /**
+     * Exchange function
+     **/
+    #if MA_CXX14
+    using std::exchange;
+    #else
+    template<class T, class U = T>
+    T exchange(T& obj, U&& new_value)
+    {
+        T old_value = std::move(obj);
+        obj = std::forward<U>(new_value);
+        return old_value;
+    }
+    #endif
     
     /**
      * Absolute function
@@ -488,6 +503,22 @@ namespace ma
             : accumulate(ma::begin(l), ma::end(l), SizeT(1), std::multiplies<SizeT>());
     }
 
+    template<typename> struct ProxyPtrValid;
+
+    template<typename T>
+    struct ProxyPtrValid<T *>
+    {
+        static constexpr bool valid(T * ptr) noexcept
+        {
+            return (bool)ptr;
+        }
+    };
+
+    template<typename T>
+    constexpr bool ptrValid(const T & ptr) noexcept
+    {
+        return ProxyPtrValid<T>::valid(ptr);
+    }
 }
 
 #endif //MA_FUNCTION_H

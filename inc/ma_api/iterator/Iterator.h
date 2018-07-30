@@ -307,13 +307,17 @@ namespace ma
     }
 }
 
-template<typename T> struct std::iterator_traits<ma::iterator::IteratorT<T>>
+namespace std
 {
-        using value_type = ma::SizeT;
-        using difference_type = ma::DiffT;
-        using pointer = void;
-        using reference = void;
-        using iterator_category = std::random_access_iterator_tag;
-};
+
+    template<typename T> struct iterator_traits<ma::iterator::IteratorT<T>>
+    {
+            using value_type = ma::SizeT;
+            using difference_type = ma::DiffT;
+            using pointer = void;
+            using reference = void;
+            using iterator_category = std::random_access_iterator_tag;
+    };
+}
 
 #endif //MA_ITERATOR_ITERATOR_H

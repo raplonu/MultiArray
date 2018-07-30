@@ -113,9 +113,12 @@ namespace ma
     }
 }
 
-template<typename Iterator, typename Shape>
-struct std::iterator_traits<ma::iterator::ShapeIterator<Iterator, Shape>>
+namespace std
 {
+
+    template<typename Iterator, typename Shape>
+    struct iterator_traits<ma::iterator::ShapeIterator<Iterator, Shape>>
+    {
     using ShapeIterator = ma::iterator::ShapeIterator<Iterator, Shape>;
 
     using value_type = typename ShapeIterator::value_type;
@@ -124,6 +127,7 @@ struct std::iterator_traits<ma::iterator::ShapeIterator<Iterator, Shape>>
     using reference = typename ShapeIterator::reference;
     using iterator_category = typename ShapeIterator::iterator_category;
 
-};
+    };
+}
 
 #endif //MA_ITERATOR_SHAPE_ITERATOR_H

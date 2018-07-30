@@ -32,6 +32,12 @@
 #define CONSTEXPR14
 #endif
 
+#if MA_CXX17
+#define MAYBE_UNUSED [[maybe_unused]]
+#else
+#define MAYBE_UNUSED
+#endif
+
 #define LIGHTVARIANT
 
 #endif //MA_CONFIG_H
