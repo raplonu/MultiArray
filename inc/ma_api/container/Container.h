@@ -54,7 +54,7 @@ namespace ma
             {}
 
             constexpr Container(Container && oc) noexcept :
-                allocator_(std::move(oc.allocator_)), pointer_(exchange(oc.pointer_, pointer(nullptr))), size_(oc.size_)
+                allocator_(std::move(oc.allocator_)), pointer_(exchange(oc.pointer_, pointer((value_type*)nullptr))), size_(oc.size_)
             {}
 
             Container & operator=(const Container & oc)
@@ -94,7 +94,7 @@ namespace ma
             const_pointer data() const noexcept { return pointer_; }
 
             constexpr size_type size() const noexcept { return size_; }
-            constexpr allocator_type get_allocator() const { return allocator_; }
+            constexpr const allocator_type & get_allocator() const { return allocator_; }
         };
     }
 }

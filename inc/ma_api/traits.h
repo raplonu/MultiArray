@@ -13,6 +13,7 @@ namespace ma
     using std::enable_if_t;
     using std::add_lvalue_reference_t;
     using std::add_rvalue_reference_t;
+    using std::remove_const_t;
     using std::conditional_t;
 
     #else
@@ -28,9 +29,21 @@ namespace ma
     template< class T >
     using add_rvalue_reference_t = typename std::add_rvalue_reference<T>::type;
 
+    template< class T >
+    using remove_const_t = typename std::remove_const<T>::type;
+
     template< bool B, class T, class F >
     using conditional_t = typename std::conditional<B,T,F>::type;
     #endif
+
+    #if MA_CXX17
+    using std::invoke_result_t;
+    #else
+    template< class F, class... ArgTypes>
+    using invoke_result_t = typename std::result_of<F(ArgTypes...)>::type;
+    #endif
+
+
 
     using std::is_base_of;
     using std::is_same;
@@ -38,10 +51,6 @@ namespace ma
     using std::is_literal_type;
     using std::is_integral;
     using std::is_pointer;
-
-    template<typename T>
-    using ValueTypeOf = typename std::iterator_traits<T>::value_type;
-
     template<typename T>
     using IteratorCategory = typename std::iterator_traits<T>::iterator_category;
 
@@ -118,7 +127,6 @@ namespace ma
         is_iterable<T>::value and
         is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value,
         TT>;
-
 
     template<typename Alloc>
     struct allocator_traits : std::allocator_traits<Alloc>

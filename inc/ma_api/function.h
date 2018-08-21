@@ -5,6 +5,7 @@
 #include <iterator>
 #include <functional>
 #include <algorithm>
+#include <map>
 
 #include <ma_api/config.h>
 #include <ma_api/type.h>
@@ -42,6 +43,9 @@ namespace ma
     constexpr T* end( T (&array)[N] ) noexcept { return array + N; }
     #endif
     #endif
+
+    template<typename Container>
+    using ValueTypeOf = decltype(*ma::begin(std::declval<Container&>()));
 
     /**
      * Front & Back function
@@ -285,6 +289,32 @@ namespace ma
     using std::copy_n;
     using std::fill;
     using std::fill_n;
+
+    template
+    <
+        typename KeyContainer, typename TContainer,
+        typename KType = ValueTypeOf<KeyContainer>, typename TType = ValueTypeOf<TContainer>,
+        typename MAP = std::map<KType, TType>
+    >
+    MAP fillMap(const KeyContainer & kData, const TContainer & tData)
+    {
+        return std::transform(ma::begin(kData), ma::end(kData), ma::begin(tData),
+        [](const KType & k, const TType & t){return std::make_pair(k, t);});
+    }
+
+    template
+    <
+        typename KeyContainer, typename TContainer, typename CastT,
+        typename KType = ValueTypeOf<KeyContainer>,
+        typename TType = invoke_result_t<CastT, ValueTypeOf<TContainer>>,
+        typename MAP = std::map<KType, TType>
+    >
+    MAP fillMap(const KeyContainer & kData, const TContainer & tData, CastT cast)
+    {
+        return std::transform(ma::begin(kData), ma::end(kData), ma::begin(tData),
+        [&cast](const KType & k, const TType & t){return std::make_pair(k, cast(t));});
+    }
+
 
     /**
      * Swap function

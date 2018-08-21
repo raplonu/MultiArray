@@ -18,6 +18,8 @@
 #include <ma_api/array/Array.h>
 #include <ma_api/array/ArrayView.h>
 
+#include <ma_api/data/DataContainer.h>
+
 namespace ma
 {
     using range::L;
