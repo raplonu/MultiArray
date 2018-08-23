@@ -93,6 +93,12 @@ namespace ma
             pointer data() noexcept { return pointer_; }
             const_pointer data() const noexcept { return pointer_; }
 
+            const_pointer begin() const noexcept {return pointer_;}
+            const_pointer end() const noexcept {return pointer_ + size_;}
+
+            pointer begin() noexcept {return pointer_;}
+            pointer end() noexcept {return pointer_ + size_;}
+
             constexpr size_type size() const noexcept { return size_; }
             constexpr const allocator_type & get_allocator() const { return allocator_; }
         };

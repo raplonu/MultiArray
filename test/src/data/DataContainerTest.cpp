@@ -10,7 +10,7 @@ namespace
     TEST(DataContainerTest, SimplePtr)
     {
         int i, *p(&i);
-        DataContainer<int> dc(p);
+        DataContainer<int> dc(p, 1);
 
         EXPECT_EQ(dc.ptr(), p);
     }
@@ -20,7 +20,7 @@ namespace
         std::unique_ptr<int> p(new int(42));
         int *addr = p.get();
 
-        DataContainer<int> dc(move(p));
+        DataContainer<int> dc(move(p), 1);
 
         EXPECT_EQ(dc.ptr(), addr);
     }

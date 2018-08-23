@@ -54,6 +54,12 @@ namespace ma
             pointer data() noexcept { return container_->data(); }
             const_pointer data() const noexcept { return container_->data(); }
 
+            const_pointer begin() const noexcept {return container_->data();}
+            const_pointer end() const noexcept {return container_->data() + container_->size();}
+
+            pointer begin() noexcept {return container_->data();}
+            pointer end() noexcept {return container_->data() + container_->size();}
+
             constexpr size_type size() const noexcept { return container_->size(); }
             constexpr allocator_type get_allocator() const { return container_->get_allocator(); }
         };
