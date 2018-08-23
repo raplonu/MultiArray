@@ -36,15 +36,6 @@ namespace ma
     using conditional_t = typename std::conditional<B,T,F>::type;
     #endif
 
-    #if MA_CXX17
-    using std::invoke_result_t;
-    #else
-    template< class F, class... ArgTypes>
-    using invoke_result_t = typename std::result_of<F(ArgTypes...)>::type;
-    #endif
-
-
-
     using std::is_base_of;
     using std::is_same;
     using std::is_const;
@@ -59,8 +50,12 @@ namespace ma
 
     template<typename T, typename TT = void>
     using IsNotIntegral = enable_if_t<not is_integral<T>::value, TT>;
+
     template<typename T>
     using DiffType = typename std::iterator_traits<T>::difference_type ;
+
+    template<typename T>
+    using ValueType = typename std::iterator_traits<T>::value_type ;
 
     template<typename T, typename TT = void>
     using IsConst = enable_if_t<is_const<T>::value, TT>;
@@ -202,190 +197,79 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotStepMet = enable_if_t<not has_step_met<T>::value, TT>;
 
-    // namespace impl
-    // {
-    //     template <typename T>
-    //     auto has_size_method_impl(int) -> decltype (
-    //         std::declval<T&>().size(),
-    //         std::true_type{});
 
-    //     template <typename T>
-    //     std::false_type has_size_method_impl(...);
-    // }
-
-    // template <typename T>
-    // using has_size_method = decltype(impl::has_size_method_impl<T>(0));
-
-    // namespace impl
-    // {
-    //     template <typename T>
-    //     auto has_step_met_impl(int) -> decltype (
-    //         std::declval<T&>().step(),
-    //         std::true_type{});
-
-    //     template <typename T>
-    //     std::false_type has_step_met_impl(...);
-    // }
-
-    // template <typename T>
-    // using has_step_met = decltype(impl::has_step_met_impl<T>(0));
-
-
+    // implementation from https://en.cppreference.com/w/cpp/types/result_of
+    namespace impl {
+    template <class T>
+    struct is_reference_wrapper : std::false_type {};
+    template <class U>
+    struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {};
     
+    template<class T>
+    struct invoke_impl {
+        template<class F, class... Args>
+        static auto call(F&& f, Args&&... args)
+            -> decltype(std::forward<F>(f)(std::forward<Args>(args)...));
+    };
+    
+    template<class B, class MT>
+    struct invoke_impl<MT B::*> {
+        template<class T, class Td = typename std::decay<T>::type,
+            class = typename std::enable_if<std::is_base_of<B, Td>::value>::type
+        >
+        static auto get(T&& t) -> T&&;
+    
+        template<class T, class Td = typename std::decay<T>::type,
+            class = typename std::enable_if<is_reference_wrapper<Td>::value>::type
+        >
+        static auto get(T&& t) -> decltype(t.get());
+    
+        template<class T, class Td = typename std::decay<T>::type,
+            class = typename std::enable_if<!std::is_base_of<B, Td>::value>::type,
+            class = typename std::enable_if<!is_reference_wrapper<Td>::value>::type
+        >
+        static auto get(T&& t) -> decltype(*std::forward<T>(t));
+    
+        template<class T, class... Args, class MT1,
+            class = typename std::enable_if<std::is_function<MT1>::value>::type
+        >
+        static auto call(MT1 B::*pmf, T&& t, Args&&... args)
+            -> decltype((invoke_impl::get(std::forward<T>(t)).*pmf)(std::forward<Args>(args)...));
+    
+        template<class T>
+        static auto call(MT B::*pmd, T&& t)
+            -> decltype(invoke_impl::get(std::forward<T>(t)).*pmd);
+    };
+    
+    template<class F, class... Args, class Fd = typename std::decay<F>::type>
+    auto INVOKE(F&& f, Args&&... args)
+        -> decltype(invoke_impl<Fd>::call(std::forward<F>(f), std::forward<Args>(args)...));
+    
+    template <typename AlwaysVoid, typename, typename...>
+    struct invoke_result { };
+    template <typename F, typename...Args>
+    struct invoke_result<decltype(void(impl::INVOKE(std::declval<F>(), std::declval<Args>()...))),
+                    F, Args...> {
+        using type = decltype(impl::INVOKE(std::declval<F>(), std::declval<Args>()...));
+    };
+    } // namespace impl
+    
+    template <class> struct result_of;
 
-    // //Detect full contiguous alloc like raw ptr, vector, array
-    // template<typename T>
-    // using is_contiguous_alloc = typename std::is_same
-    // <
-    //     typename std::iterator_traits<typename T::iterator>::iterator_category,
-    //     std::random_access_iterator_tag
-    // >;
+    template <class F, class... ArgTypes>
+    struct result_of<F(ArgTypes...)> : impl::invoke_result<void, F, ArgTypes...> {};
+    
+    template <class F, class... ArgTypes>
+    struct invoke_result : impl::invoke_result<void, F, ArgTypes...> {};
 
-    // //Detect not contiguous alloc like list, map
-    // template<typename T>
-    // using is_sequence_alloc = typename std::is_same
-    // <
-    //     typename std::iterator_traits<typename T::iterator>::iterator_category,
-    //     std::bidirectional_iterator_tag
-    // >;
 
-    // namespace impl
-    // {
-    //     template <typename T, typename Default>
-    //     auto get_allocator_type_impl(int) -> typename T::allocator_type;
+    #if MA_CXX17
+    using std::invoke_result_t;
+    #else
+    template< class F, class... ArgTypes>
+    using invoke_result_t = typename invoke_result<F, ArgTypes...>::type;
+    #endif
 
-    //     template <typename T, typename Default>
-    //     Default get_allocator_type_impl(...);
-    // }
-
-    // template <typename T, typename Default>
-    // struct get_allocator_type{using type = decltype(impl::get_allocator_type_impl<T, Default>(0));};
-
-    // namespace impl
-    // {
-    //     template <typename T, typename Alloc>
-    //     auto has_same_alloc_impl(int) -> decltype (
-    //         std::is_same<typename T::AllocT&, Alloc>::value()
-    //     );
-
-    //     template <typename T, typename Alloc>
-    //     std::false_type has_same_alloc_impl(...);
-    // }
-
-    // template<typename T, typename Alloc>
-    // using has_same_alloc = decltype(impl::has_same_alloc_impl<T, Alloc>(0));
-
-    // template<typename T>
-    // using enable_pointer = std::enable_if<std::is_pointer<T>::value, T>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//         namespace impl
-//         {
-
-//
-//             template <typename T, typename Default>
-//             auto get_allocator_type_impl(int) -> typename T::allocator_type;
-//
-//             template <typename T, typename Default>
-//             Default get_allocator_type_impl(...);
-//
-//             template <typename T>
-//             auto has_size_impl(int) -> decltype (
-//                 std::declval<T&>().size(),
-//                 std::true_type{});
-//
-//             template <typename T>
-//             std::false_type has_size_impl(...);
-//
-//             template <typename T>
-//             auto has_size_impl(int)
-//             -> decltype (
-//                 size(std::declval<T&>()),
-//                 std::true_type{});
-//
-//             template <typename T>
-//             std::false_type has_size_impl(...);
-//
-//             template <typename PtrT, typename T>
-//             auto has_ptr_impl(int)
-//             -> decltype (
-//                 common::ptrOf<PtrT>(std::declval<T&>()),
-//                 std::true_type{});
-//
-//             template <typename PtrT, typename T>
-//             std::false_type has_ptr_impl(...);
-//         }
-//
-
-//
-//         template <typename T>
-//         using has_size = decltype(impl::has_size_impl<T>(0));
-//
-//         template <typename PtrT, typename T>
-//         using has_ptr = decltype(impl::has_ptr_impl<PtrT, T>(0));
-//
-//         template <typename Data, typename T, typename Allocator>
-//         struct enable_if_not_superbase : public std::enable_if
-//         <
-//             !( std::is_base_of<base::BaseForceCopy<T>, Data>::value
-//             || std::is_base_of<BaseData<T, Allocator>, Data>::value)
-//         >{};
-//
-//
-//         template <typename T, typename DataT>
-//         struct get_allocator_type_or_default : public get_allocator_type<T, DefaultAlloc<DataT> >{};
-//
-//         template<typename T, class U = void>
-//         struct enable_if_is_iterable : public std::enable_if<is_iterable<T>::value>{};
-//
-//         template<typename T, class U = void>
-//         struct enable_if_integral : public std::enable_if<std::is_integral<T>::value>{};
-//
-//         template<typename T, class U = void>
-//         struct enable_if_has_size : public std::enable_if<std::has_size<T>::value>{};
-//
-//         template<typename Base, typename T>
-//         struct enable_if_base_of : public std::enable_if<std::is_base_of<Base, T>::value>{};
-//
-//         template<typename Base, typename T>
-//         struct enable_if_not_base_of : public std::enable_if<!std::is_base_of<Base, T>::value>{};
-//
-//         template<typename Base, typename T>
-//         struct enable_if_not_same : public std::enable_if<!std::is_same<Base, T>::value>{};
-//
-//         template<typename T, class U = void>
-//         struct enable_if_not_ptr : public std::enable_if<!std::is_pointer<T>::value>{};
-//
-//         //ptr or value
-//         template<typename T, typename DataT, class U = void>
-//         struct enable_if_not_simple_type : public std::enable_if<!(std::is_pointer<T>::value || std::is_same<T, DataT>::value)>{};
-//     }
-// }
 
 #endif //MA_TRAITS_H

@@ -45,7 +45,7 @@ namespace ma
     #endif
 
     template<typename Container>
-    using ValueTypeOf = decltype(*ma::begin(std::declval<Container&>()));
+    using ContainerValueType = ValueType<decltype(ma::begin(std::declval<Container&>()))>;
 
     /**
      * Front & Back function
@@ -290,32 +290,6 @@ namespace ma
     using std::fill;
     using std::fill_n;
 
-    template
-    <
-        typename KeyContainer, typename TContainer,
-        typename KType = ValueTypeOf<KeyContainer>, typename TType = ValueTypeOf<TContainer>,
-        typename MAP = std::map<KType, TType>
-    >
-    MAP fillMap(const KeyContainer & kData, const TContainer & tData)
-    {
-        return std::transform(ma::begin(kData), ma::end(kData), ma::begin(tData),
-        [](const KType & k, const TType & t){return std::make_pair(k, t);});
-    }
-
-    template
-    <
-        typename KeyContainer, typename TContainer, typename CastT,
-        typename KType = ValueTypeOf<KeyContainer>,
-        typename TType = invoke_result_t<CastT, ValueTypeOf<TContainer>>,
-        typename MAP = std::map<KType, TType>
-    >
-    MAP fillMap(const KeyContainer & kData, const TContainer & tData, CastT cast)
-    {
-        return std::transform(ma::begin(kData), ma::end(kData), ma::begin(tData),
-        [&cast](const KType & k, const TType & t){return std::make_pair(k, cast(t));});
-    }
-
-
     /**
      * Swap function
      **/
@@ -484,26 +458,107 @@ namespace ma
         return &(*data);
     }
 
+    namespace impl
+    {
+        template <typename T>
+        auto has_data_met_to_ptr_impl(int) -> decltype (
+            IsPointer<decltype(std::declval<T&>().data()), int>{},
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_data_met_to_ptr_impl(...);
+    }
+
+    template<typename T>
+    using has_data_met_to_ptr = decltype(impl::has_data_met_to_ptr_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasDataMetToPtr = enable_if_t<has_data_met_to_ptr<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotDataMetToPtr = enable_if_t<not has_data_met_to_ptr<T>::value, TT>;
+
     template<typename T, typename Data>
-    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<decltype(data.data()), decltype(data.data())>
+    constexpr auto ptrOf(Data && data) noexcept -> HasDataMetToPtr<Data, decltype(data.data())>
     {
         return data.data();
     }
 
-    template<typename T, typename Data>
-    constexpr auto ptrOf(Data && data) noexcept -> decltype(data.ptr())
+    namespace impl
+    {
+        template <typename T>
+        auto has_ptr_met_to_ptr_impl(int) -> decltype (
+            IsPointer<decltype(std::declval<T&>().ptr()), int>{},
+            decltype(std::declval<T&>().ptr()){},
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_ptr_met_to_ptr_impl(...);
+    }
+
+    template<typename T>
+    using has_ptr_met_to_ptr = decltype(impl::has_ptr_met_to_ptr_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasPtrMetToPtr = enable_if_t<has_ptr_met_to_ptr<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotPtrMetToPtr = enable_if_t<not has_ptr_met_to_ptr<T>::value, TT>;
+
+    template<typename T, typename Data, typename = HasNotDataMetToPtr<Data>>
+    constexpr auto ptrOf(Data && data) noexcept -> HasPtrMetToPtr<Data, decltype(data.ptr())>
     {
         return data.ptr();
     }
 
-    template<typename T, typename Data>
-    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<decltype(data.begin()), decltype(data.begin())>
+    namespace impl
+    {
+        template <typename T>
+        auto has_begin_met_to_ptr_impl(int) -> decltype (
+            IsPointer<decltype(std::declval<T&>().begin()), int>{},
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_begin_met_to_ptr_impl(...);
+    }
+
+    template<typename T>
+    using has_begin_met_to_ptr = decltype(impl::has_begin_met_to_ptr_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasBeginMetToPtr = enable_if_t<has_begin_met_to_ptr<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotBeginMetToPtr = enable_if_t<not has_begin_met_to_ptr<T>::value, TT>;
+
+    template<typename T, typename Data, typename = HasNotDataMetToPtr<Data>, typename = HasNotPtrMetToPtr<Data>>
+    constexpr auto ptrOf(Data && data) noexcept -> HasBeginMetToPtr<Data, decltype(data.begin())>
     {
         return data.begin();
     }
 
-    template<typename T, typename Data>
-    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<decltype(data.get()), decltype(data.get())>
+        namespace impl
+    {
+        template <typename T>
+        auto has_get_met_to_ptr_impl(int) -> decltype (
+            IsPointer<decltype(std::declval<T&>().get()), int>{},
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_get_met_to_ptr_impl(...);
+    }
+
+    template<typename T>
+    using has_get_met_to_ptr = decltype(impl::has_get_met_to_ptr_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasGetMetToPtr = enable_if_t<has_get_met_to_ptr<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotGetMetToPtr = enable_if_t<not has_get_met_to_ptr<T>::value, TT>;
+
+    template<typename T, typename Data, typename = HasNotDataMetToPtr<Data>, typename = HasNotPtrMetToPtr<Data>, typename = HasNotBeginMetToPtr<Data>>
+    constexpr auto ptrOf(Data && data) noexcept -> HasGetMetToPtr<Data, decltype(data.get())>
     {
         return data.get();
     }
