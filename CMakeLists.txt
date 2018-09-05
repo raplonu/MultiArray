@@ -11,7 +11,7 @@ else()
     add_compile_options(-W -Wall)
 endif()
 
-# MultiArray #
+# multiarray #
 ##############
 
 project(MultiArray VERSION 0.1 LANGUAGES CXX)
@@ -22,7 +22,7 @@ target_compile_features(MultiArray INTERFACE cxx_std_11)
 
 target_include_directories(MultiArray INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>  
-    $<INSTALL_INTERFACE:inc>
+    $<INSTALL_INTERFACE:include>
 )
 
 ########################################################################
@@ -44,14 +44,90 @@ if(benchmark_build)
     add_subdirectory(benchmark)
 endif()
 
+# if(python_build)
+#     add_subdirectory(python)
+# endif()
+
 # Install #
 ###########
 
-install(TARGETS MultiArray EXPORT MultiArrayTargets)
+include(GNUInstallDirs)
+set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/MultiArray)
 
-install(DIRECTORY inc DESTINATION include)
+#Create a ConfigVersion.cmake file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/MultiArrayConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
 
-install(EXPORT MultiArrayTargets DESTINATION lib/cmake/MultiArray)
+install(TARGETS MultiArray
+    EXPORT MultiArrayTargets
+    LIBRARY DESTINATION lib COMPONENT Runtime
+    ARCHIVE DESTINATION lib COMPONENT Development
+    RUNTIME DESTINATION bin COMPONENT Runtime
+    PUBLIC_HEADER DESTINATION include COMPONENT Development
+    BUNDLE DESTINATION bin COMPONENT Runtime
+)
 
-export(TARGETS MultiArray FILE MultiArrayTargets.cmake)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    "${PROJECT_SOURCE_DIR}/cmake/MultiArrayConfig.cmake.in"
+    "${PROJECT_BINARY_DIR}/MultiArrayConfig.cmake"
+    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+)
+
+install(EXPORT MultiArrayTargets DESTINATION ${INSTALL_CONFIGDIR})
+install(FILES "${PROJECT_BINARY_DIR}/MultiArrayConfig.cmake"
+              "${PROJECT_BINARY_DIR}/MultiArrayConfig.cmake"
+        DESTINATION ${INSTALL_CONFIGDIR})
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/inc/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+
+
+
+# include(GNUInstallDirs)
+# set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/MultiArray)
+
+# install(TARGETS multiarray
+#     EXPORT multiarray-targets
+#     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+# )
+
+# #This is required so that the exported target has the name JSONUtils and not jsonutils
+# set_target_properties(multiarray PROPERTIES EXPORT_NAME MultiArray)
+
+# install(DIRECTORY inc/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# install(EXPORT multiarray-targets
+#   FILE
+#   MultiArrayTargets.cmake
+#   NAMESPACE
+#   MultiArray::
+#   DESTINATION
+#   ${INSTALL_CONFIGDIR}
+# )
+
+# #Create a ConfigVersion.cmake file
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     ${CMAKE_CURRENT_BINARY_DIR}/MultiArrayConfigVersion.cmake
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY AnyNewerVersion
+# )
+
+# configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/MultiArrayConfig.cmake.in
+#     ${CMAKE_CURRENT_BINARY_DIR}/MultiArrayConfig.cmake
+#     INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+# )
+
+# #Install the config, configversion and custom find modules
+# install(FILES
+#     ${CMAKE_CURRENT_BINARY_DIR}/MultiArrayConfig.cmake
+#     ${CMAKE_CURRENT_BINARY_DIR}/MultiArrayConfigVersion.cmake
+#     DESTINATION ${INSTALL_CONFIGDIR}
+# )
+
 

@@ -104,6 +104,11 @@ namespace ma
                 return VectRange(1, size());
             }
 
+            constexpr SizeT ndim() const noexcept
+            {
+                return 1;
+            }
+
         };
     }
 }

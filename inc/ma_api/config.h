@@ -20,8 +20,8 @@
 #endif
 
 
-#define MA_CXX14 (__cplusplus >= 201402L)
 #define MA_CXX17 (__cplusplus >= 201703L)
+#define MA_CXX14 (__cplusplus >= 201402L && ! MA_CXX17)
 
 /**
  * Multi line constexpr only enable for c++ 14 and upper, else disabled

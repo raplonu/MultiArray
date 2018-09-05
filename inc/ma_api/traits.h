@@ -95,6 +95,18 @@ namespace ma
 
     namespace impl
     {
+        template< class T > struct is_raw_pointer_helper     : std::false_type {};
+        template< class T > struct is_raw_pointer_helper<T*> : std::true_type {};
+    }
+
+    template<typename T, typename TT = void>
+    using IsRawPointer = enable_if_t<impl::is_raw_pointer_helper<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsNotRawPointer = enable_if_t<not impl::is_raw_pointer_helper<T>::value, TT>;
+
+    namespace impl
+    {
         template <typename T>
         auto is_iterable_impl(int)
         -> decltype (
@@ -197,6 +209,30 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotStepMet = enable_if_t<not has_step_met<T>::value, TT>;
 
+    /**
+     * Shape trait
+     **/
+
+    namespace impl
+    {
+        template <typename T>
+        auto has_shape_met_impl(int) -> decltype (
+            std::declval<const T&>().shape(),
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_shape_met_impl(...);
+    }
+
+    template <typename T>
+    using has_shape_met = decltype(impl::has_shape_met_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasShapeMet = enable_if_t<has_shape_met<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotShapeMet = enable_if_t<not has_shape_met<T>::value, TT>;
+
 
     // implementation from https://en.cppreference.com/w/cpp/types/result_of
     namespace impl {
@@ -205,6 +241,10 @@ namespace ma
     template <class U>
     struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {};
     
+    /**
+     * Invoke traits
+     **/
+
     template<class T>
     struct invoke_impl {
         template<class F, class... Args>

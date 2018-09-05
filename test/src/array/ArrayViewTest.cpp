@@ -68,7 +68,7 @@ namespace
         std::vector<int> v(10);
         ArrayView<int, DefaultAlloc<int>, MultiShape<LinearRange>> a(10, v.data());
 
-        ptrOf<int>(a.begin());
+        ptrOf(a.begin());
 
         a.setMem(42);
 

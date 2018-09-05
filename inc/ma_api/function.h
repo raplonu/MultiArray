@@ -21,27 +21,27 @@ namespace ma
      * Begin & End function
      **/
     #if MA_CXX17
-    using std::begin;
-    using std::end;
+        using std::begin;
+        using std::end;
     #else
-    template< class C , typename = IsNotConst<C>>
-    constexpr auto begin( C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
-    template< class C >
-    constexpr auto begin( const C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
+        template< class C , typename = IsNotConst<C>>
+        constexpr auto begin( C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
+        template< class C >
+        constexpr auto begin( const C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
 
-    template< class C , typename = IsNotConst<C>>
-    constexpr auto end( C& c ) noexcept -> decltype(c.end()) { return c.end(); }
-    template< class C >
-    constexpr auto end( const C& c ) noexcept -> decltype(c.end()) { return c.end(); }
-    #if MA_CXX14
-    using std::begin;
-    using std::end; 
-    #else
-    template< class T, std::size_t N >
-    constexpr T* begin( T (&array)[N] ) noexcept { return array; }
-    template< class T, std::size_t N >
-    constexpr T* end( T (&array)[N] ) noexcept { return array + N; }
-    #endif
+        template< class C , typename = IsNotConst<C>>
+        constexpr auto end( C& c ) noexcept -> decltype(c.end()) { return c.end(); }
+        template< class C >
+        constexpr auto end( const C& c ) noexcept -> decltype(c.end()) { return c.end(); }
+        // #if MA_CXX14
+        //     using std::begin;
+        //     using std::end; 
+        // #else
+            template< class T, std::size_t N >
+            constexpr T* begin( T (&array)[N] ) noexcept { return array; }
+            template< class T, std::size_t N >
+            constexpr T* end( T (&array)[N] ) noexcept { return array + N; }
+        // #endif
     #endif
 
     template<typename Container>
@@ -96,6 +96,15 @@ namespace ma
     constexpr T abs(T t) noexcept
     {
         return (t < 0)?-t:t;
+    }
+
+    /**
+     * Ceil function
+     **/
+    template <typename T, typename TT = T>
+    constexpr T ceil(const T & a, const TT & b) noexcept
+    {
+        return (a + b - 1) / b;
     }
 
     /**
@@ -324,6 +333,15 @@ namespace ma
     template<typename T>
     HasContiguousMet<T, bool> contiguous(T const & t) noexcept { return t.contiguous(); }
 
+    /**
+     * Shape
+     **/
+    template<typename T>
+    constexpr HasNotShapeMet<T, VectRange> shape(T const & t) noexcept { return VectRange{ma::size(t)}; }
+
+    template<typename T>
+    HasShapeMet<T, VectRange> shape(T const & t) noexcept { return t.shape(); }
+
 
     /**
      * Compare size
@@ -446,14 +464,36 @@ namespace ma
     /**
      * ptrOf function : extract ptr for types
      **/
-    template<typename T>
-    constexpr T * ptrOf(T * data) noexcept
+    template<typename Data>
+    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<Data, Data>
     {
         return data;
     }
 
-    template<typename T, typename Data, typename = IsRandomIt<Data>>
-    constexpr T * ptrOf(Data && data) noexcept
+    namespace impl
+    {
+        template <typename T>
+        auto has_deref_to_ptr_impl(int) -> decltype (
+            IsPointer<decltype(&(*std::declval<T&>())), int>{},
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_deref_to_ptr_impl(...);
+    }
+
+    template<typename T>
+    using has_deref_to_ptr = decltype(impl::has_deref_to_ptr_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using HasDerefToPtr = enable_if_t<has_deref_to_ptr<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotDerefMetToPtr = enable_if_t<not has_deref_to_ptr<T>::value, TT>;
+
+    template<typename Data,
+        typename = IsNotPointer<Data>
+    >
+    constexpr auto ptrOf(Data && data) noexcept -> HasDerefToPtr<Data, decltype(&(*data))>
     {
         return &(*data);
     }
@@ -478,7 +518,10 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotDataMetToPtr = enable_if_t<not has_data_met_to_ptr<T>::value, TT>;
 
-    template<typename T, typename Data>
+    template<typename Data,
+        typename = IsNotPointer<Data>,
+        typename = HasNotDerefMetToPtr<Data>
+    >
     constexpr auto ptrOf(Data && data) noexcept -> HasDataMetToPtr<Data, decltype(data.data())>
     {
         return data.data();
@@ -505,7 +548,11 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotPtrMetToPtr = enable_if_t<not has_ptr_met_to_ptr<T>::value, TT>;
 
-    template<typename T, typename Data, typename = HasNotDataMetToPtr<Data>>
+    template<typename Data,
+        typename = IsNotPointer<Data>,
+        typename = HasNotDerefMetToPtr<Data>,
+        typename = HasNotDataMetToPtr<Data>
+    >
     constexpr auto ptrOf(Data && data) noexcept -> HasPtrMetToPtr<Data, decltype(data.ptr())>
     {
         return data.ptr();
@@ -531,13 +578,18 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotBeginMetToPtr = enable_if_t<not has_begin_met_to_ptr<T>::value, TT>;
 
-    template<typename T, typename Data, typename = HasNotDataMetToPtr<Data>, typename = HasNotPtrMetToPtr<Data>>
+    template<typename Data,
+        typename = IsNotPointer<Data>,
+        typename = HasNotDerefMetToPtr<Data>,
+        typename = HasNotDataMetToPtr<Data>,
+        typename = HasNotPtrMetToPtr<Data>
+    >
     constexpr auto ptrOf(Data && data) noexcept -> HasBeginMetToPtr<Data, decltype(data.begin())>
     {
         return data.begin();
     }
 
-        namespace impl
+    namespace impl
     {
         template <typename T>
         auto has_get_met_to_ptr_impl(int) -> decltype (
@@ -557,11 +609,28 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotGetMetToPtr = enable_if_t<not has_get_met_to_ptr<T>::value, TT>;
 
-    template<typename T, typename Data, typename = HasNotDataMetToPtr<Data>, typename = HasNotPtrMetToPtr<Data>, typename = HasNotBeginMetToPtr<Data>>
+    template<typename Data,
+        typename = IsNotPointer<Data>,
+        typename = HasNotDerefMetToPtr<Data>,
+        typename = HasNotDataMetToPtr<Data>,
+        typename = HasNotPtrMetToPtr<Data>,
+        typename = HasNotBeginMetToPtr<Data>
+    >
     constexpr auto ptrOf(Data && data) noexcept -> HasGetMetToPtr<Data, decltype(data.get())>
     {
         return data.get();
     }
+
+    template<typename T, typename Data, typename TT = void>
+    using HasRawPtr = IsEquivalent<T*, decltype(ptrOf(std::declval<Data&>())), TT>;
+
+    template<typename T, typename Data, typename TT = void>
+    using HasNotRawPtr = IsNotEquivalent<T*, decltype(ptrOf(std::declval<Data&>())), TT>;
+
+
+    /**
+     * Convert
+     **/
 
     template<typename T, typename TT , typename = IsEquivalent<T, TT>>
     constexpr auto convert(TT && t) noexcept -> decltype(forward<TT>(t))
@@ -570,9 +639,9 @@ namespace ma
     }
 
     template< typename T, typename Data >
-    constexpr auto convert(Data && data) noexcept -> decltype(ptrOf<T>(std::forward<Data>(data)))
+    constexpr auto convert(Data && data) noexcept -> decltype(ptrOf(std::forward<Data>(data)))
     {
-        return ptrOf<T>(std::forward<Data>(data));
+        return ptrOf(std::forward<Data>(data));
     }
 
     constexpr inline SizeT sizeOf(SizeT l) noexcept

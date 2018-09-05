@@ -137,6 +137,11 @@ namespace ma
                 return shape_.shape();
             }
 
+            SizeT ndim() const
+            {
+                return shape_.ndim();
+            }
+
             constexpr bool contiguous() const noexcept
             {
                 return shape_.contiguous();

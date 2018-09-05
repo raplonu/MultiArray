@@ -42,12 +42,12 @@ namespace ma
 
                 Ptr ptr() override
                 {
-                    return ptrOf<T>(data_);
+                    return ptrOf(data_);
                 }
 
                 CPtr ptr() const override
                 {
-                    return ptrOf<const T>(data_);
+                    return ptrOf(data_);
                 }
 
                 SizeT size() const override
@@ -64,18 +64,18 @@ namespace ma
                 SizeT size_;
 
             public:
-                PtrContainerImpl(Data data, SizeT size) noexcept :
+                PtrContainerImpl(Data && data, SizeT size) noexcept :
                     data_(forward<Data>(data)), size_(size)
                 {}
 
                 Ptr ptr() override
                 {
-                    return ptrOf<T>(data_);;
+                    return ma::ptrOf(data_);
                 }
 
                 CPtr ptr() const override
                 {
-                    return ptrOf<T>(data_);;
+                    return ma::ptrOf(data_);
                 }
 
                 SizeT size() const override
@@ -88,22 +88,32 @@ namespace ma
             <
                 typename T, typename Ptr, typename CPtr, typename Data,
                 typename Res = SharedDataContainer<T, Ptr, CPtr>,
-                typename Impl =  DataContainerImpl<T, Ptr, CPtr, Data>
+                typename Impl =  PtrContainerImpl<T, Ptr, CPtr, Data>
             >
-            Res make(Data && data)
+            Res make(Data && data, SizeT size)
             {
-                return Res(new Impl(forward<Data>(data)));
+                return Res(new Impl(forward<Data>(data), size));
+            }
+
+            template
+            <
+                typename T, typename Ptr, typename CPtr, typename Data,
+                typename Res = SharedDataContainer<T, Ptr, CPtr>
+            >
+            Res make(Data & data)
+            {
+                return make<T, Ptr, CPtr>(ma::ptrOf(data), ma::size(data));
             }
 
             template
             <
                 typename T, typename Ptr, typename CPtr, typename Data,
                 typename Res = SharedDataContainer<T, Ptr, CPtr>,
-                typename Impl =  PtrContainerImpl<T, Ptr, CPtr, Data>
+                typename Impl = DataContainerImpl<T, Ptr, CPtr, Data>
             >
-            Res make(Data && data, SizeT size)
+            Res make(Data && data)
             {
-                return Res(new Impl(forward<Data>(data), size));
+                return Res(new Impl(forward<Data>(data)));
             }
         }
 

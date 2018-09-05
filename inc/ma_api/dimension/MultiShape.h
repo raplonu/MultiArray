@@ -101,6 +101,8 @@ namespace ma
                 return contiguousDataLength() == size();
             }
 
+        protected:
+        
             constexpr SizeT dimNb() const noexcept
             {
                 return dims_.size();
@@ -111,6 +113,8 @@ namespace ma
                 return std::count_if(dims_.begin(), dims_.end(),
                     [](const DimensionT & d){return d.active();});
             }
+
+        public:
 
             template<typename Fn>
             SizeT prodDim(Fn && fn) const
@@ -220,6 +224,11 @@ namespace ma
             VectRange shape() const
             {
                 return shape(activeDimNb());
+            }
+
+            SizeT ndim() const noexcept
+            {
+                return activeDimNb();
             }
 
 
