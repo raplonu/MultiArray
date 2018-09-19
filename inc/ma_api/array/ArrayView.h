@@ -127,6 +127,11 @@ namespace ma
                 return shape_.size();
             }
 
+            constexpr bool empty() const noexcept
+            {
+                return size() == 0;
+            }
+
             constexpr SizeT step() const noexcept
             {
                 return shape_.step();

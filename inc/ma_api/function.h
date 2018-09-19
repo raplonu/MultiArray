@@ -44,6 +44,36 @@ namespace ma
         // #endif
     #endif
 
+    namespace impl
+    {
+        template <typename T>
+        auto is_iterable_impl(int)
+        -> decltype (
+            ma::begin(std::declval<T&>()) != ma::end(std::declval<T&>()), // begin/end and operator !=
+            void(), // Handle evil operator ,
+            ++std::declval<decltype(ma::begin(std::declval<T&>()))&>(), // operator ++
+            void(*ma::begin(std::declval<T&>())), // operator*
+            std::true_type{});
+
+        template <typename T>
+        std::false_type is_iterable_impl(...);
+    }
+
+    template <typename T>
+    using is_iterable = decltype(impl::is_iterable_impl<T>(0));
+
+    template<typename T, typename TT = void>
+    using IsIterable = enable_if_t<is_iterable<T>::value, TT>;
+    
+    template<typename T, typename TT = void>
+    using IsNotIterable = enable_if_t<not is_iterable<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using IsContiguousRange = enable_if_t<
+        is_iterable<T>::value and
+        is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value,
+        TT>;
+
     template<typename Container>
     using ContainerValueType = ValueType<decltype(ma::begin(std::declval<Container&>()))>;
 
@@ -656,6 +686,28 @@ namespace ma
             ? 0
             : accumulate(ma::begin(l), ma::end(l), SizeT(1), std::multiplies<SizeT>());
     }
+
+    namespace impl
+    {
+        template <typename T>
+        auto has_size_of_impl(int) -> decltype (
+            sizeOf(std::declval<T&>()),
+            std::multiplies<SizeT>()(SizeT(), std::declval<T&>()),
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_size_of_impl(...);
+    }
+
+    template <typename T>
+    using has_size_of = decltype(impl::has_size_of_impl<T>(0));
+
+
+    template<typename T, typename TT = void>
+    using HasSizeOf = enable_if_t<has_size_of<T>::value, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotSizeOf = enable_if_t<not has_size_of<T>::value, TT>;
 
     template<typename> struct ProxyPtrValid;
 

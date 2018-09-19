@@ -39,6 +39,14 @@ namespace ma
 
     template<typename T, typename Allocator = DefaultAlloc<T>>
     using MSharedArray = array::Array<T, container::SharedContainer<T, Allocator>, LShape>;
+
+
+    template<typename T, typename Allocator = DefaultAlloc<T>>
+    using BArrayView = array::ArrayView<T, Allocator, dimension::BasicShape>;
+
+    template<typename T, typename Allocator = DefaultAlloc<T>>
+    using MArrayView = array::ArrayView<T, Allocator, LShape>;
+
 }
 
 #endif //MA_LIB
