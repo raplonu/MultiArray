@@ -24,7 +24,7 @@ add_executable(MultiArrayTest
     ${MA_TEST_SRC}
 )
 
-target_compile_features(MultiArrayTest PRIVATE cxx_std_11)
+target_compile_features(MultiArrayTest PRIVATE cxx_std_14)
 
 target_link_libraries(MultiArrayTest
     PRIVATE GTest::GTest GTest::Main MultiArray)

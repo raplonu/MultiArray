@@ -112,5 +112,14 @@ namespace
         EXPECT_EQ(a.val(1), 5);
         EXPECT_EQ(a.val(2), 6);
     }
+
+    //Fake test, just an andy sandbox for test
+    TEST(ArrayTest, MultiArray)
+    {
+        MArray<int> aa({2,3,4}, 42);
+
+        EXPECT_TRUE(true);
+
+    }
 }
 

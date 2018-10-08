@@ -1,9 +1,11 @@
 #ifndef MA_ARRAY_ARRAY_VIEW
 #define MA_ARRAY_ARRAY_VIEW
 
+
 #include <ma_api/type.h>
 #include <ma_api/traits.h>
 #include <ma_api/function.h>
+#include <ma_api/printData.h>
 
 #include <ma_api/iterator/ShapeIterator.h>
 #include <ma_api/algorithm/copy.h>
@@ -44,7 +46,7 @@ namespace ma
 
         public:
             constexpr ArrayView() noexcept :
-                shape_(), ptr_(nullptr)
+                shape_(), ptr_()
             {}
 
             template<typename L>
@@ -170,6 +172,14 @@ namespace ma
                 algorithm::multiCopy<T>(*this, data, forward<Args>(args)...);
             }
         };
+
+        template <typename T, typename Allocator, typename Shape>
+        std::ostream& operator<<(std::ostream& s, const ArrayView<T, Allocator, Shape> & view)
+        {
+            printData(s, view);
+            return s;
+        }
+
     }
 }
 

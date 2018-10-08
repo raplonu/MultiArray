@@ -18,7 +18,7 @@ project(MultiArray VERSION 0.1 LANGUAGES CXX)
 
 add_library(MultiArray INTERFACE)
 
-target_compile_features(MultiArray INTERFACE cxx_std_11)
+target_compile_features(MultiArray INTERFACE cxx_std_14)
 
 target_include_directories(MultiArray INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>  

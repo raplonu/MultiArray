@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <map>
 
+
 #include <ma_api/config.h>
 #include <ma_api/type.h>
 #include <ma_api/traits.h>
@@ -662,13 +663,13 @@ namespace ma
      * Convert
      **/
 
-    template<typename T, typename TT , typename = IsEquivalent<T, TT>>
+    template<typename T, typename TT , typename = IsEquivalent<T, TT>, typename = IsConvertible<TT, T>>
     constexpr auto convert(TT && t) noexcept -> decltype(forward<TT>(t))
     {
         return forward<TT>(t);
     }
 
-    template< typename T, typename Data >
+    template< typename T, typename Data, typename = IsNotEquivalent<T, Data>, typename = IsNotConvertible<Data, T>>
     constexpr auto convert(Data && data) noexcept -> decltype(ptrOf(std::forward<Data>(data)))
     {
         return ptrOf(std::forward<Data>(data));
@@ -725,6 +726,30 @@ namespace ma
     {
         return ProxyPtrValid<T>::valid(ptr);
     }
+
+    /**
+     * Compute the next multiple of b upper than a
+     * @param  a start value
+     * @param  b value to be multiple of
+     * @return   next multiple of b upper than a
+     */
+    template<typename T>
+    inline T nextMul(const T & a, const T & b)
+    {
+        return ( (a-1) / b + 1) * b;
+    }
+
+    template<typename T, typename Pos>
+    Pos alignType(Pos offset)
+    {
+        return nextMul(offset, static_cast<Pos>(std::alignment_of<T>::value));
+    }
+
+    template<typename T>
+    constexpr void* voidPtr(T * ptr) noexcept { return ptr; }
+
+    template<typename T>
+    constexpr const void * voidPtr(const T * ptr) noexcept { return ptr; }
 }
 
 #endif //MA_FUNCTION_H

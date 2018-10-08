@@ -60,7 +60,7 @@ namespace ma
 
             setMem<T>(
                 convert<T>(forward<DST>(dst)),
-                convert<const T>(src),
+                convert<const T &>(src),
                 size, forward<Args>(args)...
             );
         }

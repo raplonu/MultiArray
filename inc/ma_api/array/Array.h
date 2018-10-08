@@ -30,7 +30,7 @@ namespace ma
                 View(), container_(allocator)
             {}
 
-            template<typename L, typename = IsNotEquivalent<L, allocator_type>>
+            template<typename L, typename = IsNotEquivalent<L, allocator_type>, typename = IsNotEquivalent<L, View>, typename = IsNotEquivalent<L, Array>>
             explicit Array(L && l, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(l), allocator), forward<L>(l))
             {}
@@ -66,6 +66,12 @@ namespace ma
                 Array(Container(sizeOf(l), allocator), l)
             {
                 View::setMem(data);
+            }
+
+            explicit Array(const View & view, const allocator_type& allocator = allocator_type()) noexcept :
+                Array(Container(sizeOf(view.shape()), allocator), view.shape())
+            {
+                View::setMem(view);
             }
 
             Array(const Array &) = default;

@@ -42,6 +42,14 @@ namespace ma
     using std::is_literal_type;
     using std::is_integral;
     using std::is_pointer;
+    using std::is_convertible;
+
+    template< class From, class To , typename TT = void>
+    using IsConvertible = enable_if_t<is_convertible<From, To>::value, TT>;
+
+    template< class From, class To , typename TT = void>
+    using IsNotConvertible = enable_if_t<not is_convertible<From, To>::value, TT>;
+
     template<typename T>
     using IteratorCategory = typename std::iterator_traits<T>::iterator_category;
 
