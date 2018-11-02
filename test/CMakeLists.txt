@@ -1,30 +1,30 @@
-project(MultiArrayTest)
+project(MultiArrayTest LANGUAGES CXX)
 
 find_package(GTest REQUIRED)
 
 set(MA_TEST_SRC
-    src/array/ArrayTest.cpp
-    src/array/BaseArrayTest.cpp
+    src/container/ContainerTest.cpp
     src/container/SharedContainerTest.cpp
-    src/copy/memCopyTest.cpp
-    src/detail/functionTest.cpp
-    src/dimension/DimensionTest.cpp
-    src/iterator/IteratorTest.cpp
     src/iterator/LinearIteratorTest.cpp
-    src/iterator/ShapeIteratorTest.cpp
-    src/iterator/StepIteratorTest.cpp
-    src/ma/ArrayTest.cpp
-    src/ma/CustomAllocatorTest.cpp
-    src/ma/PointerTest.cpp
+    src/iterator/iteratorFunctionTest.cpp
+    src/iterator/IteratorTest.cpp
     src/range/LinearRangeTest.cpp
+    src/range/rangeFunctionTest.cpp
     src/range/RangeTest.cpp
-    src/shape/MShapeTest.cpp
-    src/shape/SimpleShapeTest.cpp
+    src/dimension/DimensionTest.cpp
+    src/dimension/BasicShapeTest.cpp
+    src/dimension/MultiShapeTest.cpp
+    src/dimension/dimensionFunctionTest.cpp
+    src/array/ArrayViewTest.cpp
+    src/array/ArrayTest.cpp
+    src/data/DataContainerTest.cpp
 )
 
 add_executable(MultiArrayTest
     ${MA_TEST_SRC}
 )
+
+target_compile_features(MultiArrayTest PRIVATE cxx_std_14)
 
 target_link_libraries(MultiArrayTest
     PRIVATE GTest::GTest GTest::Main MultiArray)

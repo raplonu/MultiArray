@@ -1,40 +1,92 @@
 #include <gtest/gtest.h>
-#include <vector>
 
-#include <ma/ma>
+#include <ma_api/range/Range.h>
 
+using namespace ma;
 using namespace ma::range;
-using namespace std;
 
 namespace
 {
-
-    Range r1(vector<ma::SizeT>{0,0,1,1,2,2});
-
-    TEST(RangeTest, RangeSize)
+    TEST(RangeTest, EmptySimpleRange)
     {
-        EXPECT_EQ( r1.size(), 6 );
+        Range r;
+
+        EXPECT_EQ(r.begin(), r.end());
+        EXPECT_FALSE(r.active());
+        EXPECT_EQ(r.size(), 0);
+        EXPECT_TRUE(r.complete(0));
     }
 
-    TEST(RangeTest, RangeProperties)
+    TEST(RangeTest, SimpleRange)
     {
-        EXPECT_FALSE( r1.isComplete(6) );
+        Range r(10);
 
-        EXPECT_TRUE( r1.isActive() );
+        EXPECT_EQ(r.begin() + 10, r.end());
+        EXPECT_TRUE(r.active());
+        EXPECT_EQ(r.size(), 10);
+        EXPECT_TRUE(r.complete(10));
     }
 
-    Range r2(r1.select(Range(0,6,2)));
-
-    TEST(SubRangeTest, RangeSize)
+    TEST(RangeTest, SimpleRangeWithStep)
     {
-        EXPECT_EQ( r2.size(), 3 );
+        Range r(0, 10, 2);
+
+        EXPECT_EQ(r.begin() + 5, r.end());
+        EXPECT_TRUE(r.active());
+        EXPECT_EQ(r.size(), 5);
+        EXPECT_FALSE(r.complete(5));
     }
 
-    TEST(SubRangeTest, RangeProperties)
+    TEST(RangeTest, ReverseSimpleRange)
     {
-        EXPECT_TRUE( r2.isComplete(3) );
+        Range r(10, 0);
 
-        EXPECT_TRUE( r2.isActive() );
+        iterator::Iterator it(10, -1);
+
+        EXPECT_EQ(r.begin() + 10, r.end());
+
+        EXPECT_EQ(r.size(), 10);
+        EXPECT_FALSE(r.complete(10));
     }
 
+    TEST(RangeTest, ReverseSimpleRangeWithStep)
+    {
+        Range r(5, -5, -3);
+
+        EXPECT_EQ(r.begin() + 3, r.end());
+
+        EXPECT_EQ(r.size(), 3);
+        // Stop is change from -5 to -4 to be equal to start + step * N with N interger
+        EXPECT_EQ(r.stop(), -4);
+        EXPECT_FALSE(r.complete(3));
+    }
+
+    TEST(RangeTest, VectorRange)
+    {
+        VectRange v{0,1,2,3,4,5};
+        Range r(v);
+
+        EXPECT_EQ(r.begin() + 6, r.end());
+
+        EXPECT_EQ(r.size(), v.size());
+        // Stop is change from -5 to -4 to be equal to start + step * N with N interger
+        EXPECT_EQ(r.stop(), 6);
+        EXPECT_TRUE(r.complete(6));
+    }
+
+    TEST(RangeTest, MergeRange)
+    {
+        VectRange v1{0,1,3,2}; //Not contiguous
+        Range r1(v1);
+
+        VectRange v2{0,1,3,2}; //will reorder element 3 and 4 of v1
+        Range r2(v2);
+
+        EXPECT_FALSE(r1.complete(4));
+
+        Range r3 = r1.select(r2);
+
+        EXPECT_TRUE(r3.complete(4));
+    }
 }
+

@@ -1,36 +1,40 @@
 #include <gtest/gtest.h>
-#include <ma/ma>
 
+#include <ma_api/iterator/LinearIterator.h>
+
+using namespace ma;
 using namespace ma::iterator;
 
 namespace
 {
-    LinearIterator li(5);
-
-
-    TEST(LinearIteratorTest, LinearIteratorBaseAddition)
+    TEST(LinearIterator, SimpleShift)
     {
-        EXPECT_EQ( li.value(), 5 );
+        LinearIterator l;
 
-        ++li;
-
-        EXPECT_EQ( li.value(), 6 );
-
-        li += -2;
-
-        EXPECT_EQ( li.value(), 4 );
+        EXPECT_EQ(*l, 0);
+        EXPECT_EQ(*(l + 1), 1);
+        l += 2;
+        EXPECT_EQ(*l, 2);
     }
 
-    TEST(LinearIteratorTest, LinearIteratorComparaison)
+    TEST(LinearIterator, CustomStep)
     {
-        LinearIterator li1(5), li2(5);
+        LinearIterator l(0, 3);
 
-        EXPECT_EQ( li1, li2 );
+        EXPECT_EQ(*(l + 1), 3);
 
-        li1++;
+        EXPECT_EQ(*(l - 1), -3);
+    }
 
-        EXPECT_TRUE( li1 > li2 );
+    TEST(LinearIterator, CustomStart)
+    {
+        LinearIterator l(10);
 
-        EXPECT_TRUE( li1 == ++li2 );
+        EXPECT_EQ(*(l + 1), 11);
+
+        l -= 5;
+
+        EXPECT_EQ(*l, 5);
     }
 }
+
