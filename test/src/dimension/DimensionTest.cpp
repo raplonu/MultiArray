@@ -1,136 +1,85 @@
 #include <gtest/gtest.h>
-#include <vector>
 
-#include <ma/ma>
+#include <ma_api/dimension/Dimension.h>
+#include <ma_api/range/LinearRange.h>
 
-using namespace ma::dimension;
+using namespace ma;
 using namespace ma::range;
-using namespace std;
+using namespace ma::dimension;
 
-namespace LinearDimensionTest
+namespace
 {
-    Dimension<LinearRange> d1(5);
-
-    TEST(LinearDimensionTest, DimensionSize1)
+    TEST(DimensionTest, EmptyDimension)
     {
-        EXPECT_EQ( d1.size(), 5 );
+        Dimension<LinearRange> d;
 
-        EXPECT_EQ( d1.baseSize(), 5 );
+        EXPECT_FALSE(d.active());
+        EXPECT_EQ(d.size(), 1);
+        EXPECT_EQ(d.baseSize(), 1);
+
+        EXPECT_EQ(d.begin() + 1, d.end());
+        EXPECT_EQ(*(d.begin() + 1), *d.end());
     }
 
-    TEST(LinearDimensionTest, DimensionProperties1)
+    TEST(DimensionTest, SimpleDimension)
     {
-        EXPECT_TRUE( d1.isComplete() );
+        Dimension<LinearRange> d(10);
 
-        EXPECT_TRUE( d1.isActive() );
+        EXPECT_TRUE(d.active());
+        EXPECT_EQ(d.size(), 10);
+        EXPECT_EQ(d.baseSize(), 10);
+
+        EXPECT_EQ(d.begin() + 10, d.end());
+        EXPECT_EQ(*d.begin(), 0);
+        EXPECT_EQ(*d.end(), 10);
     }
 
-    Dimension<LinearRange> d2(d1.select(Dimension<LinearRange>(3)));
-
-    TEST(LinearDimensionTest, DimensionSize2)
+    TEST(DimensionTest, closeDimension)
     {
-        EXPECT_EQ( d2.size(), 3 );
+        Dimension<LinearRange> dd(10);
 
-        EXPECT_EQ( d2.baseSize(), 5 );
+        auto d = dd.closeAt(5);
+
+        EXPECT_FALSE(d.active());
+        EXPECT_EQ(d.size(), 1);
+        EXPECT_EQ(d.baseSize(), 10);
+
+        EXPECT_EQ(d.begin() + 1, d.end());
+        EXPECT_EQ(*d.begin(), 5);
+        EXPECT_EQ(*(d.begin() + 1), *d.end());
+    }
+    
+    TEST(DimensionTest, resetDimension)
+    {
+        Dimension<LinearRange> dd(10);
+
+        auto d = dd.closeAt(5);
+        d.reset();
+
+        EXPECT_TRUE(d.active());
+        EXPECT_EQ(d.size(), 10);
+        EXPECT_EQ(d.baseSize(), 10);
+
+        EXPECT_EQ(d.begin() + 10, d.end());
+        EXPECT_EQ(*d.begin(), 0);
+        EXPECT_EQ(*d.end(), 10);
     }
 
-    TEST(LinearDimensionTest, DimensionProperties2)
+    TEST(DimensionTest, selectSubDimension)
     {
-        EXPECT_FALSE( d2.isComplete() );
+        Dimension<LinearRange> dd(10);
 
-        EXPECT_TRUE( d2.isActive() );
-    }
+        LinearRange l(0,10,2);
 
-    Dimension<LinearRange> d3(d2.closeAt(3));
+        auto d = dd.select(l);
 
-    TEST(LinearDimensionTest, DimensionSize3)
-    {
-        EXPECT_EQ( d3.size(), 0 );
+        EXPECT_TRUE(d.active());
+        EXPECT_EQ(d.size(), 5);
+        EXPECT_EQ(d.baseSize(), 10);
 
-        EXPECT_EQ( d3.baseSize(), 5 );
-    }
-
-    TEST(LinearimensionTest, DimensionProperties3)
-    {
-        EXPECT_FALSE( d3.isComplete() );
-
-        EXPECT_FALSE( d3.isActive() );
-    }
-
-    TEST(LinearDimensionTest, DimensionPos3)
-    {
-        EXPECT_EQ( *(d3.begin()), 3 );
-
+        EXPECT_EQ(d.begin() + 5, d.end());
+        EXPECT_EQ(*d.begin(), 0);
+        EXPECT_EQ(*d.end(), 10);
     }
 }
 
-namespace DimensionTest
-{
-    Dimension<Range> d1(Range(2,7));
-
-    TEST(DimensionTest, DimensionSize1)
-    {
-        EXPECT_EQ( d1.size(), 5 );
-
-        EXPECT_EQ( d1.baseSize(), 5 );
-    }
-
-    TEST(DimensionTest, DimensionProperties1) 
-    {
-        EXPECT_FALSE( d1.isComplete() );
-
-        EXPECT_TRUE( d1.isActive() );
-    }
-
-    Dimension<Range> dTmp(Range(std::vector<ma::SizeT>{3,2,1}));
-
-    Dimension<Range> d2(d1.select(dTmp));
-
-    TEST(DimensionTest, DimensionSize2)
-    {
-        EXPECT_EQ( d2.size(), 3 );
-
-        EXPECT_EQ( d2.baseSize(), 5 );
-    }
-
-    TEST(DimensionTest, DimensionProperties2)
-    {
-        EXPECT_FALSE( d2.isComplete() );
-
-        EXPECT_TRUE( d2.isActive() );
-    }
-
-    Dimension<Range> d3(d2.closeAt(1));
-
-    TEST(DimensionTest, DimensionSize3)
-    {
-        EXPECT_EQ( d3.size(), 0 );
-
-        EXPECT_EQ( d3.baseSize(), 5 );
-    }
-
-    TEST(DimensionTest, DimensionProperties3)
-    {
-        EXPECT_FALSE( d3.isComplete() );
-
-        EXPECT_FALSE( d3.isActive() );
-    }
-
-    TEST(DimensionTest, DimensionPos3)
-    {
-        EXPECT_EQ( *(d3.begin()), 4 );
-
-    }
-
-    TEST(DimensionTest, DimensionIt3)
-    {
-        EXPECT_TRUE( (++d3.begin()) == d3.end() );
-    }
-
-    Dimension<Range> d4(Range(std::vector<ma::SizeT>{1}));
-
-    TEST(DimensionTest, DimensionIt4)
-    {
-        EXPECT_TRUE( (++d4.begin()) == d4.end() );
-    }
-}
