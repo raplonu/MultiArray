@@ -90,8 +90,8 @@ namespace ma
                     allocator_.deallocate(pointer_, size_);
             }
 
-            pointer data() noexcept { return pointer_; }
-            const_pointer data() const noexcept { return pointer_; }
+            pointer ptr() noexcept { return pointer_; }
+            const_pointer ptr() const noexcept { return pointer_; }
 
             const_pointer begin() const noexcept {return pointer_;}
             const_pointer end() const noexcept {return pointer_ + size_;}

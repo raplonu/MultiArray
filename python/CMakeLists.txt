@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.6)
 
 if(NOT TARGET wyrm)
-    if(IS_DIRECTORY ${WYRM_PATH})
-        add_subdirectory(${WYRM_PATH} wyrm_dir)
+    if(IS_DIRECTORY ${WYRM_ROOT})
+        add_subdirectory(${WYRM_ROOT} wyrm_dir)
     else()
-        message( FATAL_ERROR "wyrm path not found, specify it by set WYRM_PATH to the right path" )
+        message( FATAL_ERROR "wyrm path not found, specify it by set WYRM_ROOT to the right path" )
     endif()
 endif()
 

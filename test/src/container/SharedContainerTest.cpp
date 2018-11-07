@@ -12,7 +12,7 @@ namespace
         SharedContainer<int> c;
 
         EXPECT_EQ(c.size(), 0);
-        EXPECT_EQ(c.data(), nullptr);
+        EXPECT_EQ(c.ptr(), nullptr);
     }
 
     TEST(SharedContainerTest, ConstructorWithSize)
@@ -22,7 +22,7 @@ namespace
         SharedContainer<int> c(size);
 
         EXPECT_EQ(c.size(), size);
-        EXPECT_NE(c.data(), nullptr);
+        EXPECT_NE(c.ptr(), nullptr);
     }
 
     TEST(SharedContainerTest, CopyConstructor)
@@ -33,7 +33,7 @@ namespace
         SharedContainer<int> c2(c1);
 
         EXPECT_EQ(c2.size(), size);
-        EXPECT_NE(c2.data(), nullptr);
+        EXPECT_NE(c2.ptr(), nullptr);
     }
 
     TEST(SharedContainerTest, MoveConstructor)
@@ -42,12 +42,12 @@ namespace
 
         SharedContainer<int> c1(size);
 
-        auto ptr = c1.data();
+        auto ptr = c1.ptr();
 
         SharedContainer<int> c2(std::move(c1));
 
         EXPECT_EQ(c2.size(), size);
-        EXPECT_EQ(c2.data(), ptr);
+        EXPECT_EQ(c2.ptr(), ptr);
     }
 }
 

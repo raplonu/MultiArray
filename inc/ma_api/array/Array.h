@@ -21,8 +21,8 @@ namespace ma
             Container container_;
 
             template<typename L>
-            constexpr Array(Container && container, L && l) noexcept(noexcept(View(std::forward<L>(l), container.data()))) :
-                View(std::forward<L>(l), container.data()), container_(std::move(container))
+            constexpr Array(Container && container, L && l) noexcept(noexcept(View(std::forward<L>(l), ptrOf(container)))) :
+                View(std::forward<L>(l), ma::ptrOf(container)), container_(std::move(container))
             {}
 
         public:
