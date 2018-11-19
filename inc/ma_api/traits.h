@@ -8,33 +8,12 @@
 
 namespace ma
 {
-    #if MA_CXX14
     using std::decay_t;
     using std::enable_if_t;
     using std::add_lvalue_reference_t;
     using std::add_rvalue_reference_t;
     using std::remove_const_t;
     using std::conditional_t;
-
-    #else
-    template< typename T >
-    using decay_t = typename std::decay<T>::type;
-
-    template< bool B, typename T = void >
-    using enable_if_t = typename std::enable_if<B,T>::type;
-
-    template< class T >
-    using add_lvalue_reference_t = typename std::add_lvalue_reference<T>::type;
-
-    template< class T >
-    using add_rvalue_reference_t = typename std::add_rvalue_reference<T>::type;
-
-    template< class T >
-    using remove_const_t = typename std::remove_const<T>::type;
-
-    template< bool B, class T, class F >
-    using conditional_t = typename std::conditional<B,T,F>::type;
-    #endif
 
     using std::is_base_of;
     using std::is_same;
@@ -43,6 +22,14 @@ namespace ma
     using std::is_integral;
     using std::is_pointer;
     using std::is_convertible;
+
+    #if not MA_CXX17
+        template< class Base, class Derived >
+        constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
+
+        template< typename T >
+        constexpr bool is_integral_v = is_integral<T>::value;
+    #endif
 
     template< class From, class To , typename TT = void>
     using IsConvertible = enable_if_t<is_convertible<From, To>::value, TT>;
@@ -54,10 +41,10 @@ namespace ma
     using IteratorCategory = typename std::iterator_traits<T>::iterator_category;
 
     template<typename T, typename TT = void>
-    using IsIntegral = enable_if_t<is_integral<T>::value, TT>;
+    using IsIntegral = enable_if_t<is_integral_v<T>, TT>;
 
     template<typename T, typename TT = void>
-    using IsNotIntegral = enable_if_t<not is_integral<T>::value, TT>;
+    using IsNotIntegral = enable_if_t<not is_integral_v<T>, TT>;
 
     template<typename T>
     using DiffType = typename std::iterator_traits<T>::difference_type ;

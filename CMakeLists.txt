@@ -25,6 +25,20 @@ target_include_directories(MultiArray INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
+
+########################################################################
+#
+# Python wrap. 
+#
+# The python wrapper is not built by default.  To build it, set the
+# python_build option to ON.  You can do it by running ccmake
+# or specifying the -Dpython_build=ON flag when running cmake.
+
+if(python_build)
+    add_subdirectory(python)
+endif()
+
+
 ########################################################################
 #
 # Google Test.
@@ -40,13 +54,17 @@ if (gtest_build_tests)
   add_subdirectory(test)
 endif()
 
+########################################################################
+#
+# Google Benchmark.
+#
+# The bench are not built by default.  To build them, set the
+# benchmark_build option to ON.  You can do it by running ccmake
+# or specifying the -Dbenchmark_build=ON flag when running cmake.
+
 if(benchmark_build)
     add_subdirectory(benchmark)
 endif()
-
-# if(python_build)
-#     add_subdirectory(python)
-# endif()
 
 # Install #
 ###########

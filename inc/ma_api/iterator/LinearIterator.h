@@ -8,6 +8,10 @@ namespace ma
 {
     namespace iterator
     {
+        /**
+         * @brief Iterator defined by a position and a step
+         * 
+         */
         class LinearIterator
         {
             using value_type = SizeT;

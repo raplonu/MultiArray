@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.6)
 
 if(NOT TARGET wyrm)
+    if(NOT DEFINED WYRM_ROOT)
+        set(WYRM_ROOT $ENV{WYRM_ROOT})
+    endif()
     if(IS_DIRECTORY ${WYRM_ROOT})
         add_subdirectory(${WYRM_ROOT} wyrm_dir)
     else()

@@ -35,8 +35,8 @@ namespace ma
         template< class C >
         constexpr auto end( const C& c ) noexcept -> decltype(c.end()) { return c.end(); }
         // #if MA_CXX14
-        //     using std::begin;
-        //     using std::end; 
+        // using std::begin;
+        // using std::end; 
         // #else
             template< class T, std::size_t N >
             constexpr T* begin( T (&array)[N] ) noexcept { return array; }
@@ -609,13 +609,15 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotBeginMetToPtr = enable_if_t<not has_begin_met_to_ptr<T>::value, TT>;
 
-    template<typename Data,
-        typename = IsNotPointer<Data>,
-        typename = HasNotDerefMetToPtr<Data>,
-        typename = HasNotDataMetToPtr<Data>,
-        typename = HasNotPtrMetToPtr<Data>
-    >
-    constexpr auto ptrOf(Data && data) noexcept -> HasBeginMetToPtr<Data, decltype(data.begin())>
+    /**
+     * @brief Obtain pointer of an initializer list. Need special implementation due to begin method that return the pointer
+     * 
+     * @tparam T The underlying data type
+     * @param data The initializer list
+     * @return const T* the pointer of the underlying array
+     */
+    template<typename T>
+    constexpr const T * ptrOf(const std::initializer_list<T> & data) noexcept
     {
         return data.begin();
     }
@@ -750,6 +752,21 @@ namespace ma
 
     template<typename T>
     constexpr const void * voidPtr(const T * ptr) noexcept { return ptr; }
+
+    inline auto makePairer() {
+        return [] (const auto & e1, const auto & e2) {
+            return std::make_pair(e1, e2);
+        };
+    }
+
+    template< typename InputIt1, typename InputIt2, typename Map = std::map<ValueType<InputIt1>, ValueType<InputIt2>>>
+    Map makeMap(InputIt1 first1, InputIt1 last1, InputIt2 first2) {
+        Map res;
+
+        std::transform(first1, last1, first2, std::inserter(res, std::end(res)), makePairer());
+        
+        return res;
+    }
 }
 
 #endif //MA_FUNCTION_H

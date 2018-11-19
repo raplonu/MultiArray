@@ -28,22 +28,57 @@ namespace ma
     using LShape = dimension::MultiShape<range::LinearRange>;
     using SShape = dimension::MultiShape<range::Range>;
 
+    /**
+     * @brief One dimension array unique owner container
+     * 
+     * @tparam T type of the underlying array
+     * @tparam Allocator Allocator of the underlying array
+     */
     template<typename T, typename Allocator = DefaultAlloc<T>>
     using BArray = array::Array<T, container::Container<T, Allocator>, dimension::BasicShape>;
 
+    /**
+     * @brief Multi linear dimension array unique owner container
+     * 
+     * @tparam T type of the underlying array
+     * @tparam Allocator Allocator of the underlying array
+     */
     template<typename T, typename Allocator = DefaultAlloc<T>>
     using MArray = array::Array<T, container::Container<T, Allocator>, LShape>;
 
+    /**
+     * @brief One dimension array multi owners container
+     * 
+     * @tparam T type of the underlying array
+     * @tparam Allocator Allocator of the underlying array
+     */
     template<typename T, typename Allocator = DefaultAlloc<T>>
     using BSharedArray = array::Array<T, container::SharedContainer<T, Allocator>, dimension::BasicShape>;
 
+    /**
+     * @brief Multi linear dimension array multi owners container
+     * 
+     * @tparam T type of the underlying array
+     * @tparam Allocator Allocator of the underlying array
+     */
     template<typename T, typename Allocator = DefaultAlloc<T>>
     using MSharedArray = array::Array<T, container::SharedContainer<T, Allocator>, LShape>;
 
-
+    /**
+     * @brief One dimension array view container
+     * 
+     * @tparam T type of the underlying array
+     * @tparam Allocator Allocator of the underlying array
+     */
     template<typename T, typename Allocator = DefaultAlloc<T>>
     using BArrayView = array::ArrayView<T, Allocator, dimension::BasicShape>;
 
+    /**
+     * @brief One dimension array view container
+     * 
+     * @tparam T type of the underlying array
+     * @tparam Allocator Allocator of the underlying array
+     */
     template<typename T, typename Allocator = DefaultAlloc<T>>
     using MArrayView = array::ArrayView<T, Allocator, LShape>;
 

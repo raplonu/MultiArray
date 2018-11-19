@@ -14,6 +14,14 @@ namespace ma
 {
     namespace array
     {
+        /**
+         * @brief View of an array through a generic shape
+         * 
+         * @tparam T the underlying array type
+         * @tparam Allocator Need to specify what kind of allocator produce the array,
+         * must be change to the pointer implementation type
+         * @tparam Shape The shape type
+         */
         template <typename T, typename Allocator, typename Shape>
         class ArrayView
         {
@@ -45,10 +53,21 @@ namespace ma
             pointer ptr_;
 
         public:
+            /**
+             * @brief Default constructor. Constructs an empty container.
+             * 
+             */
             constexpr ArrayView() noexcept :
                 shape_(), ptr_()
             {}
 
+            /**
+             * @brief Constructs the container with count copies of elements with value value.
+             * 
+             * @tparam L 
+             * @param size 
+             * @param ptr 
+             */
             template<typename L>
             explicit ArrayView(L && size, pointer ptr) noexcept :
                 shape_(forward<L>(size)), ptr_(ptr)
@@ -109,7 +128,7 @@ namespace ma
                 return reference(ptr_[shape_.at(pos)]);
             }
 
-            const_reference val(SizeT pos = 0) const
+            constexpr const_reference val(SizeT pos = 0) const
             {
                 return const_reference(*(ptr_ + shape_.at(pos)));
             }
@@ -144,7 +163,7 @@ namespace ma
                 return shape_.shape();
             }
 
-            SizeT ndim() const
+            constexpr SizeT ndim() const
             {
                 return shape_.ndim();
             }
