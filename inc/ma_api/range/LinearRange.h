@@ -42,7 +42,7 @@ namespace ma
              * @brief 
              * 
              */
-            // MAYBE_UNUSED HDiffT __nothing = 0;
+            // MA_MAYBE_UNUSED HDiffT __nothing = 0;
 
         public:
             /**
@@ -196,7 +196,7 @@ namespace ma
         };
 
         template<typename T>
-        using IsNotLinearRange = enable_if_t<!is_same<T, LinearRange>::value>;
+        using IsNotLinearRange = IsNotSame<T, LinearRange>;
     }
 
 }

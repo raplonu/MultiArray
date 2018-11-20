@@ -22,7 +22,7 @@ namespace ma
 
             SizeT start_;
             HDiffT step_;
-            MAYBE_UNUSED HDiffT __nothing; //discard 2 bytes in order tor put the variant test bit
+            MA_MAYBE_UNUSED HDiffT __nothing; //discard 2 bytes in order tor put the variant test bit
 
         public:
             constexpr explicit LinearIterator(SizeT start = 0, DiffT step = 1) noexcept :
@@ -167,7 +167,7 @@ namespace ma
         }
 
         template<typename T>
-        using IsNotLinearIterator = enable_if_t<!is_same<T, LinearIterator>::value>;
+        using IsNotLinearIterator = IsNotSame<T, LinearIterator>;
 
     }
 }

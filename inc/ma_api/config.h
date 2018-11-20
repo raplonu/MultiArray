@@ -19,23 +19,22 @@
 #define CONSTASSERT
 #endif
 
+#if __cplusplus < 201402L
+    #error MutiArray need to be at least C++ 14
+#endif
 
 #define MA_CXX17 (__cplusplus >= 201703L)
 #define MA_CXX14 (__cplusplus >= 201402L && ! MA_CXX17)
 
 /**
- * Multi line constexpr only enable for c++ 14 and upper, else disabled
+ * Multi line constexpr only enable for c++ 14 and upper
  **/
-#if MA_CXX14
-#define CONSTEXPR14 constexpr
-#else
-#define CONSTEXPR14
-#endif
+#define MA_CONSTEXPR constexpr
 
 #if MA_CXX17
-#define MAYBE_UNUSED [[maybe_unused]]
+#define MA_MAYBE_UNUSED [[maybe_unused]]
 #else
-#define MAYBE_UNUSED
+#define MA_MAYBE_UNUSED
 #endif
 
 #define LIGHTVARIANT

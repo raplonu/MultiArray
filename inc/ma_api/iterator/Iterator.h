@@ -86,16 +86,16 @@ namespace ma
 
             IteratorM iterator_;
 
-            // CONSTEXPR14 IteratorVariant(IteratorInterface * ptr) noexcept :
+            // MA_CONSTEXPR IteratorVariant(IteratorInterface * ptr) noexcept :
             //     iterator_(detail::initBig, ptr)
             // {}
             
         public:
-            CONSTEXPR14 IteratorVariant(SizeT start = 0, DiffT step = 1) noexcept :
+            MA_CONSTEXPR IteratorVariant(SizeT start = 0, DiffT step = 1) noexcept :
                 iterator_(detail::initSmall, start, step)
             {}
 
-            CONSTEXPR14 IteratorVariant(const LinearIterator & li) noexcept :
+            MA_CONSTEXPR IteratorVariant(const LinearIterator & li) noexcept :
                 iterator_(detail::initSmall, li)
             {}
 
@@ -229,8 +229,9 @@ namespace ma
 
             template<
                 typename T, typename BaseT = decay_t<T>,
-                typename = IsNotSame<IteratorT, BaseT>,
-                typename = IsRandomIt<BaseT>
+                typename = IsAll<not is_same_v<IteratorT, BaseT>, is_random_it_v<BaseT> >
+                // typename = IsNotSame<IteratorT, BaseT>,
+                // typename = IsRandomIt<BaseT>
             >
             IteratorT(T && it)
                 :it_(forward<T>(it))

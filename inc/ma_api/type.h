@@ -22,10 +22,10 @@ namespace ma
     template<typename T>
     using DefaultAlloc = std::allocator<T>;
 
-    using VectRange = std::vector<SizeT>;
+    using VectRange = std::vector<int>;
 
-    template<SizeT N>
-    using ArrayRange = std::array<SizeT, N>;
+    template<int N>
+    using ArrayRange = std::array<int, N>;
 }
 
 #endif //MA_TYPE_H

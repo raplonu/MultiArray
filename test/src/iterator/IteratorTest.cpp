@@ -28,7 +28,7 @@ namespace
 
     TEST(Iterator, LinearStart)
     {
-        Iterator l(10);
+        Iterator l(10, 1);
 
         EXPECT_EQ(*(l + 1), 11);
 

@@ -115,14 +115,14 @@ namespace ma
 
             // Emplace constructor for small data
             template<typename... Args>
-            CONSTEXPR14 Variant(InitSmall, Args && ... args) noexcept : data_()
+            MA_CONSTEXPR Variant(InitSmall, Args && ... args) noexcept : data_()
             {
                 data_.small = Small(std::forward<Args>(args)...);
 
                 testSmall();
             }
 
-            CONSTEXPR14 Variant(Big * big) noexcept : data_()
+            MA_CONSTEXPR Variant(Big * big) noexcept : data_()
             {
                 data_.big = big;
 

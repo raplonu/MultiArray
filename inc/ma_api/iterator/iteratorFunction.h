@@ -8,17 +8,17 @@ namespace ma
 {
     namespace iterator
     {
-        constexpr inline SizeT iteratorId(LinearIterator it) noexcept
+        constexpr inline int iteratorId(LinearIterator it) noexcept
         {
             return *it;
         }
 
 
         template<typename T, typename = IsNotLinearIterator<T>>
-        constexpr SizeT iteratorId(const T & it) noexcept
+        constexpr std::ptrdiff_t iteratorId(const T & it) noexcept
         {
             //access address as ID to compare 2 iterator
-            return reinterpret_cast<SizeT>(&(*it));
+            return reinterpret_cast<std::ptrdiff_t>(&(*it));
         }
     }
 }

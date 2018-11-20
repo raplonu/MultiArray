@@ -22,27 +22,27 @@ namespace ma
      * Begin & End function
      **/
     #if MA_CXX17
-        using std::begin;
-        using std::end;
-    #else
-        template< class C , typename = IsNotConst<C>>
-        constexpr auto begin( C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
-        template< class C >
-        constexpr auto begin( const C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
 
-        template< class C , typename = IsNotConst<C>>
-        constexpr auto end( C& c ) noexcept -> decltype(c.end()) { return c.end(); }
-        template< class C >
-        constexpr auto end( const C& c ) noexcept -> decltype(c.end()) { return c.end(); }
-        // #if MA_CXX14
-        // using std::begin;
-        // using std::end; 
-        // #else
-            template< class T, std::size_t N >
-            constexpr T* begin( T (&array)[N] ) noexcept { return array; }
-            template< class T, std::size_t N >
-            constexpr T* end( T (&array)[N] ) noexcept { return array + N; }
-        // #endif
+    using std::begin;
+    using std::end;
+
+    #else
+
+    template< class C , typename = IsNotConst<C>>
+    constexpr auto begin( C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
+    template< class C >
+    constexpr auto begin( const C& c ) noexcept -> decltype(c.begin()) { return c.begin(); }
+
+    template< class C , typename = IsNotConst<C>>
+    constexpr auto end( C& c ) noexcept -> decltype(c.end()) { return c.end(); }
+    template< class C >
+    constexpr auto end( const C& c ) noexcept -> decltype(c.end()) { return c.end(); }
+
+    template< class T, std::size_t N >
+    constexpr T* begin( T (&array)[N] ) noexcept { return array; }
+    template< class T, std::size_t N >
+    constexpr T* end( T (&array)[N] ) noexcept { return array + N; }
+
     #endif
 
     namespace impl
@@ -61,22 +61,47 @@ namespace ma
     }
 
     template <typename T>
-    using is_iterable = decltype(impl::is_iterable_impl<T>(0));
+    constexpr bool is_iterable_v = decltype(impl::is_iterable_impl<T>(0))::value;
 
     template<typename T, typename TT = void>
-    using IsIterable = enable_if_t<is_iterable<T>::value, TT>;
+    using IsIterable = enable_if_t<is_iterable_v<T>, TT>;
     
     template<typename T, typename TT = void>
-    using IsNotIterable = enable_if_t<not is_iterable<T>::value, TT>;
+    using IsNotIterable = enable_if_t<not is_iterable_v<T>, TT>;
 
-    template<typename T, typename TT = void>
-    using IsContiguousRange = enable_if_t<
-        is_iterable<T>::value and
-        is_same<IteratorCategory<T>, std::bidirectional_iterator_tag>::value,
-        TT>;
+    /***************************
+     * container utility
+     **************************/
 
     template<typename Container>
-    using ContainerValueType = ValueType<decltype(ma::begin(std::declval<Container&>()))>;
+    struct container_traits
+    {
+        using IteratorType = decltype(ma::begin(std::declval<Container&>()));
+        using CIteratorType = decltype(ma::begin(std::declval<const Container&>()));
+
+        using value_type = ItValueType<IteratorType>;
+
+        using pointer = ItPointerType<IteratorType>;
+        using const_pointer = ItPointerType<CIteratorType>;
+
+        using reference = ItReferenceType<IteratorType>;
+        using const_reference = ItReferenceType<CIteratorType>;
+
+        using iterator_category = ItCategory<IteratorType>;
+    };
+
+    template<typename T>
+    using CoValueType =        typename ma::container_traits<T>::value_type;
+
+    template<typename T>
+    using CoPointerType =      typename ma::container_traits<T>::pointer;
+
+    template<typename T>
+    using CoConstPointerType = typename ma::container_traits<T>::const_pointer;
+
+
+    template<typename T, typename TT = void>
+    using IsContiguousRange = enable_if_t<is_all_v< is_iterable_v<T>, is_bidirect_it_v<T>>, TT>;
 
     /**
      * Front & Back function
@@ -108,75 +133,42 @@ namespace ma
     /**
      * Exchange function
      **/
-    #if MA_CXX14
     using std::exchange;
-    #else
-    template<class T, class U = T>
-    T exchange(T& obj, U&& new_value)
-    {
-        T old_value = std::move(obj);
-        obj = std::forward<U>(new_value);
-        return old_value;
-    }
-    #endif
     
     /**
      * Absolute function
      **/
     template<typename T>
-    constexpr T abs(T t) noexcept
-    {
-        return (t < 0)?-t:t;
-    }
+    constexpr T abs(T t) noexcept { return (t < T{})?-t:t; }
 
     /**
      * Ceil function
      **/
     template <typename T, typename TT = T>
-    constexpr T ceil(const T & a, const TT & b) noexcept
-    {
-        return (a + b - 1) / b;
-    }
+    constexpr T ceil(const T & a, const TT & b) noexcept { return (a + b - 1) / b; }
 
     /**
      * Min & Max function
      **/
-
-    #if MA_CXX14
     using std::max;
     using std::min;
-    #else
-    template<typename T>
-    constexpr const T & max(const T & t1, const T & t2) noexcept
-    {
-        return (t1 > t2)?t1:t2;
-    }
-
-    template<typename T>
-    constexpr const T & min(const T & t1, const T & t2) noexcept
-    {
-        return (t1 < t2)?t1:t2;
-    }
-    #endif
 
     /**
      * Size function
      **/
 
     #if MA_CXX17
+
     using std::size;
+
     #else
-    template <typename C> 
-    constexpr auto size(const C& c) noexcept -> IsIntegral<decltype(c.size()), SizeT>
-    {
-        return c.size();
-    }
+
+    template < typename C , typename = HasSizeMet<C> > 
+    constexpr auto size(const C& c) noexcept { return c.size(); }
 
     template <class T, std::size_t N>
-    constexpr SizeT size(const T (&)[N]) noexcept
-    {
-        return N;
-    }
+    constexpr int size(const T (&)[N]) noexcept { return N; }
+
     #endif
 
     namespace impl
@@ -191,29 +183,24 @@ namespace ma
     }
 
     template <typename T>
-    using has_size = decltype(impl::has_size_impl<T>(0));
-
-
-    template<typename T, typename TT = void>
-    using HasSize = enable_if_t<has_size<T>::value, TT>;
+    constexpr bool has_size_v = decltype(impl::has_size_impl<T>(0))::value;
 
     template<typename T, typename TT = void>
-    using HasNotSize = enable_if_t<not has_size<T>::value, TT>;
+    using HasSize = enable_if_t<has_size_v<T>, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotSize = enable_if_t<not has_size_v<T>, TT>;
 
     /**
      * Step function
      **/
     template<typename T>
-    constexpr auto step(const T & t) noexcept -> IsIntegral<decltype(t.step()), SizeT>
-    {
-        return t.step();
-    }
+    constexpr auto step(const T & t) noexcept // -> IsIntegral<decltype(t.step()), int>
+    { return t.step(); }
 
     template<typename T, typename = HasNotStepMet<T>>
-    constexpr auto step(T const & t) noexcept -> IsIntegral<decltype(size(t)), SizeT>
-    {
-        return size(t);
-    }
+    constexpr auto step(T const & t) noexcept // -> IsIntegral<decltype(size(t)), int>
+    { return size(t); }
 
     namespace impl
     {
@@ -227,63 +214,61 @@ namespace ma
     }
 
     template <typename T>
-    using has_step = decltype(impl::has_step_impl<T>(0));
-
-
-    template<typename T, typename TT = void>
-    using HasStep = enable_if_t<has_step<T>::value, TT>;
+    constexpr bool has_step_v = decltype(impl::has_step_impl<T>(0))::value;
 
     template<typename T, typename TT = void>
-    using HasNotStep = enable_if_t<not has_step<T>::value, TT>;
+    using HasStep = enable_if_t<has_step_v<T>, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotStep = enable_if_t<not has_step_v<T>, TT>;
 
     /**
      * Empty function
      **/
     #if MA_CXX17
+
     using std::empty;
+
     #else
+
     template <class C> 
-    constexpr auto empty(const C& c) noexcept -> decltype(c.empty())
-    {
-        return c.empty();
-    }
+    constexpr bool empty(const C& c) noexcept { return c.empty(); }
 
     template <class T, std::size_t N> 
-    constexpr bool empty(const T (&)[N]) noexcept
-    {
-        return false;
-    }
+    constexpr bool empty(const T (&)[N]) noexcept { return false; }
 
     template <class E> 
-    constexpr bool empty(std::initializer_list<E> il) noexcept
-    {
-        return il.size() == 0;
-    }
-    #endif    
+    constexpr bool empty(std::initializer_list<E> il) noexcept { return il.size() == 0; }
+
+    #endif
 
 
     /**
      * Advance function : push forward an iterator n times
      **/
     #if MA_CXX17
+
     using std::advance;
+
     #else
-    template< class InputIt, class Distance, typename = IsBidirectIt<InputIt>, typename = IsNotRandomIt<InputIt>>
-    CONSTEXPR14 void advance(InputIt & it, Distance n)
+
+    template< class InputIt, typename = IsAll<is_bidirect_it_v<InputIt>, not is_random_it_v<InputIt> > >
+    MA_CONSTEXPR void advance(InputIt & it, ItDiffType<InputIt> n)
     {
         if(n >= 0)
-            for(SizeT i(0); i < n; ++i)
+            for(int i{}; i < n; ++i)
                 ++it;
         else
-            for(SizeT i(0); i < -n; ++i)
+            for(int i{}; i < -n; ++i)
                 --it;
     }
 
-    template< class InputIt, class Distance, typename = IsRandomIt<InputIt>>
-    CONSTEXPR14 void advance(InputIt & it, Distance n)
+    template< class InputIt>//, typename = IsRandomIt<InputIt>>
+    MA_CONSTEXPR void advance(InputIt & it, ItDiffType<InputIt> n)
     {
         it += n;
     }
+
     #endif
 
 
@@ -292,34 +277,41 @@ namespace ma
      **/
 
     #if MA_CXX17
+
     using std::next;
+
     #else
+
     template<class ForwardIt>
-    CONSTEXPR14 ForwardIt next(ForwardIt it, DiffType<ForwardIt> n = 1)
+    MA_CONSTEXPR ForwardIt next(ForwardIt it, ItDiffType<ForwardIt> n = 1)
     {
         ma::advance(it, n);
         return it;
     }
+
     #endif
 
     /**
      * Distance function
      **/
     #if MA_CXX17
+
     using std::distance;
+
     #else
-    template<typename T>
-    constexpr  IsRandomIt<T, SizeT> distance(const T & t1, const T & t2) noexcept
+
+    template<typename InputIt, typename = IsNotRandomIt<InputIt> >
+    constexpr ItDiffType<InputIt> distance(InputIt t1, InputIt t2) noexcept
     {
-        return static_cast<SizeT>(t2 - t1);
+        return (t1 != t2) ? 0 : 1 + distance(++t1, t2);
     }
 
-    template<typename T>
-    constexpr IsNotRandomIt<T, SizeT> distance(T t1, T t2) noexcept
+    template<typename InputIt>
+    constexpr  ItDiffType<InputIt> distance(InputIt t1, InputIt t2) noexcept
     {
-        //Force to use recurtion because of c++11 constexpr limitation
-        return (t1 != t2) ? 0 : distance(++t1, t2) + 1;
+        return t2 - t1;
     }
+
     #endif
 
     /**
@@ -327,6 +319,7 @@ namespace ma
      **/
     using std::copy;
     using std::copy_n;
+
     using std::fill;
     using std::fill_n;
 
@@ -339,16 +332,10 @@ namespace ma
      * Special Values
      **/
     template<typename T>
-    constexpr T zero() noexcept
-    {
-        return T(0);
-    }
+    constexpr T zero() noexcept { return T{}; }
 
     template<typename T>
-    constexpr T one() noexcept
-    {
-        return T(1);
-    }
+    constexpr T one() noexcept { return T{1}; }
 
     /**
      * Accumulate
@@ -358,27 +345,26 @@ namespace ma
     /**
      * Contiguous
      **/
-    template<typename T>
-    constexpr HasNotContiguousMet<T, bool> contiguous(T const &) noexcept { return true; }
+    template<typename T, typename = HasContiguousMet<T> >
+    auto contiguous(const T & t) noexcept { return t.contiguous(); }
 
-    template<typename T>
-    HasContiguousMet<T, bool> contiguous(T const & t) noexcept { return t.contiguous(); }
+    template<typename T, typename = HasNotContiguousMet<T> >
+    constexpr bool contiguous(const T &) noexcept { return true; }
 
     /**
      * Shape
      **/
-    template<typename T>
-    constexpr HasNotShapeMet<T, VectRange> shape(T const & t) noexcept { return VectRange{ma::size(t)}; }
+    template<typename T, typename = HasShapeMet<T> >
+    auto shape(const T & t) noexcept { return t.shape(); }
 
-    template<typename T>
-    HasShapeMet<T, VectRange> shape(T const & t) noexcept { return t.shape(); }
-
+    template<typename T, typename = HasNotShapeMet<T> >
+    VectRange shape(const T & t) noexcept { return VectRange{ma::size(t)}; }
 
     /**
      * Compare size
      **/
 
-    inline void throwIfMismatch(SizeT s1, SizeT s2, const std::string & str)
+    inline void throwIfMismatch(int s1, int s2, const std::string & str)
     {
         if(s1 != s2) throw std::length_error(str);
     }
@@ -387,9 +373,9 @@ namespace ma
     {
 
         template<bool DefaultEnabled, typename T, typename = HasSize<T>>
-        SizeT tryGetSize(const T & t, SizeT defaultSize)
+        int tryGetSize(const T & t, int defaultSize)
         {
-            SizeT newSize(size(t));
+            int newSize(size(t));
 
             if(DefaultEnabled) throwIfMismatch(newSize, defaultSize, "Data hasn't the same size");
 
@@ -397,7 +383,7 @@ namespace ma
         }
 
         template<bool DefaultEnabled, typename T>
-        constexpr auto tryGetSize(T const &, SizeT defaultSize) noexcept -> HasNotSize<T, SizeT>
+        constexpr auto tryGetSize(T const &, int defaultSize) noexcept -> HasNotSize<T, int>
         {
             return defaultSize;
         }
@@ -408,11 +394,11 @@ namespace ma
         template<bool SizeFound, typename First, typename... Datas>
         struct Sizes<SizeFound, First, Datas...>
         {
-            static SizeT get(SizeT lastSize, const First & f, const Datas &... datas)
+            static int get(int lastSize, const First & f, const Datas &... datas)
             {
                 lastSize = tryGetSize<SizeFound>(f, lastSize);
 
-                return Sizes<SizeFound || has_size<First>::value, Datas...>::get
+                return Sizes<SizeFound || has_size_v<First>, Datas...>::get
                     (lastSize, datas...);
             }
         };
@@ -421,13 +407,13 @@ namespace ma
         template<>
         struct Sizes<true>
         {
-            constexpr static SizeT get(SizeT lastSize) noexcept { return lastSize; }
+            constexpr static int get(int lastSize) noexcept { return lastSize; }
         };
 
     }
 
     template<typename... T>
-    SizeT sizes(const T & ... t)
+    int sizes(const T & ... t)
     {
         return impl::Sizes<false, T...>::get(0, t...);
     }
@@ -437,7 +423,7 @@ namespace ma
      * Steps
      **/
 
-    inline SizeT crossStep(SizeT s1, SizeT s2)
+    inline int crossStep(int s1, int s2)
     {
         if(s1>s2) swap(s1, s2);
 
@@ -451,7 +437,7 @@ namespace ma
     namespace impl
     {
         template<bool DefaultEnabled, typename T>
-        auto tryGetStep(const T & t, SizeT defaultStep) -> HasStep<T, SizeT>
+        auto tryGetStep(const T & t, int defaultStep) -> HasStep<T, int>
         {
             if(DefaultEnabled)
                 return crossStep(step(t), defaultStep);
@@ -460,7 +446,7 @@ namespace ma
         }
 
         template<bool DefaultEnabled, typename T>
-        constexpr auto tryGetStep(const T &, SizeT defaultStep) noexcept -> HasNotStep<T, SizeT>
+        constexpr auto tryGetStep(const T &, int defaultStep) noexcept -> HasNotStep<T, int>
         {
             return defaultStep;
         }
@@ -470,11 +456,11 @@ namespace ma
         template<bool StepFound, typename First, typename... Datas>
         struct Steps<StepFound, First, Datas...>
         {
-            static SizeT get(SizeT lastStep, const First & f, const Datas &... datas)
+            static int get(int lastStep, const First & f, const Datas &... datas)
             {
                 lastStep = tryGetStep<StepFound>(f, lastStep);
 
-                return Steps<StepFound || has_step<First>::value, Datas...>::get(lastStep, datas...);
+                return Steps<StepFound || has_step_v<First>, Datas...>::get(lastStep, datas...);
             }
         };
 
@@ -482,21 +468,42 @@ namespace ma
         template<>
         struct Steps<true>
         {
-            constexpr static SizeT get(SizeT lastStep) noexcept { return lastStep; }
+            constexpr static int get(int lastStep) noexcept { return lastStep; }
         };
     }
 
     template<typename... T>
-    SizeT steps(const T & ... t)
+    int steps(const T & ... t)
     {
         return impl::Steps<false, T...>::get(0, t...);
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * ptrOf function : extract ptr for types
      **/
-    template<typename Data>
-    constexpr auto ptrOf(Data && data) noexcept -> IsPointer<Data, Data>
+    template<typename Data, typename = IsPointer<Data>>
+    constexpr auto ptrOf(Data && data) noexcept
     {
         return data;
     }
@@ -513,18 +520,19 @@ namespace ma
     }
 
     template<typename T>
-    using has_deref_to_ptr = decltype(impl::has_deref_to_ptr_impl<T>(0));
+    constexpr bool has_deref_to_ptr_v = decltype(impl::has_deref_to_ptr_impl<T>(0))::value;
 
     template<typename T, typename TT = void>
-    using HasDerefToPtr = enable_if_t<has_deref_to_ptr<T>::value, TT>;
+    using HasDerefToPtr = enable_if_t<has_deref_to_ptr_v<T>, TT>;
 
     template<typename T, typename TT = void>
-    using HasNotDerefMetToPtr = enable_if_t<not has_deref_to_ptr<T>::value, TT>;
+    using HasNotDerefMetToPtr = enable_if_t<not has_deref_to_ptr_v<T>, TT>;
 
     template<typename Data,
-        typename = IsNotPointer<Data>
+        typename = IsNotPointer<Data>,
+        typename = HasDerefToPtr<Data>
     >
-    constexpr auto ptrOf(Data && data) noexcept -> HasDerefToPtr<Data, decltype(&(*data))>
+    constexpr auto ptrOf(Data && data) noexcept
     {
         return &(*data);
     }
@@ -661,33 +669,69 @@ namespace ma
     using HasNotRawPtr = IsNotEquivalent<T*, decltype(ptrOf(std::declval<Data&>())), TT>;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Convert
      **/
 
-    template<typename T, typename TT , typename = IsEquivalent<T, TT>, typename = IsConvertible<TT, T>>
-    constexpr auto convert(TT && t) noexcept -> decltype(forward<TT>(t))
-    {
-        return forward<TT>(t);
-    }
-
-    template< typename T, typename Data, typename = IsNotEquivalent<T, Data>, typename = IsNotConvertible<Data, T>>
-    constexpr auto convert(Data && data) noexcept -> decltype(ptrOf(std::forward<Data>(data)))
+    template< typename T, typename Data, typename Res = decltype(ma::ptrOf(std::declval<Data>())),
+        typename = IsAll<is_pointer_v<Res>, is_convertible_v<ItValueType<Res>, T> >
+    >
+    constexpr auto convert(Data && data) noexcept
     {
         return ptrOf(std::forward<Data>(data));
     }
 
-    constexpr inline SizeT sizeOf(SizeT l) noexcept
+    template<typename T, typename TT , typename = IsAll<is_equivalent_v<T, TT>, is_convertible_v<TT, T> > >
+    constexpr TT convert(TT && t) noexcept
+    {
+        return forward<TT>(t);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    constexpr inline int sizeOf(int l) noexcept
     {
         return l;
     }
 
     template<typename L, typename = IsIterable<L>>
-    SizeT sizeOf(const L & l) noexcept
+    int sizeOf(const L & l) noexcept
     {
         return ma::empty(l)
             ? 0
-            : accumulate(ma::begin(l), ma::end(l), SizeT(1), std::multiplies<SizeT>());
+            : accumulate(ma::begin(l), ma::end(l), int(1), std::multiplies<int>());
     }
 
     namespace impl
@@ -695,7 +739,7 @@ namespace ma
         template <typename T>
         auto has_size_of_impl(int) -> decltype (
             sizeOf(std::declval<T&>()),
-            std::multiplies<SizeT>()(SizeT(), std::declval<T&>()),
+            std::multiplies<int>()(int(), std::declval<T&>()),
             std::true_type{});
 
         template <typename T>
@@ -703,14 +747,14 @@ namespace ma
     }
 
     template <typename T>
-    using has_size_of = decltype(impl::has_size_of_impl<T>(0));
+    using has_size_of_v = decltype(impl::has_size_of_impl<T>(0))::value;
 
 
     template<typename T, typename TT = void>
-    using HasSizeOf = enable_if_t<has_size_of<T>::value, TT>;
+    using HasSizeOf = enable_if_t<has_size_of_v<T>, TT>;
 
     template<typename T, typename TT = void>
-    using HasNotSizeOf = enable_if_t<not has_size_of<T>::value, TT>;
+    using HasNotSizeOf = enable_if_t<not has_size_of_v<T>, TT>;
 
     template<typename> struct ProxyPtrValid;
 
@@ -759,7 +803,7 @@ namespace ma
         };
     }
 
-    template< typename InputIt1, typename InputIt2, typename Map = std::map<ValueType<InputIt1>, ValueType<InputIt2>>>
+    template< typename InputIt1, typename InputIt2, typename Map = std::map<ItValueType<InputIt1>, ItValueType<InputIt2>>>
     Map makeMap(InputIt1 first1, InputIt1 last1, InputIt2 first2) {
         Map res;
 
