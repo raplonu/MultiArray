@@ -47,41 +47,108 @@ namespace ma {
         template <typename T, typename Container, typename Shape>
         class Array : public ArrayView<T, typename Container::allocator_type, Shape>
         {
+            /**
+             * @brief Base class of array, handle data access and modification
+             * 
+             */
             using View = ArrayView<T, typename Container::allocator_type, Shape>;
         public:
+            /**
+             * @brief The underlying type
+             * 
+             */
             using value_type = T;
+            /**
+             * @brief The allocator type
+             * 
+             */
             using allocator_type = typename Container::allocator_type;
 
         protected:
+            /**
+             * @brief The container member that old the data
+             * 
+             */
             Container container_;
 
+            /**
+             * @brief protected constructor that take a container and a shape
+             * 
+             * @tparam L the shape type of the constructor
+             * @param container the container that old the data
+             * @param l the shape of the data
+             */
             template<typename L>
             constexpr Array(Container && container, L && l) noexcept(noexcept(View(std::forward<L>(l), ptrOf(container)))) :
                 View(std::forward<L>(l), ma::ptrOf(container)), container_(std::move(container))
             {}
 
         public:
+            /**
+             * @brief Construct a new Array object with zero element. No allocation is performed
+             * 
+             * @param allocator the allocator of the array, will not be used
+             */
             constexpr explicit Array(const allocator_type& allocator = allocator_type()) noexcept :
                 View(), container_(allocator)
             {}
 
-            template<typename L, typename = IsNotEquivalent<L, allocator_type>, typename = IsNotEquivalent<L, View>, typename = IsNotEquivalent<L, Array>>
+            /**
+             * @brief Construct a new Array object, allocate the number of elements defined by shape
+             * 
+             * @tparam L shape type
+             * @tparam IsNotEquivalents<L, ...> check if L is not same than allocator_type, View, Array types
+             * @param l shape
+             * @param allocator optional allocator
+             */
+            template< typename L, typename = IsNotEquivalents<L, allocator_type, View, Array> >
             explicit Array(L && l, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(l), allocator), forward<L>(l))
             {}
 
+            /**
+             * @brief Construct a new Array object, allocate the number of elements defined by l
+             * 
+             * @tparam L the scalar type of the Shape
+             * @param l the shape
+             * @param allocator optional allocator
+             */
             template<typename L>
             explicit Array(const initializer_list<L> & l, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(l), allocator), l)
             {}
 
-            template<typename L, typename Data, typename = IsNotEquivalent<Data, Array>, typename = IsNotEquivalent<L, Container>, typename = IsNotEquivalent<Data, allocator_type>>
+            /**
+             * @brief Construct a new Array object, allocate the number of elements defined by l and init them using data
+             * 
+             * @tparam L the Shape type
+             * @tparam Data The initialization data type
+             * @tparam IsNotEquivalent<L, Container> check if L is a Shape
+             * @tparam IsNotEquivalents<Data, Array, allocator_type> check if ...
+             * @param l shape
+             * @param data initial data
+             * @param allocator optional allocator
+             */
+            template<typename L, typename Data,
+                typename = IsNotEquivalent<L, Container>,
+                typename = IsNotEquivalents<Data, Array, allocator_type>
+            >
             explicit Array(L && l, Data && data, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(l), allocator), forward<L>(l))
             {
                 View::setMem(std::forward<Data>(data));
             }
 
+            /**
+             * @brief Construct a new Array object, allocate the number of elements defined by l and init them using data
+             * 
+             * @tparam L the scalar type of the Shape
+             * @tparam Data The initialization data type
+             * @tparam IsNotEquivalent<Data, allocator_type> 
+             * @param l shape
+             * @param data initial data
+             * @param allocator optional allocator
+             */
             template<typename L, typename Data, typename = IsNotEquivalent<Data, allocator_type>>
             explicit Array(const initializer_list<L> & l, Data && data, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(l), allocator), l)
@@ -89,6 +156,16 @@ namespace ma {
                 View::setMem(std::forward<Data>(data));
             }
 
+            /**
+             * @brief Construct a new Array object, allocate the number of elements defined by l and init them using data
+             * 
+             * @tparam L the shape type
+             * @tparam Data the scalar type of data
+             * @tparam IsNotEquivalent<L, Container> 
+             * @param l shape
+             * @param data initial data
+             * @param allocator optional allocator
+             */
             template<typename L, typename Data, typename = IsNotEquivalent<L, Container>>
             explicit Array(L && l, const initializer_list<Data> & data, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(l), allocator), forward<L>(l))
@@ -96,6 +173,15 @@ namespace ma {
                 View::setMem(data);
             }
 
+            /**
+             * @brief Construct a new Array object, allocate the number of elements defined by l and init them using data
+             * 
+             * @tparam L the scalar type of the Shape
+             * @tparam Data the scalar type of data
+             * @param l shape
+             * @param data initial data
+             * @param allocator optional allocator
+             */
             template<typename L, typename Data>
             explicit Array(const initializer_list<L> & l, const initializer_list<Data> & data, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(l), allocator), l)
@@ -103,28 +189,62 @@ namespace ma {
                 View::setMem(data);
             }
 
+            /**
+             * @brief Construct a new Array object from another view, using the same shape and copy data
+             * 
+             * @param view the view to take data of
+             * @param allocator optional allocator
+             */
             explicit Array(const View & view, const allocator_type& allocator = allocator_type()) noexcept :
                 Array(Container(sizeOf(view.shape()), allocator), view.shape())
             {
                 View::setMem(view);
             }
 
+            /**
+             * @brief Copy construct a new Array object
+             * 
+             */
             Array(const Array &) = default;
+
+            /**
+             * @brief Move construct a new Array object
+             * 
+             */
             constexpr Array(Array &&) noexcept = default;
 
+            /**
+             * @brief Copy assign object
+             * 
+             * @return Array& the reference to *this
+             */
             Array& operator=(const Array &) = default;
+
+            /**
+             * @brief Move assign object
+             * 
+             * @return Array& the reference to *this
+             */
             Array& operator=(Array &&) = default;
 
-            constexpr const allocator_type & get_allocator() const
-            {
+            /**
+             * @brief Get the allocator object const reference
+             * 
+             * @return allocator_type
+             */
+            constexpr const allocator_type & get_allocator() const {
                 return container_.get_allocator();
             }
 
-            constexpr SizeT baseSize() const
-            {
+            /**
+             * @brief Obtain the allocated size independently of the shape
+             * 
+             * @return constexpr SizeT 
+             */
+            constexpr SizeT baseSize() const {
                 return container_.size();
             }
-
+            
             using View::size;
         };
         /** @} */       // end group View

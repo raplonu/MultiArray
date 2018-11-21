@@ -34,9 +34,9 @@ target_include_directories(MultiArray INTERFACE
 # python_build option to ON.  You can do it by running ccmake
 # or specifying the -Dpython_build=ON flag when running cmake.
 
-if(python_build)
-    add_subdirectory(python)
-endif()
+# if(python_build)
+#     add_subdirectory(python)
+# endif()
 
 
 ########################################################################

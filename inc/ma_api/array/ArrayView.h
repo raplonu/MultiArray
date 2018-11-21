@@ -115,108 +115,136 @@ namespace ma
             ~ArrayView() = default;
 
             template<typename... R>
-            ArrayView at(R&&...ranges) const
-            {
+            ArrayView at(R&&...ranges) const {
                 return ArrayView(shape_.subShape(forward<R>(ranges)...), ptr_);
             }
 
-            ArrayView operator[](SizeT pos) const
-            {
+            /**
+             * @brief Return a view on the data with the inner dimension closed at pos
+             * 
+             * @param pos the position where to close the inner dimension
+             * @return ArrayView 
+             */
+            ArrayView operator[](SizeT pos) const {
                 return ArrayView(shape_.closeAt(pos), ptr_);
             }
 
-            iterator begin()
-            {
+            /**
+             * @brief access to the first element iterator
+             * 
+             * @return iterator 
+             */
+            iterator begin() {
                 return iterator(ptr_, shape_, 0);
             }
 
-            const_iterator begin() const
-            {
+            /**
+             * @brief access to the first element const iterator
+             * 
+             * @return const_iterator 
+             */
+            const_iterator begin() const {
                 return const_iterator(ptr_, shape_, 0);
             }
 
-            iterator end()
-            {
+            /**
+             * @brief access to the last element iterator
+             * 
+             * @return iterator 
+             */
+            iterator end() {
                 return iterator(ptr_, shape_, size());
             }
 
-            const_iterator end() const
-            {
+            /**
+             * @brief access to the last element const iterator
+             * 
+             * @return const_iterator 
+             */
+            const_iterator end() const {
                 return const_iterator(ptr_, shape_, size());
             }
 
-            reference val(SizeT pos = 0)
-            {
+            /**
+             * @brief access the a specific element that has the pos distance from the beginning of the shape
+             * 
+             * @param pos 
+             * @return reference 
+             */
+            reference val(SizeT pos = 0) {
                 return reference(ptr_[shape_.at(pos)]);
             }
 
-            constexpr const_reference val(SizeT pos = 0) const
-            {
+            /**
+             * @brief access the a specific element that has the pos distance from the beginning of the shape
+             * 
+             * @param pos 
+             * @return const_reference 
+             */
+            constexpr const_reference val(SizeT pos = 0) const {
                 return const_reference(*(ptr_ + shape_.at(pos)));
             }
 
-            pointer ptr() noexcept
-            {
+            /**
+             * @brief return the pointer to the start of the array
+             * 
+             * @return pointer 
+             */
+            pointer ptr() noexcept {
                 return ptr_ + shape_.at(0);
             }
 
-            constexpr const_pointer ptr() const noexcept
-            {
+            /**
+             * @brief return the const pointer to the start of the array
+             * 
+             * @return const_pointer 
+             */
+            constexpr const_pointer ptr() const noexcept {
                 return ptr_ + shape_.at(0);
             }
 
-            constexpr SizeT size() const noexcept
-            {
+            constexpr SizeT size() const noexcept {
                 return shape_.size();
             }
 
-            constexpr bool empty() const noexcept
-            {
+            constexpr bool empty() const noexcept {
                 return size() == 0;
             }
 
-            constexpr SizeT step() const noexcept
-            {
+            constexpr SizeT step() const noexcept {
                 return shape_.step();
             }
 
-            VectRange shape() const
-            {
+            VectRange shape() const {
                 return shape_.shape();
             }
 
-            constexpr SizeT ndim() const
-            {
+            constexpr SizeT ndim() const {
                 return shape_.ndim();
             }
 
-            constexpr bool contiguous() const noexcept
-            {
+            constexpr bool contiguous() const noexcept {
                 return shape_.contiguous();
             }
 
             template<typename OData, typename... Args>
-            void copyTo(OData && data, Args && ... args) const
-            {
+            void copyTo(OData && data, Args && ... args) const {
                 algorithm::multiCopy<T>(forward<OData>(data), *this, forward<Args>(args)...);
             }
 
             template<typename OData, typename... Args>
-            void setMem(const OData & data, Args && ... args)
-            {
+            void setMem(const OData & data, Args && ... args) {
                 algorithm::multiCopy<T>(*this, data, forward<Args>(args)...);
             }
 
             template<typename TT, typename... Args>
-            void setMem(const std::initializer_list<TT> & data, Args && ... args)
-            {
+            void setMem(const std::initializer_list<TT> & data, Args && ... args) {
                 algorithm::multiCopy<T>(*this, data, forward<Args>(args)...);
             }
         };
 
         template <typename T, typename Allocator, typename Shape>
-        std::ostream& operator<<(std::ostream& s, const ArrayView<T, Allocator, Shape> & view)
-        {
+        std::ostream& operator<<(std::ostream& s, const ArrayView<T, Allocator, Shape> & view) {
             printData(s, view);
             return s;
         }

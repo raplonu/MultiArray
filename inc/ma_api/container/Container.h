@@ -34,6 +34,12 @@ namespace ma
 {
     namespace container
     {
+        /**
+         * @brief Define a Container structure that old a exclusive contiguous buffer
+         * 
+         * @tparam T the underlying type
+         * @tparam DefaultAlloc<T> the allocator type
+         */
         template<typename T, typename Allocator = DefaultAlloc<T>>
         class Container {
         public:
@@ -79,8 +85,7 @@ namespace ma
                 allocator_(std::move(oc.allocator_)), pointer_(exchange(oc.pointer_, pointer((value_type*)nullptr))), size_(oc.size_)
             {}
 
-            Container & operator=(const Container & oc)
-            {
+            Container & operator=(const Container & oc) {
                 reset();
 
                 allocator_ = oc.allocator_;
@@ -91,8 +96,7 @@ namespace ma
                 return *this;
             }
 
-            Container & operator=(Container && oc) noexcept
-            {
+            Container & operator=(Container && oc) noexcept {
                 allocator_ = std::move(oc.allocator_);
                 size_ = oc.size_;
 
@@ -101,15 +105,12 @@ namespace ma
                 return *this;
             }
 
-            ~Container()
-            {
+            ~Container() {
                 reset();
             }
 
-            void reset()
-            {
-                if(ptrValid(pointer_))
-                    allocator_.deallocate(pointer_, size_);
+            void reset() {
+                if(ptrValid(pointer_)) allocator_.deallocate(pointer_, size_);
             }
 
             pointer ptr() noexcept { return pointer_; }

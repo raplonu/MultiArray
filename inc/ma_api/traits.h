@@ -180,6 +180,9 @@ namespace ma
     template<typename T1, typename T2, typename TT = void>
     using IsNotEquivalent = enable_if_t<not is_equivalent_v<T1, T2>, TT>;
 
+    template<typename T, typename... Ts>
+    using IsNotEquivalents = IsAll<not is_same_v<T, Ts>...>;
+
     template<typename T, typename TT = void>
     constexpr bool is_bidirect_it_v = is_same_v<ItCategory<T>, std::bidirectional_iterator_tag>;
 
