@@ -490,23 +490,9 @@ namespace ma
 
 
 
-
-
-
-
-
-
-
-
-
-    /**
-     * ptrOf function : extract ptr for types
-     **/
-    template<typename Data, typename = IsPointer<Data>>
-    constexpr auto ptrOf(Data && data) noexcept
-    {
-        return data;
-    }
+    /***************************
+     * pointer utility
+     **************************/
 
     namespace impl
     {
@@ -528,14 +514,6 @@ namespace ma
     template<typename T, typename TT = void>
     using HasNotDerefMetToPtr = enable_if_t<not has_deref_to_ptr_v<T>, TT>;
 
-    template<typename Data,
-        typename = IsNotPointer<Data>,
-        typename = HasDerefToPtr<Data>
-    >
-    constexpr auto ptrOf(Data && data) noexcept
-    {
-        return &(*data);
-    }
 
     namespace impl
     {
@@ -549,22 +527,13 @@ namespace ma
     }
 
     template<typename T>
-    using has_data_met_to_ptr = decltype(impl::has_data_met_to_ptr_impl<T>(0));
+    constexpr bool has_data_met_to_ptr_v = decltype(impl::has_data_met_to_ptr_impl<T>(0))::value;
 
     template<typename T, typename TT = void>
-    using HasDataMetToPtr = enable_if_t<has_data_met_to_ptr<T>::value, TT>;
+    using HasDataMetToPtr = enable_if_t<has_data_met_to_ptr_v<T>, TT>;
 
     template<typename T, typename TT = void>
-    using HasNotDataMetToPtr = enable_if_t<not has_data_met_to_ptr<T>::value, TT>;
-
-    template<typename Data,
-        typename = IsNotPointer<Data>,
-        typename = HasNotDerefMetToPtr<Data>
-    >
-    constexpr auto ptrOf(Data && data) noexcept -> HasDataMetToPtr<Data, decltype(data.data())>
-    {
-        return data.data();
-    }
+    using HasNotDataMetToPtr = enable_if_t<not has_data_met_to_ptr_v<T>, TT>;
 
     namespace impl
     {
@@ -579,23 +548,14 @@ namespace ma
     }
 
     template<typename T>
-    using has_ptr_met_to_ptr = decltype(impl::has_ptr_met_to_ptr_impl<T>(0));
+    constexpr bool has_ptr_met_to_ptr_v = decltype(impl::has_ptr_met_to_ptr_impl<T>(0))::value;
 
     template<typename T, typename TT = void>
-    using HasPtrMetToPtr = enable_if_t<has_ptr_met_to_ptr<T>::value, TT>;
+    using HasPtrMetToPtr = enable_if_t<has_ptr_met_to_ptr_v<T>, TT>;
 
     template<typename T, typename TT = void>
-    using HasNotPtrMetToPtr = enable_if_t<not has_ptr_met_to_ptr<T>::value, TT>;
+    using HasNotPtrMetToPtr = enable_if_t<not has_ptr_met_to_ptr_v<T>, TT>;
 
-    template<typename Data,
-        typename = IsNotPointer<Data>,
-        typename = HasNotDerefMetToPtr<Data>,
-        typename = HasNotDataMetToPtr<Data>
-    >
-    constexpr auto ptrOf(Data && data) noexcept -> HasPtrMetToPtr<Data, decltype(data.ptr())>
-    {
-        return data.ptr();
-    }
 
     namespace impl
     {
@@ -609,13 +569,49 @@ namespace ma
     }
 
     template<typename T>
-    using has_begin_met_to_ptr = decltype(impl::has_begin_met_to_ptr_impl<T>(0));
+    constexpr bool has_begin_met_to_ptr_v = decltype(impl::has_begin_met_to_ptr_impl<T>(0))::value;
 
     template<typename T, typename TT = void>
-    using HasBeginMetToPtr = enable_if_t<has_begin_met_to_ptr<T>::value, TT>;
+    using HasBeginMetToPtr = enable_if_t<has_begin_met_to_ptr_v<T>, TT>;
 
     template<typename T, typename TT = void>
-    using HasNotBeginMetToPtr = enable_if_t<not has_begin_met_to_ptr<T>::value, TT>;
+    using HasNotBeginMetToPtr = enable_if_t<not has_begin_met_to_ptr_v<T>, TT>;
+
+
+    namespace impl
+    {
+        template <typename T>
+        auto has_get_met_to_ptr_impl(int) -> decltype (
+            IsPointer<decltype(std::declval<T&>().get()), int>{},
+            std::true_type{});
+
+        template <typename T>
+        std::false_type has_get_met_to_ptr_impl(...);
+    }
+
+    template<typename T>
+    constexpr bool has_get_met_to_ptr_v = decltype(impl::has_get_met_to_ptr_impl<T>(0))::value;
+
+    template<typename T, typename TT = void>
+    using HasGetMetToPtr = enable_if_t<has_get_met_to_ptr_v<T>, TT>;
+
+    template<typename T, typename TT = void>
+    using HasNotGetMetToPtr = enable_if_t<not has_get_met_to_ptr_v<T>, TT>;
+
+
+    // template<typename T, typename Data, typename TT = void>
+    // using HasRawPtr = IsEquivalent<T*, decltype(ptrOf(std::declval<Data&>())), TT>;
+
+    // template<typename T, typename Data, typename TT = void>
+    // using HasNotRawPtr = IsNotEquivalent<T*, decltype(ptrOf(std::declval<Data&>())), TT>;
+
+
+
+
+    /**
+     * ptrOf function : extract ptr for types
+     **/
+
 
     /**
      * @brief Obtain pointer of an initializer list. Need special implementation due to begin method that return the pointer
@@ -630,62 +626,93 @@ namespace ma
         return data.begin();
     }
 
-    namespace impl
+    /**
+     * @brief Return a pointer in the case Data is a pointer
+     * 
+     * @tparam Data a pointer type
+     * @tparam IsPointer<Data> check if data is pointer type
+     * @param data a pointer
+     * @return decltype(data) the pointer of the underlying data
+     */
+    template<typename Data, typename = IsPointer<Data>>
+    constexpr auto ptrOf(Data data) noexcept -> decltype(data)
     {
-        template <typename T>
-        auto has_get_met_to_ptr_impl(int) -> decltype (
-            IsPointer<decltype(std::declval<T&>().get()), int>{},
-            std::true_type{});
-
-        template <typename T>
-        std::false_type has_get_met_to_ptr_impl(...);
+        return data;
     }
 
-    template<typename T>
-    using has_get_met_to_ptr = decltype(impl::has_get_met_to_ptr_impl<T>(0));
-
-    template<typename T, typename TT = void>
-    using HasGetMetToPtr = enable_if_t<has_get_met_to_ptr<T>::value, TT>;
-
-    template<typename T, typename TT = void>
-    using HasNotGetMetToPtr = enable_if_t<not has_get_met_to_ptr<T>::value, TT>;
-
-    template<typename Data,
-        typename = IsNotPointer<Data>,
-        typename = HasNotDerefMetToPtr<Data>,
-        typename = HasNotDataMetToPtr<Data>,
-        typename = HasNotPtrMetToPtr<Data>,
-        typename = HasNotBeginMetToPtr<Data>
+    /**
+     * @brief Return a pointer of a structure that can dereference data (i.e. an iterator)
+     * 
+     * @tparam Data a structure type that can dereference
+     * @tparam IsAll<...> check if is not a pointer type and can dereference
+     * @param data the dereferencable data
+     * @return decltype(&(*std::forward<Data>(data))) the pointer of the underlying data
+     */
+    template<typename Data, typename = IsAll<
+        not is_pointer_v<decay_t<Data>>,
+        has_deref_to_ptr_v<Data> >
     >
-    constexpr auto ptrOf(Data && data) noexcept -> HasGetMetToPtr<Data, decltype(data.get())>
+    constexpr auto ptrOf(Data && data) noexcept -> decltype(&(*std::forward<Data>(data)))
     {
-        return data.get();
+        return &(*std::forward<Data>(data));
     }
 
-    template<typename T, typename Data, typename TT = void>
-    using HasRawPtr = IsEquivalent<T*, decltype(ptrOf(std::declval<Data&>())), TT>;
+    /**
+     * @brief Return a pointer of a structure that can return pointer with get method (i.e. a unique_ptr)
+     * 
+     * @tparam Data a structure with get method
+     * @tparam IsAll<...> check if Data cannot dereference and has get method
+     * @param data the data container
+     * @return decltype(std::forward<Data>(data).get()) the pointer of the underlying data
+     */
+    template<typename Data, typename = IsAll<
+        not has_deref_to_ptr_v<Data>,
+        has_get_met_to_ptr_v<Data> >
+    >
+    constexpr auto ptrOf(Data && data) noexcept -> decltype(std::forward<Data>(data).get())
+    {
+        return std::forward<Data>(data).get();
+    }
 
-    template<typename T, typename Data, typename TT = void>
-    using HasNotRawPtr = IsNotEquivalent<T*, decltype(ptrOf(std::declval<Data&>())), TT>;
+    /**
+     * @brief Return a pointer of a structure that can return pointer with data method (i.e. a vector)
+     * 
+     * @tparam Data a structure with data method
+     * @tparam IsAll<...> check if Data has not get method and has data method
+     * @param data the data container
+     * @return decltype(std::forward<Data>(data).data()) the pointer of the underlying data
+     */
+    template<typename Data, typename = IsAll<
+        not has_get_met_to_ptr_v<Data>,
+        has_data_met_to_ptr_v<Data> >
+    >
+    constexpr auto ptrOf(Data && data) noexcept -> decltype(std::forward<Data>(data).data())
+    {
+        return std::forward<Data>(data).data();
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * @brief Return a pointer of a structure that can return pointer with ptr method (i.e. a MultiArray)
+     * 
+     * @tparam Data a structure with ptr method
+     * @tparam IsAll<...> check if Data has not data method and has ptr method
+     * @param data the data container
+     * @return decltype(std::forward<Data>(data).data()) the pointer of the underlying data
+     */
+    template<typename Data, typename = IsAll<
+        not has_data_met_to_ptr_v<Data>,
+        has_ptr_met_to_ptr_v<Data> >
+    >
+    constexpr auto ptrOf(Data && data) noexcept -> decltype(std::forward<Data>(data).ptr())
+    {
+        return std::forward<Data>(data).ptr();
+    }
 
     /**
      * Convert
      **/
 
-    template< typename T, typename Data, typename Res = decltype(ma::ptrOf(std::declval<Data>())),
+    template< typename T, typename Data, typename Res = decay_t<decltype(ma::ptrOf(std::declval<Data>()))>,
         typename = IsAll<is_pointer_v<Res>, is_convertible_v<ItValueType<Res>, T> >
     >
     constexpr auto convert(Data && data) noexcept
@@ -747,7 +774,7 @@ namespace ma
     }
 
     template <typename T>
-    using has_size_of_v = decltype(impl::has_size_of_impl<T>(0))::value;
+    constexpr bool has_size_of_v = decltype(impl::has_size_of_impl<T>(0))::value;
 
 
     template<typename T, typename TT = void>

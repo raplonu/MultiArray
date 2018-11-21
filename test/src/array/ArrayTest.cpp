@@ -121,5 +121,17 @@ namespace
         EXPECT_TRUE(true);
 
     }
+
+    TEST(ArrayTest, PointerOfPointerTest)
+    {
+        int i = 42;
+        BArray<int*> aa(1, &i);
+        int *ptr;
+        
+        aa.copyTo(&ptr);
+
+        EXPECT_EQ(*aa.ptr(), ptr);
+        EXPECT_EQ(&i, ptr);
+    }
 }
 

@@ -35,5 +35,17 @@ namespace
         EXPECT_EQ(dc.ptr(), addr);
         EXPECT_EQ(*dc.ptr(), 42);
     }
+
+    TEST(DataContainerTest, PointerOfPointerTest)
+    {
+        int i = 42;
+        std::vector<int*> v{&i};
+        int **addr = v.data();
+
+        DataContainer<int*> dc(move(v));
+
+        EXPECT_EQ(dc.ptr(), addr);
+        EXPECT_EQ(**dc.ptr(), 42);
+    }
 }
 
