@@ -70,7 +70,7 @@ namespace ma
 
         public:
             constexpr explicit Container(const allocator_type& allocator = Allocator()) noexcept :
-                allocator_(allocator), pointer_(nullptr), size_(0)
+                allocator_(allocator), pointer_((T*)(nullptr)), size_(0)
             {}
 
             constexpr explicit Container(size_type size, const allocator_type& allocator = Allocator()):
