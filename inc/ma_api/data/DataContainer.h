@@ -98,6 +98,10 @@ namespace ma
         {
             using Impl = impl::SharedDataContainer<T, Ptr, CPtr>;
 
+        public:
+            using pointer = Ptr;
+            using const_pointer = CPtr;
+
         protected:
             int offset_;
             int size_;

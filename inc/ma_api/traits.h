@@ -48,20 +48,36 @@ namespace ma
     template<> struct AllImpl<>
     { static constexpr bool value = true; };
 
+    template<bool... Types> struct AnyImpl;
+    template<bool Head, bool... Types> struct AnyImpl<Head, Types...>
+    { static constexpr bool value = Head || AnyImpl<Types...>::value; };
+
+    template<> struct AnyImpl<>
+    { static constexpr bool value = false; };
+
     }
 
     template<bool... Vals>
     constexpr bool is_all_v = impl::AllImpl<Vals...>::value;
+
+    template<bool... Vals>
+    constexpr bool is_any_v = impl::AnyImpl<Vals...>::value;
 
     #else // if MA_CXX17
 
     template<bool... Vals>
     constexpr bool is_all_v = (... && Vals);
 
+    template<bool... Vals>
+    constexpr bool is_any_v = (... || Vals);
+
     #endif
 
     template<bool... Vals>
     using IsAll = enable_if_t<is_all_v<Vals...>>;
+
+    template<bool... Vals>
+    using IsAny = enable_if_t<is_any_v<Vals...>>;
 
     #if not MA_CXX17
     template< class Base, class Derived >
@@ -416,6 +432,38 @@ namespace ma
     using invoke_result_t = typename invoke_result<F, ArgTypes...>::type;
 
     #endif
+
+    template<typename Key , typename Val> struct Pair {
+        using type = Val;
+        
+        template<typename T>
+        static constexpr bool value = std::is_same<Key, T>::value;
+    };
+
+    namespace impl
+    {
+        template<typename Key, typename... PAIR> struct FindTypeImpl;
+
+        template<typename Key, typename... PAIR>
+        using FindTypeImplT = typename FindTypeImpl<Key, PAIR...>::type;
+        
+        template<typename Key, typename FPair, typename... PAIR> struct FindTypeImpl<Key, FPair, PAIR...> { 
+            static constexpr bool value = FPair::template value<Key>;
+
+            using trueType = typename FPair::type;
+            using falseType = FindTypeImplT<Key, PAIR...>;
+
+            using type = std::conditional_t<value, trueType, falseType>;
+        };
+        
+        template<typename Key> struct FindTypeImpl<Key> {
+            using type = std::false_type;
+        };
+        
+    }
+
+    template<typename Key, typename... PAIR>
+    using FindType = impl::FindTypeImplT<Key, PAIR...>;
 
 }
 
